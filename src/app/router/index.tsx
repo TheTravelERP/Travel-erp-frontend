@@ -5,6 +5,7 @@ import RegisterPage from '../../auth/pages/RegisterPage';
 import AppLayout from '../../layout/AppLayout';
 import DashboardPage from '../../pages/dashboard/DashboardPage';
 import UserList from '../../pages/UserList';
+import EnquiriesList from '../../pages/crm/EnquiriesList';
 
 export default function AppRouter() {
   return (
@@ -29,7 +30,7 @@ export default function AppRouter() {
         <Route path="/customer" element={<div>Customer</div>} />
 
         {/* Enquiries */}
-        <Route path="/enquiries" element={<div>Enquiries</div>} />
+        <Route path="/app/crm/enquiries" element={<EnquiriesList/>} />
 
         {/* Reports */}
         <Route path="/reports" element={<div>Reports</div>} />
