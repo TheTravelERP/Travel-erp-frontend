@@ -1,0 +1,145 @@
+[
+  {
+    "id": "dashboard",
+    "title": "Dashboard",
+    "path": "/app/dashboard",
+    "icon": "Dashboard"
+  },
+
+  {
+    "type": "subheader",
+    "title": "Sales & CRM"
+  },
+  {
+    "id": "crm",
+    "title": "CRM",
+    "icon": "People",
+    "children": [
+      { "id": "crm_enquiries", "title": "Enquiries", "path": "/app/crm/enquiries" },
+      { "id": "crm_quotations", "title": "Quotations", "path": "/app/crm/quotations" },
+      { "id": "crm_customers", "title": "Customers", "path": "/app/crm/customers" }
+    ]
+  },
+
+  {
+    "id": "packages_bookings",
+    "title": "Packages & Bookings",
+    "icon": "ShoppingBag",
+    "children": [
+      { "id": "pkg_types", "title": "Package Types", "path": "/app/packages/types" },
+      { "id": "pkg_details", "title": "Package Details", "path": "/app/packages/details" },
+      { "id": "pkg_list", "title": "Package List", "path": "/app/packages/list" },
+      { "id": "bookings_list", "title": "Bookings List", "path": "/app/bookings/list" }
+    ]
+  },
+
+  {
+    "type": "subheader",
+    "title": "Operations & Logistics"
+  },
+  {
+    "id": "travelers_ops",
+    "title": "Travelers & Visa",
+    "icon": "EmojiPeople",
+    "children": [
+      { "id": "traveler_list", "title": "Travelers / Pilgrims", "path": "/app/ops/travelers" },
+      { "id": "visa_mgmt", "title": "Visa Management", "path": "/app/ops/visa" }
+    ]
+  },
+
+  {
+    "id": "services_ops",
+    "title": "Service & Itinerary",
+    "icon": "Layers",
+    "children": [
+      { "id": "booking_services", "title": "Booking Services", "path": "/app/ops/booking-services" },
+      { "id": "room_allocation", "title": "Room Allocation", "path": "/app/ops/rooming" }
+    ]
+  },
+
+  {
+    "id": "inventory",
+    "title": "Inventory & Procurement",
+    "icon": "Inventory",
+    "children": [
+      { "id": "stock", "title": "Service Stock (Blocks)", "path": "/app/inventory/stock" },
+      { "id": "contracts", "title": "Vendor Contracts", "path": "/app/inventory/contracts" },
+      { "id": "vendors", "title": "Vendor Master", "path": "/app/inventory/vendors" },
+      { "id": "hotels", "title": "Hotel Master", "path": "/app/inventory/hotels", "icon": "Hotel" },
+      { "id": "airlines", "title": "Airline Master", "path": "/app/inventory/airlines", "icon": "Flight" }
+    ]
+  },
+
+  {
+    "type": "subheader",
+    "title": "Finance & Accounting"
+  },
+  {
+    "id": "finance",
+    "title": "Invoicing & Receipts",
+    "icon": "AttachMoney",
+    "children": [
+      { "id": "invoices", "title": "Sales Invoices (AR)", "path": "/app/finance/invoices" },
+      { "id": "receipts", "title": "Receipts & Allocations", "path": "/app/finance/receipts" },
+      { "id": "vendor_bills", "title": "Vendor Bills (AP)", "path": "/app/finance/vendor-bills" }
+    ]
+  },
+
+  {
+    "id": "banking_expenses",
+    "title": "Banking & Expenses",
+    "icon": "AccountBalance",
+    "children": [
+      { "id": "transactions", "title": "Payment Transactions", "path": "/app/banking/transactions" },
+      { "id": "expenses", "title": "Expenses", "path": "/app/banking/expenses" }
+    ]
+  },
+
+  {
+    "id": "accounting",
+    "title": "General Ledger",
+    "icon": "AccountBalance",
+    "children": [
+      { "id": "gl_journal", "title": "Journal Entries", "path": "/app/accounting/journals" },
+      { "id": "coa", "title": "Chart of Accounts", "path": "/app/accounting/coa" }
+    ]
+  },
+
+  {
+    "type": "subheader",
+    "title": "Reporting & Setup"
+  },
+  {
+    "id": "reports",
+    "title": "Analytics & Reports",
+    "icon": "ShowChart",
+    "children": [
+      { "id": "rpt_profit", "title": "Profitability Analysis", "path": "/app/reports/profitability" },
+      { "id": "rpt_ar", "title": "A/R & Balances Due", "path": "/app/reports/ar" },
+      { "id": "rpt_stock_usage", "title": "Inventory Stock Usage", "path": "/app/reports/stock-usage" },
+      { "id": "rpt_traveler_data", "title": "Traveler / Passport Data", "path": "/app/reports/traveler-data" },
+      { "id": "rpt_financials", "title": "Financial Statements", "path": "/app/reports/financials" },
+      { "id": "rpt_audit", "title": "System Audit Log", "path": "/app/reports/audit" }
+    ]
+  },
+
+  {
+    "id": "support",
+    "title": "Support & Ticketing",
+    "icon": "SupportAgent",
+    "path": "/app/support/tickets"
+  },
+
+  {
+    "id": "settings",
+    "title": "System Settings",
+    "icon": "Settings",
+    "children": [
+      { "id": "user_master", "title": "User Management", "path": "/app/settings/users" },
+      { "id": "agent_branding", "title": "Agent Branding", "path": "/app/settings/branding" },
+      { "id": "currency_master", "title": "Currency & Rates", "path": "/app/settings/currencies" },
+      { "id": "doc_seq", "title": "Document Numbering", "path": "/app/settings/doc-seq" },
+      { "id": "menu_perm", "title": "Menu Permissions", "path": "/app/settings/permissions" }
+    ]
+  }
+]
