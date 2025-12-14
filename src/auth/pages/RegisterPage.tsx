@@ -9,6 +9,7 @@ import {
   Stack,
   Divider,
   Alert,
+  MenuItem,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -46,6 +47,7 @@ export default function RegisterPage() {
     resolver: zodResolver(registerOrgSchema),
     defaultValues: {
       organization_name: "",
+      organization_country: "",
       admin_name: "",
       email: "",
       mobile: "",
@@ -124,6 +126,29 @@ export default function RegisterPage() {
                 />
               )}
             />
+
+            <Controller
+              name="organization_country"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  select
+                  label="Country"
+                  fullWidth
+                  required
+                  error={!!errors.organization_country}
+                  helperText={errors.organization_country?.message ?? ""}
+                >
+                  <MenuItem value="IN">India</MenuItem>
+                  <MenuItem value="SA">Saudi Arabia</MenuItem>
+                  <MenuItem value="AE">United Arab Emirates</MenuItem>
+                  <MenuItem value="BD">Bangladesh</MenuItem>
+                  <MenuItem value="PK">Pakistan</MenuItem>
+                </TextField>
+              )}
+            />
+
 
             <Controller
               name="admin_name"
