@@ -44,7 +44,7 @@ export default function AppRouter() {
       </Route>
 
       {/* Fallback */}
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to={`/app/dashboard`} replace />} />
     </Routes>
   );
 }

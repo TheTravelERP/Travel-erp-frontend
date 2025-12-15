@@ -4,11 +4,13 @@ import api from "../../services/api";
 export type Session = {
   user_id: number;
   org_id: number;
+  org_code: string;
   email: string;
 } | null;
 
 type AuthCtx = {
   session: Session;
+  org_code?: string;
   isAuthenticated: boolean;
   login: (s: Session) => void;
   logout: () => Promise<void>;
@@ -45,7 +47,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ session, isAuthenticated: !!session, login, logout, loading }}
+      value={{
+        session,
+        org_code: session?.org_code,
+        isAuthenticated: !!session,
+        login,
+        logout,
+        loading,
+      }}
     >
       {!loading && children}
     </AuthContext.Provider>

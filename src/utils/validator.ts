@@ -32,7 +32,7 @@ export const mobileValidator = z
 // full form schema (shape the frontend sends)
 export const registerOrgSchema = z.object({
   organization_name: nameValidator,
-  organization_country: nameValidator,
+  country_code: nameValidator,
   admin_name: nameValidator,
   email: emailValidator,
   mobile: mobileValidator,

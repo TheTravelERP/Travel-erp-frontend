@@ -22,7 +22,7 @@ export async function registerOrgApi(payload: RegisterOrgInput) {
   const body = {
     organization: {
       name: payload.organization_name,
-      base_currency: "INR",
+      country_code: payload.country_code,
       max_users: 50,
       max_bookings: 1000,
     },

@@ -47,7 +47,7 @@ export default function RegisterPage() {
     resolver: zodResolver(registerOrgSchema),
     defaultValues: {
       organization_name: "",
-      organization_country: "",
+      country_code: "",
       admin_name: "",
       email: "",
       mobile: "",
@@ -128,7 +128,7 @@ export default function RegisterPage() {
             />
 
             <Controller
-              name="organization_country"
+              name="country_code"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -137,8 +137,8 @@ export default function RegisterPage() {
                   label="Country"
                   fullWidth
                   required
-                  error={!!errors.organization_country}
-                  helperText={errors.organization_country?.message ?? ""}
+                  error={!!errors.country_code}
+                  helperText={errors.country_code?.message ?? ""}
                 >
                   <MenuItem value="IN">India</MenuItem>
                   <MenuItem value="SA">Saudi Arabia</MenuItem>
