@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { fetchUserMenu } from '../services/menu.service';
 import type { MenuItem } from '../types/menu.types';
+import { useAuth } from '../hooks/useAuth';
 
 type MenuCtx = {
   loading: boolean;
@@ -11,10 +12,7 @@ type MenuCtx = {
 
 const MenuContext = createContext<MenuCtx | undefined>(undefined);
 
-function findMenuRecursive(
-  items: MenuItem[],
-  key: string
-): MenuItem | undefined {
+function findMenuRecursive(items: MenuItem[], key: string): MenuItem | undefined {
   for (const item of items) {
     if (item.id === key) return item;
     if (item.children) {
@@ -25,6 +23,7 @@ function findMenuRecursive(
 }
 
 export function MenuProvider({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated } = useAuth(); // 👈 WATCH AUTH
   const [loading, setLoading] = useState(false);
   const [menu, setMenu] = useState<MenuItem[]>([]);
 
@@ -38,12 +37,16 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // 🔥 KEY FIX
   useEffect(() => {
-    refresh();
-  }, []);
+    if (isAuthenticated) {
+      refresh();
+    } else {
+      setMenu([]); // clear on logout
+    }
+  }, [isAuthenticated]);
 
-  const findMenu = (key: string) =>
-    findMenuRecursive(menu, key);
+  const findMenu = (key: string) => findMenuRecursive(menu, key);
 
   const value = useMemo(
     () => ({ loading, menu, refresh, findMenu }),
