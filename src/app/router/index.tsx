@@ -3,9 +3,8 @@ import ProtectedRoute from './ProtectedRoute';
 import LoginPage from '../../auth/pages/LoginPage';
 import RegisterPage from '../../auth/pages/RegisterPage';
 import AppLayout from '../../layout/AppLayout';
+import CrmRoutes from '../../pages/crm/crm.routes';
 import DashboardPage from '../../pages/dashboard/DashboardPage';
-import UserList from '../../pages/UserList';
-import EnquiriesList from '../../pages/crm/EnquiriesList';
 
 export default function AppRouter() {
   return (
@@ -19,27 +18,10 @@ export default function AppRouter() {
         
         {/* Default Redirect */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
-        {/* Dashboard */}
         <Route path="/dashboard" element={<DashboardPage />} />
 
-        {/* Sales */}
-        <Route path="/sales" element={<div>Sales</div>} />
+        <Route path="/app/crm/*" element={<CrmRoutes />} />
 
-        {/* Customer */}
-        <Route path="/customer" element={<div>Customer</div>} />
-
-        {/* Enquiries */}
-        <Route path="/app/crm/enquiries" element={<EnquiriesList/>} />
-
-        {/* Reports */}
-        <Route path="/reports" element={<div>Reports</div>} />
-
-        {/* Settings */}
-        <Route path="/settings" element={<div>Settings</div>} />
-
-        {/* ✅ USER MANAGEMENT PAGE */}
-        <Route path="/app/settings/users" element={<UserList />} />
 
       </Route>
 
