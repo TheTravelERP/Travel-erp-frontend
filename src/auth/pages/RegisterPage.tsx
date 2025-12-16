@@ -9,7 +9,9 @@ import {
   Stack,
   Divider,
   Alert,
-  MenuItem,
+  Autocomplete,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +20,7 @@ import { registerOrgSchema, type RegisterOrgInput } from "../../utils/validator"
 import { registerOrgApi } from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "../../components/ui/SnackbarProvider";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const Root = styled("div")(({ theme }) => ({
   minHeight: "100vh",
@@ -95,6 +98,20 @@ export default function RegisterPage() {
     }
   }
 
+  const countries = [
+    { code: 'IN', label: 'India', phone: '91' },
+    { code: 'SA', label: 'Saudi Arabia', phone: '966' },
+    { code: 'AE', label: 'United Arab Emirates', phone: '971' },
+    { code: 'BD', label: 'Bangladesh', phone: '880' },
+    { code: 'PK', label: 'Pakistan', phone: '92' },
+  ];
+
+  const [showPassword, setShowPassword] = React.useState(false);
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault(); // Prevents focus loss when clicking the icon
+  };
+
   return (
     <Root>
       <Card elevation={6}>
@@ -130,22 +147,47 @@ export default function RegisterPage() {
             <Controller
               name="country_code"
               control={control}
-              render={({ field }) => (
-                <TextField
+              render={({ field: { onChange, value, ...field } }) => (
+                <Autocomplete
                   {...field}
-                  select
-                  label="Country"
-                  fullWidth
-                  required
-                  error={!!errors.country_code}
-                  helperText={errors.country_code?.message ?? ""}
-                >
-                  <MenuItem value="IN">India</MenuItem>
-                  <MenuItem value="SA">Saudi Arabia</MenuItem>
-                  <MenuItem value="AE">United Arab Emirates</MenuItem>
-                  <MenuItem value="BD">Bangladesh</MenuItem>
-                  <MenuItem value="PK">Pakistan</MenuItem>
-                </TextField>
+                  options={countries}
+                  autoHighlight
+                  // Ensure the value matches the country object based on the code
+                  value={countries.find((c) => c.code === value) || null}
+                  onChange={(_, newValue) => {
+                    onChange(newValue ? newValue.code : "");
+                  }}
+                  getOptionLabel={(option) => option.label}
+                  renderOption={(props, option) => (
+                    <Box 
+                      component="li" 
+                      sx={{ '& > img': { mr: 2, flexShrink: 0 }, fontSize: '0.9rem' }} 
+                      {...props}
+                    >
+                      <img
+                        loading="lazy"
+                        width="20"
+                        src={`https://flagcdn.com/w20/${option.code.toLowerCase()}.png`}
+                        srcSet={`https://flagcdn.com/w40/${option.code.toLowerCase()}.png 2x`}
+                        alt=""
+                      />
+                      {option.label} ({option.code}) +{option.phone}
+                    </Box>
+                  )}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Select Country"
+                      required
+                      error={!!errors.country_code}
+                      helperText={errors.country_code?.message ?? ""}
+                      inputProps={{
+                        ...params.inputProps,
+                        autoComplete: 'new-password', // disable autocomplete and autofill
+                      }}
+                    />
+                  )}
+                />
               )}
             />
 
@@ -202,11 +244,26 @@ export default function RegisterPage() {
                 <TextField
                   {...field}
                   label="Password"
-                  type="password"
+                  // Dynamically change type between 'password' and 'text'
+                  type={showPassword ? "text" : "password"}
                   fullWidth
                   required
                   error={!!errors.password}
                   helperText={errors.password?.message ?? "Min 8 characters"}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleClickShowPassword}
+                          onMouseDown={handleMouseDownPassword}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
               )}
             />

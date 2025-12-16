@@ -7,6 +7,8 @@ import {
   Typography,
   Stack,
   Divider,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +18,7 @@ import { loginApi } from "../services/auth.service";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSnackbar } from "../../components/ui/SnackbarProvider";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const Card = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -44,10 +47,11 @@ export default function LoginPage() {
       const res = await loginApi(values);
 
       login({
-      user_id: res.user_id,
-      org_id: res.org_id,
-      email: res.email,
-    });
+        user_id: res.user_id,
+        org_id: res.org_id,
+        email: res.email,
+        org_code: ""
+      });
       showSnackbar({ message: "Login successful", severity: "success" });
 
       const redirectTo = location?.state?.from || "/dashboard";
@@ -63,6 +67,12 @@ export default function LoginPage() {
       showSnackbar({ message: msg, severity: "error" });
     }
   }
+
+  const [showPassword, setShowPassword] = React.useState(false);
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault(); // Prevents focus loss when clicking the icon
+  };
 
   return (
     <Box
@@ -107,11 +117,27 @@ export default function LoginPage() {
               render={({ field }) => (
                 <TextField
                   {...field}
-                  fullWidth
                   label="Password"
-                  type="password"
+                  // Dynamically change type between 'password' and 'text'
+                  type={showPassword ? "text" : "password"}
+                  fullWidth
+                  required
                   error={!!errors.password}
-                  helperText={errors.password?.message}
+                  helperText={errors.password?.message ?? "Min 8 characters"}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleClickShowPassword}
+                          onMouseDown={handleMouseDownPassword}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
               )}
             />
