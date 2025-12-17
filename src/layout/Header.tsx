@@ -11,6 +11,10 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import { useState } from "react";
 import ProfilePopover from "./ProfilePopover";
+import Logo2 from "../assets/Logo2.png"
+import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
+import Badge from "@mui/material/Badge";
+
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -48,10 +52,14 @@ export default function Header({ toggleSidebar, open, drawerWidth }: HeaderProps
   };
 
   const handleMenuClose = () => setAnchorElUser(null);
+  const notificationCount = 5; // later from API / websocket
+
 
   return (
     <>
-      <AppBarShift position="fixed" open={open} drawerWidth={drawerWidth}>
+      <AppBarShift position="fixed" open={open} drawerWidth={drawerWidth} toggleSidebar={function (): void {
+        throw new Error("Function not implemented.");
+      } }>
         <Toolbar sx={{ minHeight: "64px !important" }}>
           
           {/* Sidebar Toggle */}
@@ -60,16 +68,38 @@ export default function Header({ toggleSidebar, open, drawerWidth }: HeaderProps
           </IconButton>
 
           {/* App Title */}
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            Travel ERP
-          </Typography>
+          <Box
+            component="img"
+            src={Logo2}
+            alt="Travel ERP Logo"
+            sx={{
+              height: 40,      // Adjust height as needed
+              width: 'auto',    // Maintains aspect ratio
+              display: 'block'  // Prevents baseline alignment issues
+            }}
+          />
 
           <Box sx={{ flexGrow: 1 }} />
+            {/* Notifications */}
+            <IconButton
+              color="inherit"
+              sx={{ mr: 1 }}
+              onClick={() => console.log("Open notifications")}
+            >
+              <Badge
+                badgeContent={notificationCount}
+                color="error"
+                overlap="circular"
+                max={99}
+              >
+                <NotificationsNoneIcon />
+              </Badge>
+            </IconButton>
 
-          {/* Profile Button */}
-          <IconButton onClick={handleProfileMenuOpen} sx={{ p: 0 }}>
-            <Avatar sx={{ width: 38, height: 38 }} />
-          </IconButton>
+            {/* Profile Button */}
+            <IconButton onClick={handleProfileMenuOpen} sx={{ p: 0 }}>
+              <Avatar sx={{ width: 38, height: 38 }} />
+            </IconButton>
         </Toolbar>
       </AppBarShift>
 

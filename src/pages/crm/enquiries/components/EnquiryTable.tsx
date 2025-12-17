@@ -19,6 +19,7 @@ import {
   Card,
   CardContent,
   Typography,
+  Pagination,
 } from '@mui/material';
 
 import { alpha } from '@mui/material/styles';
@@ -49,6 +50,7 @@ const getStatusChipProps = (status: string) => {
       color: cfg?.color,
       fontWeight: 600,
       fontSize: '0.7rem',
+      height: 22,
     },
   };
 };
@@ -69,9 +71,11 @@ export default function EnquiryTable() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const [selectedTab, setSelectedTab] = useState('All');
+  const [selectedTab, setSelectedTab] = useState<'All' | 'Hot' | 'Warm' | 'Cold'>('All');
   const [search, setSearch] = useState('');
-  const [selected, setSelected] = useState<number[]>([]);
+  const [page, setPage] = useState(1);
+
+  const rowsPerPage = 10;
 
   /* ---------------- FILTERING ---------------- */
 
@@ -83,38 +87,42 @@ export default function EnquiryTable() {
     }
 
     if (search) {
+      const s = search.toLowerCase();
       data = data.filter(
         (d) =>
-          d.customer_name.toLowerCase().includes(search.toLowerCase()) ||
-          d.package_name.toLowerCase().includes(search.toLowerCase())
+          d.customer_name.toLowerCase().includes(s) ||
+          d.package_name.toLowerCase().includes(s)
       );
     }
 
     return data;
   }, [selectedTab, search]);
 
+  /* ---------------- PAGINATION ---------------- */
+
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+
+  const paginatedData = useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    return filteredData.slice(start, start + rowsPerPage);
+  }, [filteredData, page]);
+
   /* ---------------- MOBILE VIEW ---------------- */
 
   if (isMobile) {
     return (
       <Box>
-        {filteredData.map((row) => (
+        {paginatedData.map((row) => (
           <Card key={row.id} sx={{ mb: 1.5 }}>
             <CardContent>
-              <Typography fontWeight={600}>
-                {row.customer_name}
-              </Typography>
+              <Typography fontWeight={600}>{row.customer_name}</Typography>
 
               <Typography variant="caption" color="text.secondary">
                 {row.package_name}
               </Typography>
 
               <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
-                <Chip
-                  label={row.status}
-                  size="small"
-                  {...getStatusChipProps(row.status)}
-                />
+                <Chip label={row.status} size="small" {...getStatusChipProps(row.status)} />
                 <Chip
                   label={row.conversion_status}
                   size="small"
@@ -122,14 +130,23 @@ export default function EnquiryTable() {
                 />
               </Box>
 
-              <Box sx={{ mt: 1 }}>
-                <Typography variant="body2">
-                  Quote: {formatCurrency(row.quote_amount, row.currency_code)}
-                </Typography>
-              </Box>
+              <Typography sx={{ mt: 1 }} variant="body2">
+                Quote: {formatCurrency(row.quote_amount, row.currency_code)}
+              </Typography>
             </CardContent>
           </Card>
         ))}
+
+        {/* Pagination */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={(_, value) => setPage(value)}
+            color="primary"
+            shape="rounded"
+          />
+        </Box>
       </Box>
     );
   }
@@ -139,7 +156,14 @@ export default function EnquiryTable() {
   return (
     <>
       {/* Tabs */}
-      <Tabs value={selectedTab} onChange={(_, v) => setSelectedTab(v)} sx={{ mb: 2 }}>
+      <Tabs
+        value={selectedTab}
+        onChange={(_, v) => {
+          setSelectedTab(v);
+          setPage(1);
+        }}
+        sx={{ mb: 2 }}
+      >
         <Tab value="All" label="All" />
         <Tab value="Hot" label="Hot" />
         <Tab value="Warm" label="Warm" />
@@ -151,7 +175,10 @@ export default function EnquiryTable() {
         fullWidth
         placeholder="Search customer or package..."
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setPage(1);
+        }}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -181,7 +208,7 @@ export default function EnquiryTable() {
           </TableHead>
 
           <TableBody>
-            {filteredData.map((row) => (
+            {paginatedData.map((row) => (
               <TableRow
                 key={row.id}
                 hover
@@ -198,9 +225,7 @@ export default function EnquiryTable() {
                 <TableCell>{row.id}</TableCell>
 
                 <TableCell>
-                  <Typography fontWeight={600}>
-                    {row.customer_name}
-                  </Typography>
+                  <Typography fontWeight={600}>{row.customer_name}</Typography>
                 </TableCell>
 
                 <TableCell>{row.package_name}</TableCell>
@@ -208,11 +233,7 @@ export default function EnquiryTable() {
                 <TableCell align="center">{row.pax_count}</TableCell>
 
                 <TableCell>
-                  <Chip
-                    label={row.status}
-                    size="small"
-                    {...getStatusChipProps(row.status)}
-                  />
+                  <Chip label={row.status} size="small" {...getStatusChipProps(row.status)} />
                 </TableCell>
 
                 <TableCell>
@@ -241,9 +262,45 @@ export default function EnquiryTable() {
                 </TableCell>
               </TableRow>
             ))}
+
+            {paginatedData.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={enquiryColumns.length + 2} align="center">
+                  <Typography color="text.secondary">No enquiries found</Typography>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Pagination Footer */}
+      {totalPages > 1 && (
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mt: 2,
+          }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            Showing {(page - 1) * rowsPerPage + 1}–
+            {Math.min(page * rowsPerPage, filteredData.length)} of{' '}
+            {filteredData.length}
+          </Typography>
+
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={(_, value) => setPage(value)}
+            color="primary"
+            shape="rounded"
+            showFirstButton
+            showLastButton
+          />
+        </Box>
+      )}
     </>
   );
 }

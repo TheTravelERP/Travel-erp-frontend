@@ -36,6 +36,8 @@ import SettingsIcon from "@mui/icons-material/Settings";
 
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import Logo from '../assets/logo.png'; // adjust path
+
 
 // Icon Map
 const IconMap: any = {
@@ -183,9 +185,27 @@ export default function Sidebar({
         },
       }}
     >
-      <Toolbar />
+      <Toolbar
+        sx={{
+          px: 2,
+          display: 'flex',
+          alignItems: 'center',
+          cursor: 'pointer',
+        }}
+        onClick={() => navigate('/app/dashboard')}
+      >
+        <Box
+          component="img"
+          src={Logo}
+          alt="Travel ERP"
+          sx={{
+            height: 36,
+            width: 'auto',
+          }}
+        />
+      </Toolbar>
       <Divider />
-      <List>{menuItems.map(item => renderItem(item))}</List>
+      <List>{menuItems.map((item: any) => renderItem(item))}</List>
     </Drawer>
   );
 }

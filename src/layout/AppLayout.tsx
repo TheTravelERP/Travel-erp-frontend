@@ -39,7 +39,7 @@ export default function AppLayout() {
         <Box 
           component="main" 
           flexGrow={1} 
-          p={3} 
+          p={1} 
           sx={{ transition: theme.transitions.create('margin') }}
         >
           <Outlet /> 
