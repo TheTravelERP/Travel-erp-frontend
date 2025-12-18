@@ -21,6 +21,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate } from 'react-router-dom';
 
 import EnquiryTable from './components/EnquiryTable';
+import { usePermission } from '../../../hooks/usePermission';
+
 
 
 
@@ -28,6 +30,8 @@ export default function EnquiryListPage() {
   const navigate = useNavigate();
   const [exportAnchor, setExportAnchor] = React.useState<null | HTMLElement>(null);
   const [moreAnchor, setMoreAnchor] = React.useState<null | HTMLElement>(null);
+  const perms = usePermission('crm_enquiries');
+
 
   return (
     <Box sx={{ p: { xs: 2, md: 4 } }}>
@@ -57,50 +61,60 @@ export default function EnquiryListPage() {
         {/* RIGHT – ACTIONS */}
         <Stack direction="row" spacing={1} alignItems="center">
           {/* Add Enquiry */}
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => navigate('/app/crm/enquiries/create')}
-          >
-            Add Enquiry
-          </Button>
+          {perms.can_create && (
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => navigate('/app/crm/enquiries/create')}
+            >
+              Add Enquiry
+            </Button>
+          )}
+
 
           {/* Advanced Search (outside more) */}
-          <Button
-            variant="outlined"
-            startIcon={<SearchIcon />}
-            onClick={() => console.log('Advanced Search')}
-          >
-            Search
-          </Button>
+          {perms.can_view && (
+            <Button
+              variant="outlined"
+              startIcon={<SearchIcon />}
+              onClick={() => console.log('Advanced Search')}
+            >
+              Search
+            </Button>
+          )}
 
           {/* Import */}
-          <Button
-            variant="outlined"
-            startIcon={<UploadIcon />}
-            onClick={() => console.log('Import')}
-          >
-            Import
-          </Button>
+          {perms.import && (
+            <Button
+              variant="outlined"
+              startIcon={<UploadIcon />}
+              onClick={() => console.log('Import')}
+            >
+              Import
+            </Button>
+          )}
 
           {/* Export */}
-          <Button
-            variant="outlined"
-            startIcon={<DownloadIcon />}
-            onClick={(e) => setExportAnchor(e.currentTarget)}
-          >
-            Export
-          </Button>
-
-          <Menu
-            anchorEl={exportAnchor}
-            open={Boolean(exportAnchor)}
-            onClose={() => setExportAnchor(null)}
-          >
-            <MenuItem onClick={() => console.log('Export CSV')}>Export CSV</MenuItem>
-            <MenuItem onClick={() => console.log('Export Excel')}>Export Excel</MenuItem>
-            <MenuItem onClick={() => console.log('Export PDF')}>Export PDF</MenuItem>
-          </Menu>
+          {perms.can_export && (
+            <>
+              <Button
+                variant="outlined"
+                startIcon={<DownloadIcon />}
+                onClick={(e) => setExportAnchor(e.currentTarget)}
+              >
+                Export
+              </Button>
+              <Menu
+                anchorEl={exportAnchor}
+                open={Boolean(exportAnchor)}
+                onClose={() => setExportAnchor(null)}
+              >
+                <MenuItem onClick={() => console.log('Export CSV')}>Export CSV</MenuItem>
+                <MenuItem onClick={() => console.log('Export Excel')}>Export Excel</MenuItem>
+                <MenuItem onClick={() => console.log('Export PDF')}>Export PDF</MenuItem>
+              </Menu>
+            </>
+          )}
 
           {/* More */}
           <IconButton onClick={(e) => setMoreAnchor(e.currentTarget)}>
