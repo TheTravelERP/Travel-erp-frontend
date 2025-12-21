@@ -24,7 +24,8 @@ function findMenuRecursive(items: MenuItem[], key: string): MenuItem | undefined
 
 export function MenuProvider({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth(); // 👈 WATCH AUTH
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
   const [menu, setMenu] = useState<MenuItem[]>([]);
 
   const refresh = async () => {
@@ -43,6 +44,7 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
       refresh();
     } else {
       setMenu([]); // clear on logout
+      setLoading(false);
     }
   }, [isAuthenticated]);
 
