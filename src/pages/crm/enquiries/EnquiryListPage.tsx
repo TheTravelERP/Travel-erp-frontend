@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Button,
@@ -11,17 +11,20 @@ import {
   Breadcrumbs,
   Link,
   Paper,
+  Collapse,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import UploadIcon from '@mui/icons-material/Upload';
 import DownloadIcon from '@mui/icons-material/Download';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SearchIcon from '@mui/icons-material/Search';
+import FilterListIcon from '@mui/icons-material/FilterList';
 
 import { useNavigate } from 'react-router-dom';
 
 import EnquiryTable from './components/EnquiryTable';
 import { usePermission } from '../../../hooks/usePermission';
+import EnquiryFilters from './components/EnquiryFilters';
 
 
 
@@ -31,6 +34,7 @@ export default function EnquiryListPage() {
   const [exportAnchor, setExportAnchor] = React.useState<null | HTMLElement>(null);
   const [moreAnchor, setMoreAnchor] = React.useState<null | HTMLElement>(null);
   const perms = usePermission('crm_enquiries');
+  const [showFilters, setShowFilters] = useState(false);
 
 
   return (
@@ -75,11 +79,12 @@ export default function EnquiryListPage() {
           {/* Advanced Search (outside more) */}
           {perms.can_view && (
             <Button
-              variant="outlined"
-              startIcon={<SearchIcon />}
-              onClick={() => console.log('Advanced Search')}
+              variant={showFilters ? "contained" : "outlined"} // Change color when active
+              color={showFilters ? "secondary" : "primary"}
+              startIcon={<FilterListIcon />}
+              onClick={() => setShowFilters(!showFilters)}
             >
-              Search
+              {showFilters ? "Hide Filters" : "Filters"}
             </Button>
           )}
 
@@ -136,8 +141,10 @@ export default function EnquiryListPage() {
         </Stack>
       </Box>
 
-      {/* Content */}
       <Paper elevation={4} sx={{ p: { xs: 1.5, md: 3 }, borderRadius: 2 }}>
+        <Collapse in={showFilters}>
+          <EnquiryFilters />
+        </Collapse>
         <EnquiryTable />
       </Paper>
     </Box>
