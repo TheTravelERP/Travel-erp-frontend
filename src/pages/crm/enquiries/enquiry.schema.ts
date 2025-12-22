@@ -14,7 +14,7 @@ export const enquirySchema = z
 
     // enquiry core
     pax_count: z.number().min(1),
-    type: z.enum(['General', 'Warm']),
+    lead_source: z.enum(['Website', 'Agent', 'WalkIn', 'Referral', 'Corporate', 'Others']),
     status: z.enum(['Hot', 'Warm', 'Cold']),
     conversion_status: z.enum(['Lost', 'Pending', 'Converted']),
     description: z.string().optional(),
