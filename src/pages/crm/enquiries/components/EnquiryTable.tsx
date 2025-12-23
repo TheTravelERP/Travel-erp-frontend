@@ -133,7 +133,7 @@ export default function EnquiryTable() {
           [...Array(3)].map((_, i) => <Skeleton key={i} variant="rectangular" height={120} sx={{ mb: 2, borderRadius: 2 }} />)
         ) : (
           paginatedData.map((row) => (
-            <Card key={row.id} sx={{ mb: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider' }} elevation={0}>
+            <Card key={row.id} sx={{ mb: 1, borderRadius: 2, border: '1px solid', borderColor: 'divider' }} elevation={0}>
               <CardContent>
                 <Box display="flex" justifyContent="space-between" alignItems="flex-start">
                   <Typography fontWeight={700} variant="subtitle1">{row.customer_name}</Typography>

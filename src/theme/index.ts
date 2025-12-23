@@ -1,29 +1,16 @@
 // src/theme/index.ts
-import { createTheme } from "@mui/material/styles";
-import palette from "./palette";
-import typography from "./typography";
+import { createTheme } from '@mui/material/styles';
+import palette from './palette';
+import typography from './typography';
+import components from './components';
 
 const theme = createTheme({
   palette,
   typography,
   shape: {
-    // borderRadius: 10,
+    borderRadius: 1,
   },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-        //   borderRadius: 8,
-        //   fontWeight: 600,
-        },
-      },
-    },
-  },
+  components,
 });
 
 export default theme;
-
-
-// import { createTheme } from '@mui/material/styles';
-// const theme = createTheme({});
-// export default theme;

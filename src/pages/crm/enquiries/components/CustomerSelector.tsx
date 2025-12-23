@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Box,
   Paper,
@@ -10,18 +10,18 @@ import {
   InputAdornment,
   useTheme,
   useMediaQuery,
-} from "@mui/material";
+} from '@mui/material';
 import Grid from '@mui/material/Grid';
-import { Controller } from "react-hook-form";
-import type { Control, UseFormSetValue } from "react-hook-form";
+import { Controller } from 'react-hook-form';
+import type { Control, UseFormSetValue } from 'react-hook-form';
 
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import PersonSearchIcon from "@mui/icons-material/PersonSearch";
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 
-/* ---------------- MOCK DATA (replace with API later) ---------------- */
+/* ---------------- MOCK DATA ---------------- */
 const MOCK_CUSTOMERS = [
-  { id: 1, name: "John Doe", mobile: "9999999999" },
-  { id: 2, name: "Aadil Hussain", mobile: "8888888888" },
+  { id: 1, name: 'John Doe', mobile: '9999999999' },
+  { id: 2, name: 'Aadil Hussain', mobile: '8888888888' },
 ];
 
 /* ---------------- TYPES ---------------- */
@@ -35,37 +35,36 @@ export default function CustomerSelector({
   setValue,
 }: CustomerSelectorProps) {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const [mode, setMode] = useState<"new" | "existing">("new");
+  const [mode, setMode] = useState<'new' | 'existing'>('new');
 
   /* ---------------- HANDLERS ---------------- */
   const handleModeChange = (
     _: React.MouseEvent<HTMLElement>,
-    value: "new" | "existing" | null
+    value: 'new' | 'existing' | null
   ) => {
     if (!value) return;
 
     setMode(value);
-
-    // Reset conflicting fields when switching
-    setValue("cust_id", null);
-    setValue("customer_name", "");
-    setValue("customer_mobile", "");
+    setValue('cust_id', null);
+    setValue('customer_name', '');
+    setValue('customer_mobile', '');
   };
 
   /* ---------------- RENDER ---------------- */
   return (
-    <Paper variant="outlined" sx={{ p: 2, borderRadius: 1, height: "100%" }}>
+    <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
+      {/* Header */}
       <Box
         display="flex"
-        flexDirection={{ xs: "column", sm: "row" }}
+        flexDirection={{ xs: 'column', sm: 'row' }}
         justifyContent="space-between"
-        alignItems={{ xs: "flex-start", sm: "center" }}
+        alignItems={{ xs: 'flex-start', sm: 'center' }}
         gap={2}
         mb={2}
       >
-        <Typography fontWeight={700} color="primary">
+        <Typography color="primary">
           Customer Information
         </Typography>
 
@@ -75,14 +74,15 @@ export default function CustomerSelector({
           onChange={handleModeChange}
           size="small"
           fullWidth={isMobile}
-          sx={{ "& .MuiToggleButton-root": { flex: 1 } }}
+          sx={{ '& .MuiToggleButton-root': { flex: 1 } }}
         >
           <ToggleButton value="new">
-            <PersonAddIcon sx={{ mr: 1, fontSize: 18 }} />
+            <PersonAddIcon fontSize="small" sx={{ mr: 1 }} />
             New
           </ToggleButton>
+
           <ToggleButton value="existing">
-            <PersonSearchIcon sx={{ mr: 1, fontSize: 18 }} />
+            <PersonSearchIcon fontSize="small" sx={{ mr: 1 }} />
             Existing
           </ToggleButton>
         </ToggleButtonGroup>
@@ -90,7 +90,7 @@ export default function CustomerSelector({
 
       {/* Body */}
       <Grid container spacing={2}>
-        {mode === "new" ? (
+        {mode === 'new' ? (
           <>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Controller
@@ -99,8 +99,8 @@ export default function CustomerSelector({
                 render={({ field, fieldState }) => (
                   <TextField
                     {...field}
-                    label="Customer Name"
                     fullWidth
+                    label="Customer Name"
                     required
                     error={!!fieldState.error}
                     helperText={fieldState.error?.message}
@@ -116,8 +116,8 @@ export default function CustomerSelector({
                 render={({ field, fieldState }) => (
                   <TextField
                     {...field}
-                    label="Mobile Number"
                     fullWidth
+                    label="Mobile Number"
                     required
                     error={!!fieldState.error}
                     helperText={fieldState.error?.message}
@@ -132,7 +132,7 @@ export default function CustomerSelector({
             </Grid>
           </>
         ) : (
-          <Grid size={{ xs: 12, md: 12 }}>
+          <Grid size={{ xs: 12 }}>
             <Controller
               name="cust_id"
               control={control}
@@ -144,18 +144,13 @@ export default function CustomerSelector({
                   getOptionLabel={(o) => `${o.name} (${o.mobile})`}
                   onChange={(_, v) => {
                     field.onChange(v?.id ?? null);
-
                     if (v) {
-                      setValue("customer_name", v.name);
-                      setValue("customer_mobile", v.mobile);
+                      setValue('customer_name', v.name);
+                      setValue('customer_mobile', v.mobile);
                     }
                   }}
                   renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Search Customer"
-                      fullWidth
-                    />
+                    <TextField {...params} fullWidth label="Search Customer" />
                   )}
                 />
               )}

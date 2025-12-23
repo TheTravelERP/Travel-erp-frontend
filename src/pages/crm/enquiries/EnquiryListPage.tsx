@@ -38,7 +38,7 @@ export default function EnquiryListPage() {
 
 
   return (
-    <Box sx={{ p: { xs: 2, md: 4 } }}>
+    <Box sx={{ p: { xs: 1, md: 1 } }}>
       {/* Header */}
       <Box
         sx={{
@@ -141,7 +141,7 @@ export default function EnquiryListPage() {
         </Stack>
       </Box>
 
-      <Paper elevation={4} sx={{ p: { xs: 1.5, md: 3 }, borderRadius: 2 }}>
+      <Paper elevation={4} sx={{ p: { xs: 1, md: 2 }, borderRadius: 2 }}>
         <Collapse in={showFilters}>
           <EnquiryFilters />
         </Collapse>

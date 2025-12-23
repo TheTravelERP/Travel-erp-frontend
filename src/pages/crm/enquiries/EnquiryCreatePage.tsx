@@ -30,7 +30,7 @@ export default function EnquiryCreatePage() {
   }
 
   return (
-    <Box sx={{ p: { xs: 2, md: 4 } }}>
+    <Box sx={{ p: { xs: 1, md: 1 } }}>
       {/* Header */}
       <Typography variant="h6" fontWeight={700}>
         Create Enquiry

@@ -1,13 +1,30 @@
 // src/theme/typography.ts
+import type { TypographyOptions } from '@mui/material/styles';
+import { tokens } from './tokens';
 
-const typography = {
-  fontFamily: "'Inter', sans-serif",
-  h1: { fontWeight: 700 },
-  h2: { fontWeight: 700 },
-  h3: { fontWeight: 600 },
-  h4: { fontWeight: 600 },
-  button: { textTransform: "none", fontWeight: 600 },
+const typography: TypographyOptions = {
+  fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+
+  h1: {
+    fontSize: '3rem',
+    fontWeight: tokens.fontWeight.bold,
+  },
+
+  h6: {
+    fontWeight: tokens.fontWeight.bold,
+  },
+
+  subtitle1: {
+    fontWeight: tokens.fontWeight.bold,
+  },
+
+  body1: {
+    fontSize: '1rem',
+  },
+
+  body2: {
+    fontSize: '0.875rem',
+  },
 };
 
 export default typography;
-

@@ -62,7 +62,7 @@ export default function EnquiryForm({
   /* ---------------- RENDER ---------------- */
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ flexGrow: 1 }}>
-      <Grid container spacing={3}>
+      <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 6 }}>
           <CustomerSelector control={control} setValue={setValue} />
         </Grid>
@@ -144,7 +144,7 @@ export default function EnquiryForm({
 
         {/* ================= ROW 3: ACTIONS ================= */}
         <Grid size={{ xs: 12 }}>
-          <Divider sx={{ my: 3 }} />
+          <Divider sx={{ my: 2 }} />
           <Box display="flex" justifyContent="flex-end" gap={2}>
             <Button 
               variant="outlined" 

@@ -77,32 +77,43 @@ export default function LoginPage() {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
-        display: "grid",
-        placeItems: "center",
-        backgroundColor: "background.default",
+        minHeight: '100vh',
+        display: 'grid',
+        placeItems: 'center',
+        bgcolor: 'background.default',
         px: 2,
       }}
     >
-      <Card elevation={4}>
-        <Stack spacing={2} alignItems="center">
-         <Typography variant="h4" color="primary.main">
+      {/* Login Container */}
+      <Paper
+        elevation={0}
+        sx={{
+          width: '100%',
+          maxWidth: 420,
+          p: 3,
+        }}
+      >
+        {/* Header */}
+        <Stack spacing={1.5} alignItems="center" mb={3}>
+          <Typography variant="h5" color="primary">
             Travel ERP
           </Typography>
-          <Typography variant="h6" color="text.secondary">
+    
+          <Typography variant="body2" color="text.secondary">
             Sign in to continue
           </Typography>
         </Stack>
-
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} mt={2}>
+    
+        {/* Form */}
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
           <Stack spacing={2}>
+            {/* Email */}
             <Controller
               name="email"
               control={control}
               render={({ field }) => (
                 <TextField
                   {...field}
-                  fullWidth
                   label="Email"
                   type="email"
                   error={!!errors.email}
@@ -110,7 +121,8 @@ export default function LoginPage() {
                 />
               )}
             />
-
+    
+            {/* Password */}
             <Controller
               name="password"
               control={control}
@@ -118,17 +130,13 @@ export default function LoginPage() {
                 <TextField
                   {...field}
                   label="Password"
-                  // Dynamically change type between 'password' and 'text'
-                  type={showPassword ? "text" : "password"}
-                  fullWidth
-                  required
+                  type={showPassword ? 'text' : 'password'}
                   error={!!errors.password}
-                  helperText={errors.password?.message ?? "Min 8 characters"}
+                  helperText={errors.password?.message ?? 'Min 8 characters'}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
-                          aria-label="toggle password visibility"
                           onClick={handleClickShowPassword}
                           onMouseDown={handleMouseDownPassword}
                           edge="end"
@@ -141,29 +149,31 @@ export default function LoginPage() {
                 />
               )}
             />
-
+    
+            {/* Submit */}
             <Button
               type="submit"
               variant="contained"
               fullWidth
-              size="large"
               disabled={isSubmitting}
+              sx={{ minHeight: 56 }}
             >
-              {isSubmitting ? "Signing in..." : "Sign In"}
+              {isSubmitting ? 'Signing in...' : 'Sign In'}
             </Button>
-
+    
             <Divider />
-
+    
+            {/* Register */}
             <Button
               variant="text"
               fullWidth
-              onClick={() => navigate("/register")}
+              onClick={() => navigate('/register')}
             >
-              Don't have an account? Register
+              Don&apos;t have an account? Register
             </Button>
           </Stack>
         </Box>
-      </Card>
+      </Paper>
     </Box>
   );
 }
