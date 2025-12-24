@@ -1,4 +1,4 @@
-// enquiry.types.ts
+// src/pages/crm/enquiries/enquiry.types.ts
 export interface EnquiryListColumn {
   id: string;
   label: string;

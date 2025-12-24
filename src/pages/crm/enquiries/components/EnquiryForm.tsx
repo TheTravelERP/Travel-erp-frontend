@@ -73,8 +73,8 @@ export default function EnquiryForm({
 
         {/* ENQUIRY DETAILS */}
         <Grid size={{ xs: 12, md: 12 }}>
-          <Paper variant="outlined" sx={{ p:  2, borderRadius: 2 }}>
-            <Typography fontWeight={700} color="primary" mb={2}>
+          <Paper variant="outlined" sx={{ p:  2 }}>
+            <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
               Enquiry Details
             </Typography>
 

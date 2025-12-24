@@ -11,7 +11,10 @@ const typography: TypographyOptions = {
   },
 
   h6: {
+    fontSize: '0.95rem',          // close to body1
     fontWeight: tokens.fontWeight.bold,
+    lineHeight: 1.4,
+    letterSpacing: '0.01em',
   },
 
   subtitle1: {
@@ -25,6 +28,7 @@ const typography: TypographyOptions = {
   body2: {
     fontSize: '0.875rem',
   },
+
 };
 
 export default typography;

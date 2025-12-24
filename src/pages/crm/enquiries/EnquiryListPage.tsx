@@ -17,7 +17,6 @@ import AddIcon from '@mui/icons-material/Add';
 import UploadIcon from '@mui/icons-material/Upload';
 import DownloadIcon from '@mui/icons-material/Download';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 
 import { useNavigate } from 'react-router-dom';

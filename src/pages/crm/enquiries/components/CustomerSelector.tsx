@@ -64,7 +64,7 @@ export default function CustomerSelector({
         gap={2}
         mb={2}
       >
-        <Typography color="primary">
+        <Typography variant="h6" color="primary">
           Customer Information
         </Typography>
 
