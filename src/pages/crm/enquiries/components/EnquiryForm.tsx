@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+// src/pages/crm/enquiries/componenets/EnquiryForm.tsx
 import {
   Box,
   Button,
@@ -7,8 +7,6 @@ import {
   Typography,
   InputAdornment,
   Paper,
-  useTheme,
-  useMediaQuery,
   Divider,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
@@ -48,11 +46,12 @@ export default function EnquiryForm({
       cust_id: null,
       customer_name: '',
       customer_mobile: '',
+      customer_email: '',
       pkg_id: null,
       package_name: '',
       lead_source: 'WalkIn',
       pax_count: 1,
-      status: 'Warm',
+      priority: 'Warm',
       conversion_status: 'Pending',
       description: '',
       ...defaultValues,
@@ -63,11 +62,11 @@ export default function EnquiryForm({
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ flexGrow: 1 }}>
       <Grid container spacing={2}>
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <CustomerSelector control={control} setValue={setValue} />
         </Grid>
 
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid size={{ xs: 12, md: 4 }}>
          <PackageSelector control={control} setValue={setValue} />
         </Grid>
 
@@ -118,7 +117,7 @@ export default function EnquiryForm({
               </Grid>
               <Grid size={{ xs: 12, sm: 4 }}>
                 <Controller
-                  name="status"
+                  name="priority"
                   control={control}
                   render={({ field }) => (
                     <TextField {...field} select label="Priority" fullWidth>

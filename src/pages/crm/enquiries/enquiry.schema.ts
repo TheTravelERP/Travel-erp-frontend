@@ -1,21 +1,23 @@
+//src/pages/crm/enquiries/enquiries.schema.ts
 import * as z from 'zod';
 
 export const enquirySchema = z
   .object({
     // customer
-    cust_id: z.number().optional().nullable(),
-    customer_name: z.string().optional(),
+    cust_id: z.number().nullable().optional(),
+    customer_name: z.string().trim().optional(),
     customer_mobile: z.string().optional(),
-    customer_email: z.string().optional(),
+    customer_email: z.string().email().optional(),
+
 
     // package
-    pkg_id: z.number().optional().nullable(),
-    package_name: z.string().optional(),
+    pkg_id: z.number().nullable().optional(),
+    package_name: z.string().trim().optional(),
 
     // enquiry core
-    pax_count: z.number().min(1),
+    pax_count: z.coerce.number().min(1, 'Minimum 1 PAX'),
     lead_source: z.enum(['Website', 'Agent', 'WalkIn', 'Referral', 'Corporate', 'Others']),
-    status: z.enum(['Hot', 'Warm', 'Cold']),
+    priority: z.enum(['Hot', 'Warm', 'Cold']),
     conversion_status: z.enum(['Lost', 'Pending', 'Converted']),
     description: z.string().optional(),
   })

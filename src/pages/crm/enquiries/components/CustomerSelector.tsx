@@ -92,7 +92,7 @@ export default function CustomerSelector({
       <Grid container spacing={2}>
         {mode === 'new' ? (
           <>
-            <Grid size={{ xs: 12, sm: 6 }}>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <Controller
                 name="customer_name"
                 control={control}
@@ -109,7 +109,7 @@ export default function CustomerSelector({
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 6 }}>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <Controller
                 name="customer_mobile"
                 control={control}
@@ -126,6 +126,21 @@ export default function CustomerSelector({
                         <InputAdornment position="start">+91</InputAdornment>
                       ),
                     }}
+                  />
+                )}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <Controller
+                name="customer_email"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Email"
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
                   />
                 )}
               />

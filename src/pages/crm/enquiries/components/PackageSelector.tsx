@@ -95,12 +95,14 @@ export default function PackageSelector({
             <Controller
               name="package_name"
               control={control}
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <TextField
                   {...field}
                   fullWidth
                   label="Package Name"
                   required
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
                 />
               )}
             />

@@ -1,3 +1,4 @@
+// src/pages/crm/enquiries/EnquiryCreatePage.tsx
 import {
   Box,
   Breadcrumbs,
@@ -11,6 +12,7 @@ import EnquiryForm, { type EnquiryFormInput } from './components/EnquiryForm';
 import { createEnquiry } from '../../../services/enquiry.service';
 import { usePermission } from '../../../hooks/usePermission';
 import { useSnackbar } from '../../../components/ui/SnackbarProvider';
+import { Link as RouterLink } from 'react-router-dom';
 
 export default function EnquiryCreatePage() {
   const navigate = useNavigate();
@@ -24,10 +26,20 @@ export default function EnquiryCreatePage() {
   }
 
   async function handleCreate(data: EnquiryFormInput) {
-    await createEnquiry(data);
-    showSnackbar({ message: 'Enquiry created successfully', severity: 'success' });
-    navigate('/app/crm/enquiries');
+    try {
+      await createEnquiry(data);
+      showSnackbar({ message: 'Enquiry created successfully', severity: 'success' });
+      navigate('/app/crm/enquiries');
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        'Failed to create enquiry';
+
+      showSnackbar({ message: msg, severity: 'error' });
+    }
   }
+
 
   return (
     <Box sx={{ p: { xs: 1, md: 1 } }}>
@@ -37,10 +49,10 @@ export default function EnquiryCreatePage() {
       </Typography>
 
       <Breadcrumbs sx={{ mb: 2 }}>
-        <Link underline="hover" color="inherit" href="/app/dashboard">
+        <Link component={RouterLink} to="/app/dashboard" underline="hover">
           Dashboard
         </Link>
-        <Link underline="hover" color="inherit" href="/app/crm/enquiries">
+        <Link component={RouterLink} to="/app/crm/enquiries" underline="hover">
           Enquiries
         </Link>
         <Typography color="text.primary">Create</Typography>
