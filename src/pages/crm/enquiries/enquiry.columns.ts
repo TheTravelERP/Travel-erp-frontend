@@ -8,13 +8,19 @@ import type { EnquiryListColumn } from './enquiry.types'; // local UI type (opti
 export const enquiryColumns: EnquiryListColumn[] = [
   {
     id: 'id',
-    label: 'Enquiry #',
+    label: 'Enquiry',
     sortable: true,
     minWidth: 90,
   },
   {
     id: 'customer_name',
     label: 'Customer',
+    sortable: true,
+    minWidth: 200,
+  },
+  {
+    id: 'customer_mobile',
+    label: 'Mobile',
     sortable: true,
     minWidth: 200,
   },
@@ -32,8 +38,8 @@ export const enquiryColumns: EnquiryListColumn[] = [
     minWidth: 80,
   },
   {
-    id: 'status',
-    label: 'Status',
+    id: 'priority',
+    label: 'Priority',
     sortable: true,
     format: 'chip',
     minWidth: 110,
@@ -44,14 +50,6 @@ export const enquiryColumns: EnquiryListColumn[] = [
     sortable: true,
     format: 'chip',
     minWidth: 120,
-  },
-  {
-    id: 'quote_amount',
-    label: 'Quote',
-    sortable: true,
-    align: 'right',
-    format: 'currency',
-    minWidth: 130,
   },
   {
     id: 'agent_name',

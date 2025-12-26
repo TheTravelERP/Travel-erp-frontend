@@ -7,6 +7,7 @@ export interface Enquiry {
 
   customer_name: string;
   customer_mobile: string;
+  customer_email?: string | null;
 
   status: EnquiryStatus;
   conversion_status: ConversionStatus;
@@ -19,3 +20,32 @@ export interface Enquiry {
 
   created_at: string;
 }
+
+
+export interface EnquiryListItem {
+  id: number;
+
+  customer_name: string;
+  customer_mobile: string;
+
+  package_name: string;
+
+  pax_count: number;
+  priority: string;
+  conversion_status: ConversionStatus;
+
+  agent_name: string;
+  created_at: string;
+}
+
+
+export interface EnquiryListResponse {
+  data: EnquiryListItem[];
+  meta: {
+    total: number;
+    page: number;
+    page_size: number;
+    total_pages: number;
+  };
+}
+

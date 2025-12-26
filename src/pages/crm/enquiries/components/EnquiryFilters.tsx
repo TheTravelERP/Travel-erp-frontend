@@ -1,7 +1,41 @@
-import { Box, TextField, MenuItem, Button, Grid, Typography, Stack } from '@mui/material';
+// src/pages/crm/enquiries/components/EnquiryFilters.tsx
+
+import {
+  Box,
+  TextField,
+  MenuItem,
+  Button,
+  Grid,
+  Typography,
+  Stack,
+} from '@mui/material';
 import { CONVERSION_STATUS_OPTIONS } from '../../../../constants/enquiry.options';
 
-export default function EnquiryFilters() {
+/* ================= TYPES ================= */
+
+export interface EnquiryFilterValues {
+  conversion_status?: string;
+  agent_name?: string;
+  from_date?: string;
+  to_date?: string;
+  lead_source?: string;
+}
+
+interface EnquiryFiltersProps {
+  value: EnquiryFilterValues;
+  onChange: (v: Partial<EnquiryFilterValues>) => void;
+  onApply: () => void;
+  onReset: () => void;
+}
+
+/* ================= COMPONENT ================= */
+
+export default function EnquiryFilters({
+  value,
+  onChange,
+  onApply,
+  onReset,
+}: EnquiryFiltersProps) {
   return (
     <Box
       sx={{
@@ -21,13 +55,15 @@ export default function EnquiryFilters() {
       </Stack>
 
       <Grid container spacing={2}>
-        {/* Row 1 */}
+        {/* Date Range */}
         <Grid size={{ xs: 12, md: 3 }}>
           <TextField
             label="From Date"
             type="date"
             fullWidth
+            value={value.from_date ?? ''}
             slotProps={{ inputLabel: { shrink: true } }}
+            onChange={(e) => onChange({ from_date: e.target.value })}
           />
         </Grid>
 
@@ -36,20 +72,25 @@ export default function EnquiryFilters() {
             label="To Date"
             type="date"
             fullWidth
+            value={value.to_date ?? ''}
             slotProps={{ inputLabel: { shrink: true } }}
+            onChange={(e) => onChange({ to_date: e.target.value })}
           />
         </Grid>
 
+        {/* Conversion Status */}
         <Grid size={{ xs: 12, md: 3 }}>
-          <TextField select label="Status" fullWidth defaultValue="">
-            <MenuItem value="Hot">Hot</MenuItem>
-            <MenuItem value="Warm">Warm</MenuItem>
-            <MenuItem value="Cold">Cold</MenuItem>
-          </TextField>
-        </Grid>
-        <Grid size={{ xs:12, md:3 }}>
-          <TextField select label="Conversion Status" fullWidth defaultValue="">
-            {CONVERSION_STATUS_OPTIONS.map(opt => (
+          <TextField
+            select
+            label="Conversion Status"
+            fullWidth
+            value={value.conversion_status ?? ''}
+            onChange={(e) =>
+              onChange({ conversion_status: e.target.value })
+            }
+          >
+            <MenuItem value="">All</MenuItem>
+            {CONVERSION_STATUS_OPTIONS.map((opt) => (
               <MenuItem key={opt.value} value={opt.value}>
                 {opt.label}
               </MenuItem>
@@ -57,26 +98,29 @@ export default function EnquiryFilters() {
           </TextField>
         </Grid>
 
-       
-
+        {/* Lead Source */}
         <Grid size={{ xs: 12, md: 3 }}>
-          <TextField label="Customer Name" fullWidth />
-        </Grid>
-
-        {/* Row 2 */}
-        <Grid size={{ xs: 12, md: 3 }}>
-          <TextField label="Mobile Number" fullWidth />
-        </Grid>
-
-        <Grid size={{ xs: 12, md: 3 }}>
-          <TextField label="Agent Name" fullWidth />
-        </Grid>
-
-        <Grid size={{ xs: 12, md: 3 }}>
-          <TextField select label="Lead Source" fullWidth defaultValue="">
+          <TextField
+            select
+            label="Lead Source"
+            fullWidth
+            value={value.lead_source ?? ''}
+            onChange={(e) => onChange({ lead_source: e.target.value })}
+          >
+            <MenuItem value="">All</MenuItem>
             <MenuItem value="WalkIn">Walk-In</MenuItem>
             <MenuItem value="Website">Website</MenuItem>
           </TextField>
+        </Grid>
+
+        {/* Agent */}
+        <Grid size={{ xs: 12, md: 3 }}>
+          <TextField
+            label="Agent Name"
+            fullWidth
+            value={value.agent_name ?? ''}
+            onChange={(e) => onChange({ agent_name: e.target.value })}
+          />
         </Grid>
 
         {/* Actions */}
@@ -87,8 +131,12 @@ export default function EnquiryFilters() {
           gap={1}
           mt={1}
         >
-          <Button color="inherit">Reset</Button>
-          <Button variant="contained">Apply Filters</Button>
+          <Button color="inherit" onClick={onReset}>
+            Reset
+          </Button>
+          <Button variant="contained" onClick={onApply}>
+            Apply Filters
+          </Button>
         </Grid>
       </Grid>
     </Box>
