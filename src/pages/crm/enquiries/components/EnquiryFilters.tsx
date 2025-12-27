@@ -39,7 +39,7 @@ export default function EnquiryFilters({
   return (
     <Box
       sx={{
-        p: 3,
+        p: 2,
         bgcolor: 'grey.50',
         borderRadius: 2,
         mb: 3,

@@ -1,5 +1,5 @@
 // src/pages/crm/enquiries/EnquiryListPage.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   Box,
   Button,
@@ -117,6 +117,45 @@ export default function EnquiryListPage() {
     setSearchParams(next);
   };
 
+  /* ----------- EXPORT --------- */
+  const handleExport = (format: "csv" | "excel" | "pdf") => {
+    const params = new URLSearchParams(location.search);
+    params.set("format", format);
+
+    window.open(
+      `${import.meta.env.VITE_API_BASE_URL}/api/v1/crm/enquiries/export?${params}`,
+      "_blank"
+    );
+
+    setExportAnchor(null);
+  };
+
+  /* ------------- IMPORT -------------------- */
+   const handleImport = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/v1/crm/enquiries/import", {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
+
+    if (!res.ok) {
+      throw new Error("Import failed");
+    }
+
+    const data = await res.json();
+    console.log(data);
+
+    // Optional: refresh list after import
+    // fetchEnquiries();
+  };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+ 
+
   /* ================= RENDER ================= */
 
   return (
@@ -169,10 +208,20 @@ export default function EnquiryListPage() {
                 open={Boolean(exportAnchor)}
                 onClose={() => setExportAnchor(null)}
               >
-                <MenuItem>Export CSV</MenuItem>
-                <MenuItem>Export Excel</MenuItem>
+                <MenuItem onClick={() => handleExport("csv")}>Export CSV</MenuItem>
+                <MenuItem onClick={() => handleExport("excel")}>Export Excel</MenuItem>
+                <MenuItem onClick={() => handleExport("pdf")}>Export PDF</MenuItem>
               </Menu>
             </>
+          )}
+          {perms.can_import && (
+            <Button
+              variant="outlined"
+              startIcon={<UploadIcon />}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Import CSV
+            </Button>
           )}
 
           <IconButton onClick={(e) => setMoreAnchor(e.currentTarget)}>
@@ -195,6 +244,18 @@ export default function EnquiryListPage() {
 
       {/* CONTENT */}
       <Paper sx={{ p: 2 }}>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv"
+          hidden
+          onChange={(e) => {
+            if (e.target.files?.[0]) {
+              handleImport(e.target.files[0]);
+              e.target.value = ""; // allow re-upload same file
+            }
+          }}
+        />
         <Collapse in={showFilters}>
           <EnquiryFilters
             value={draftFilters}
