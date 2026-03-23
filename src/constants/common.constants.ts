@@ -1,3 +1,4 @@
+// src/constant/common.constants.ts
 export const ActiveStatus = {
   ACTIVE: 'Active',
   INACTIVE: 'Inactive',

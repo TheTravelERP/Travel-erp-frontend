@@ -1,4 +1,4 @@
-//src/constants/enquiry.constatnts.ts
+// src/constant/enquiry.constants.ts
 export const ConversionStatus = {
   LOST: 'Lost',
   PENDING: 'Pending',
