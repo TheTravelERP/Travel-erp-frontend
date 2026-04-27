@@ -37,8 +37,6 @@ import InboxIcon from '@mui/icons-material/Inbox';
 
 import type { EnquiryListItem } from '../../../../types/enquiry.types';
 import { enquiryColumns } from '../enquiry.columns';
-import { CONVERSION_STATUS_COLOR_MAP } from './conversionStatusChip';
-
 /* ================= TYPES ================= */
 
 interface Props {
@@ -166,15 +164,7 @@ export default function EnquiryTable({
                   <TableCell>{row.package_name}</TableCell>
                   <TableCell align="center">{row.pax_count}</TableCell>
                   <TableCell>{row.priority}</TableCell>
-                  <TableCell>
-                    <Chip
-                      size="small"
-                      label={row.conversion_status}
-                      color={
-                        CONVERSION_STATUS_COLOR_MAP[row.conversion_status]
-                      }
-                    />
-                  </TableCell>
+                  <TableCell>{row.conversion_status}</TableCell>
                   <TableCell>{row.agent_name}</TableCell>
                   <TableCell>
                     {new Date(row.created_at).toLocaleDateString()}

@@ -21,6 +21,10 @@ import PackageSelector from './PackageSelector';
 
 export type EnquiryFormInput = z.infer<typeof enquirySchema>;
 
+import DropdownAutocomplete from '../../../../components/common/DropdownAutocomplete';
+
+
+
 interface EnquiryFormProps {
   defaultValues?: Partial<EnquiryFormInput>;
   onSubmit: (data: EnquiryFormInput) => Promise<void>;
@@ -49,9 +53,9 @@ export default function EnquiryForm({
       customer_email: '',
       pkg_id: null,
       package_name: '',
-      lead_source: 'WalkIn',
+      lead_source: '',
       pax_count: 1,
-      priority: 'Warm',
+      priority: '',
       conversion_status: 'Pending',
       description: '',
       ...defaultValues,
@@ -79,19 +83,13 @@ export default function EnquiryForm({
 
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, sm: 4 }}>
-                <Controller
+                <DropdownAutocomplete
                   name="lead_source"
+                  label="Source"
                   control={control}
-                  render={({ field }) => (
-                    <TextField {...field} select label="Source" fullWidth>
-                      <MenuItem value="Website">Website</MenuItem>
-                      <MenuItem value="Agent">Agent</MenuItem>
-                      <MenuItem value="WalkIn">Walk-In</MenuItem>
-                      <MenuItem value="Referral">Referral</MenuItem>
-                      <MenuItem value="Corporate">Corporate</MenuItem>
-                      <MenuItem value="Others">Others</MenuItem>
-                    </TextField>
-                  )}
+                  useForm={true}
+                  allowAdd={true}
+                  pagination
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 4 }}>
@@ -116,16 +114,13 @@ export default function EnquiryForm({
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 4 }}>
-                <Controller
+                <DropdownAutocomplete
                   name="priority"
+                  label="Enquiry Priority"
                   control={control}
-                  render={({ field }) => (
-                    <TextField {...field} select label="Priority" fullWidth>
-                      <MenuItem value="Hot">🔥 Hot</MenuItem>
-                      <MenuItem value="Warm">☀️ Warm</MenuItem>
-                      <MenuItem value="Cold">❄️ Cold</MenuItem>
-                    </TextField>
-                  )}
+                  useForm={true}
+                  allowAdd={false}
+                  pagination={false}
                 />
               </Grid>
               <Grid size={{ xs: 12 }}>

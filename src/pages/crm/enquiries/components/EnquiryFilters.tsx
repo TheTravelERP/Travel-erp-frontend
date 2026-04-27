@@ -8,9 +8,8 @@ import {
   Grid,
   Typography,
   Stack,
-} from '@mui/material';
-import { CONVERSION_STATUS_OPTIONS } from '../../../../constants/enquiry.options';
-
+} from "@mui/material";
+import DropdownAutocomplete from "../../../../components/common/DropdownAutocomplete";
 /* ================= TYPES ================= */
 
 export interface EnquiryFilterValues {
@@ -40,11 +39,11 @@ export default function EnquiryFilters({
     <Box
       sx={{
         p: 2,
-        bgcolor: 'grey.50',
+        bgcolor: "grey.50",
         borderRadius: 2,
         mb: 3,
-        border: '1px solid',
-        borderColor: 'divider',
+        border: "1px solid",
+        borderColor: "divider",
       }}
     >
       {/* Header */}
@@ -61,7 +60,7 @@ export default function EnquiryFilters({
             label="From Date"
             type="date"
             fullWidth
-            value={value.from_date ?? ''}
+            value={value.from_date ?? ""}
             slotProps={{ inputLabel: { shrink: true } }}
             onChange={(e) => onChange({ from_date: e.target.value })}
           />
@@ -72,7 +71,7 @@ export default function EnquiryFilters({
             label="To Date"
             type="date"
             fullWidth
-            value={value.to_date ?? ''}
+            value={value.to_date ?? ""}
             slotProps={{ inputLabel: { shrink: true } }}
             onChange={(e) => onChange({ to_date: e.target.value })}
           />
@@ -80,22 +79,17 @@ export default function EnquiryFilters({
 
         {/* Conversion Status */}
         <Grid size={{ xs: 12, md: 3 }}>
-          <TextField
-            select
+          <DropdownAutocomplete
+            name="conversion_status"
             label="Conversion Status"
-            fullWidth
-            value={value.conversion_status ?? ''}
-            onChange={(e) =>
-              onChange({ conversion_status: e.target.value })
+            value={value.conversion_status ?? null}
+            onChange={(val) =>
+              onChange({ conversion_status: val || undefined })
             }
-          >
-            <MenuItem value="">All</MenuItem>
-            {CONVERSION_STATUS_OPTIONS.map((opt) => (
-              <MenuItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </MenuItem>
-            ))}
-          </TextField>
+            useForm={false}
+            allowAdd={false}
+            pagination={false}
+          />
         </Grid>
 
         {/* Lead Source */}
@@ -104,7 +98,7 @@ export default function EnquiryFilters({
             select
             label="Lead Source"
             fullWidth
-            value={value.lead_source ?? ''}
+            value={value.lead_source ?? ""}
             onChange={(e) => onChange({ lead_source: e.target.value })}
           >
             <MenuItem value="">All</MenuItem>
@@ -118,19 +112,13 @@ export default function EnquiryFilters({
           <TextField
             label="Agent Name"
             fullWidth
-            value={value.agent_name ?? ''}
+            value={value.agent_name ?? ""}
             onChange={(e) => onChange({ agent_name: e.target.value })}
           />
         </Grid>
 
         {/* Actions */}
-        <Grid
-          size={12}
-          display="flex"
-          justifyContent="flex-end"
-          gap={1}
-          mt={1}
-        >
+        <Grid size={12} display="flex" justifyContent="flex-end" gap={1} mt={1}>
           <Button color="inherit" onClick={onReset}>
             Reset
           </Button>
