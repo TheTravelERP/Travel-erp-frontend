@@ -22,6 +22,8 @@ import PackageSelector from './PackageSelector';
 export type EnquiryFormInput = z.infer<typeof enquirySchema>;
 
 import DropdownAutocomplete from '../../../../components/common/DropdownAutocomplete';
+import { useDropdownOptions } from '../../../../hooks/useDropdownOptions';
+
 
 
 
@@ -56,11 +58,12 @@ export default function EnquiryForm({
       lead_source: '',
       pax_count: 1,
       priority: '',
-      conversion_status: 'Pending',
+      conversion_status: 'PENDING',
       description: '',
       ...defaultValues,
     },
   });
+  const { options: priorityOptions } = useDropdownOptions("priority");
 
   /* ---------------- RENDER ---------------- */
   return (
@@ -82,17 +85,7 @@ export default function EnquiryForm({
             </Typography>
 
             <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <DropdownAutocomplete
-                  name="lead_source"
-                  label="Source"
-                  control={control}
-                  useForm={true}
-                  allowAdd={true}
-                  pagination
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 4 }}>
+               <Grid size={{ xs: 12, sm: 2 }}>
                 <Controller
                   name="pax_count"
                   control={control}
@@ -113,14 +106,31 @@ export default function EnquiryForm({
                   )}
                 />
               </Grid>
-              <Grid size={{ xs: 12, sm: 4 }}>
+
+              <Grid size={{ xs: 12, sm: 3 }}>
                 <DropdownAutocomplete
-                  name="priority"
-                  label="Enquiry Priority"
+                  name="lead_source"
+                  label="Source"
                   control={control}
                   useForm={true}
-                  allowAdd={false}
-                  pagination={false}
+                  allowAdd={true}
+                  pagination
+                />
+              </Grid>
+             
+              <Grid size={{ xs: 12, sm: 3 }}>
+                <Controller
+                  name="priority"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField {...field} select label="Enquiry Priority" fullWidth>
+                      {priorityOptions.map((opt) => (
+                        <MenuItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
                 />
               </Grid>
               <Grid size={{ xs: 12 }}>

@@ -1,3 +1,4 @@
+// src/pages/crm/enquiries/enquiry.routes.tsx
 import { Routes, Route } from 'react-router-dom';
 import EnquiryListPage from './EnquiryListPage';
 import EnquiryCreatePage from './EnquiryCreatePage';
@@ -11,7 +12,7 @@ export default function EnquiryRoutes() {
       <Route
         index
         element={
-          <PermissionRoute menuId="crm_enquiries" action="can_view">
+          <PermissionRoute menuId="crm.enquiries" action="can_view">
             <EnquiryListPage />
           </PermissionRoute>
         }
@@ -20,7 +21,7 @@ export default function EnquiryRoutes() {
       <Route
         path="create"
         element={
-          <PermissionRoute menuId="crm_enquiries" action="can_create">
+          <PermissionRoute menuId="crm.enquiries" action="can_create">
             <EnquiryCreatePage />
           </PermissionRoute>
         }
@@ -30,7 +31,7 @@ export default function EnquiryRoutes() {
       <Route
         path=":id/edit"
         element={
-          <PermissionRoute menuId="crm_enquiries" action="can_edit">
+          <PermissionRoute menuId="crm.enquiries" action="can_edit">
             <EnquiryEditPage />
           </PermissionRoute>
         }
@@ -38,7 +39,7 @@ export default function EnquiryRoutes() {
       <Route
         path=":id/view"
         element={
-          <PermissionRoute menuId="crm_enquiries" action="can_view">
+          <PermissionRoute menuId="crm.enquiries" action="can_view">
             <EnquiryViewPage />
           </PermissionRoute>
         }

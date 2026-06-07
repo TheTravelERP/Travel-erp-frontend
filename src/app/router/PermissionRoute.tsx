@@ -1,3 +1,4 @@
+// src/app/router/PermissionRoute.tsx
 import { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { usePermission } from '../../hooks/usePermission';

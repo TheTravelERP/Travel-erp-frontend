@@ -18,7 +18,7 @@ export default function EnquiryCreatePage() {
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
 
-  const perms = usePermission('crm_enquiries');
+  const perms = usePermission('crm.enquiries');
 
   // 🚫 Permission Guard
   if (!perms.can_create) {

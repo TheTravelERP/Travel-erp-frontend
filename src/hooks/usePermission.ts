@@ -1,3 +1,5 @@
+// src/hooks/usePermission.ts
+
 import { useMenu } from '../context/MenuContext';
 
 const EMPTY_PERMISSIONS = {

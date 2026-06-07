@@ -40,3 +40,17 @@ export const createDropdownOption = async (
 
   return data;
 };
+
+export const getEntityDropdownOptions = async (params: {
+  dropdown_name: string;
+  search?: string;
+  page?: number;
+  page_size?: number;
+}) => {
+  const { data } = await api.get('/api/v1/common/dropdowns/entity', {
+    params,
+    withCredentials: true,
+  });
+
+  return data;
+};

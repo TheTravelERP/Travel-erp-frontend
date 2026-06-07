@@ -36,7 +36,7 @@ import type { EnquiryListItem } from '../../../types/enquiry.types';
 
 export default function EnquiryListPage() {
   const navigate = useNavigate();
-  const perms = usePermission('crm_enquiries');
+  const perms = usePermission('crm.enquiries');
   const [searchParams, setSearchParams] = useSearchParams();
 
   /* ---------- UI ---------- */

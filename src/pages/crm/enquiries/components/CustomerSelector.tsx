@@ -19,11 +19,13 @@ import type { Control, UseFormSetValue } from 'react-hook-form';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 
+import EntityAutocomplete from '../../../../components/common/EntityAutocomplete';
+
 /* ---------------- MOCK DATA ---------------- */
-const MOCK_CUSTOMERS = [
-  { id: 1, name: 'John Doe', mobile: '9999999999' },
-  { id: 2, name: 'Aadil Hussain', mobile: '8888888888' },
-];
+// const MOCK_CUSTOMERS = [
+//   { id: 1, name: 'John Doe', mobile: '9999999999' },
+//   { id: 2, name: 'Aadil Hussain', mobile: '8888888888' },
+// ];
 
 /* ---------------- TYPES ---------------- */
 interface CustomerSelectorProps {
@@ -148,30 +150,22 @@ export default function CustomerSelector({
             </Grid>
           </>
         ) : (
-          <Grid size={{ xs: 12 }}>
-            <Controller
-              name="cust_id"
-              control={control}
-              render={({ field }) => (
-                <Autocomplete
-                  fullWidth
-                  options={MOCK_CUSTOMERS}
-                  isOptionEqualToValue={(o, v) => o.id === v.id}
-                  getOptionLabel={(o) => `${o.name} (${o.mobile})`}
-                  onChange={(_, v) => {
-                    field.onChange(v?.id ?? null);
-                    if (v) {
-                      setValue('customer_name', v.name);
-                      setValue('customer_mobile', v.mobile);
-                    }
-                  }}
-                  renderInput={(params) => (
-                    <TextField {...params} fullWidth label="Search Customer" />
-                  )}
-                />
-              )}
-            />
-          </Grid>
+         <Grid size={{ xs: 12 }}>
+          <EntityAutocomplete
+            name="cust_id"
+            label="Search Customer"
+            control={control}
+            dropdownName="customers"
+            setValue={setValue}
+            allowAdd
+            onAddNew={() => console.log("Open modal")}
+            autoFillMap={{
+              customer_name: "label",
+              customer_mobile: "mobile",
+              customer_email: "email",
+            }}
+          />
+        </Grid>
         )}
       </Grid>
     </Paper>

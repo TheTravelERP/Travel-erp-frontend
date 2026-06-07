@@ -10,7 +10,7 @@ export type MenuPermission = {
 };
 
 export type MenuItem = {
-  id: string;                 // menu.key (crm_enquiries)
+  id: string;                 // menu.key (crm.enquiries)
   title: string;
   path?: string;
   icon?: string;

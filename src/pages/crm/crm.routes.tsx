@@ -1,3 +1,4 @@
+// src/pages/crm/crm.routes.tsx
 import { Routes, Route, Navigate } from 'react-router-dom';
 import EnquiryRoutes from './enquiries/enquiry.routes';
 

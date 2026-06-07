@@ -1,3 +1,4 @@
+// src/pages/crm/enquiries/enquiry.columns.ts
 import type { EnquiryListColumn } from './enquiry.types'; // local UI type (optional)
 // local UI type (optional)
 

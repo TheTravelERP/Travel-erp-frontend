@@ -15,7 +15,7 @@
     "title": "CRM",
     "icon": "People",
     "children": [
-      { "id": "crm_enquiries", "title": "Enquiries", "path": "/app/crm/enquiries" },
+      { "id": "crm.enquiries", "title": "Enquiries", "path": "/app/crm/enquiries" },
       { "id": "crm_quotations", "title": "Quotations", "path": "/app/crm/quotations" },
       { "id": "crm_customers", "title": "Customers", "path": "/app/crm/customers" }
     ]

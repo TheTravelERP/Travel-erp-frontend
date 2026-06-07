@@ -1,3 +1,4 @@
+// src/pages/crm/enquiries/components/PackageSelector.tsx
 import { useState } from 'react';
 import {
   Box,

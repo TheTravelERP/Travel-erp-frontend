@@ -18,6 +18,7 @@ export interface EnquiryFilterValues {
   from_date?: string;
   to_date?: string;
   lead_source?: string;
+  priority?: string;
 }
 
 interface EnquiryFiltersProps {
@@ -94,17 +95,32 @@ export default function EnquiryFilters({
 
         {/* Lead Source */}
         <Grid size={{ xs: 12, md: 3 }}>
-          <TextField
-            select
+          <DropdownAutocomplete
+            name="lead_source"                
             label="Lead Source"
-            fullWidth
-            value={value.lead_source ?? ""}
-            onChange={(e) => onChange({ lead_source: e.target.value })}
-          >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="WalkIn">Walk-In</MenuItem>
-            <MenuItem value="Website">Website</MenuItem>
-          </TextField>
+            value={value.lead_source ?? null}
+            onChange={(val: string | null) =>
+              onChange({ lead_source: val || undefined })
+            }
+            useForm={false}                 
+            allowAdd={false}                 
+            pagination={false}              
+          />
+        </Grid>
+
+         {/* priority */}
+        <Grid size={{ xs: 12, md: 3 }}>
+          <DropdownAutocomplete
+            name="priority"                 
+            label="Enquiry Priority"
+            value={value.priority ?? null}
+            onChange={(val: string | null) =>
+              onChange({ priority: val || undefined })
+            }
+            useForm={false}                 
+            allowAdd={false}                 
+            pagination={false}              
+          />
         </Grid>
 
         {/* Agent */}
