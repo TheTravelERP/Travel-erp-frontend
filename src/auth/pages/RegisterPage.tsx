@@ -1,5 +1,5 @@
 // src/auth/pages/RegisterPage.tsx
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -21,6 +21,7 @@ import { registerOrgApi } from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "../../components/ui/SnackbarProvider";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { getCountries } from "../../services/public.service";
 
 const Root = styled("div")(({ theme }) => ({
   minHeight: "100vh",
@@ -41,6 +42,12 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
 
+  const [countries, setCountries] = React.useState<any[]>([]);
+  const [countryLoading, setCountryLoading] = React.useState(false);
+  const [selectedCountry, setSelectedCountry] = useState<any | null>(null);
+  const [selectedPhoneCountry, setSelectedPhoneCountry] = useState<any | null>(null);
+
+
   const {
     control,
     handleSubmit,
@@ -55,6 +62,7 @@ export default function RegisterPage() {
       email: "",
       mobile: "",
       password: "",
+      confirm_password: "",
     },
   });
 
@@ -64,17 +72,23 @@ export default function RegisterPage() {
   async function onSubmit(data: RegisterOrgInput) {
     setGlobalError(null);
     try {
-      const res = await registerOrgApi(data);
-      // If backend returns message + code, use it; otherwise show generic
+      // Create a shallow copy of the form data
+      const payload = { ...data };
+
+      // Append selected country phone code prefix to raw mobile sequence before delivery
+      if (selectedPhoneCountry?.phone_code && payload.mobile) {
+        // Strip out hyphens or spaces from complex codes (e.g., "1-684" -> "1684")
+        const cleanPhoneCode = selectedPhoneCountry.phone_code.replace(/[^0-9]/g, "");
+        payload.mobile = `+${cleanPhoneCode}${payload.mobile}`;
+      }
+
+      const res = await registerOrgApi(payload);
       const msg = res?.message || "Organization created — please login.";
       showSnackbar({ message: msg, severity: "success" });
       setSuccessMessage(msg);
       setTimeout(() => navigate("/login", { replace: true }), 900);
     } catch (err: any) {
-      // extract meaningful message from axios error
       const detail = err?.response?.data;
-      // common shapes:
-      // { detail: "..." } or { message: "..."} or { errors: { field: "msg" } }
       const messageFromApi =
         detail?.detail || detail?.message || (typeof detail === "string" ? detail : null);
 
@@ -82,15 +96,12 @@ export default function RegisterPage() {
         showSnackbar({ message: String(messageFromApi), severity: "error" });
         setGlobalError(String(messageFromApi));
       } else {
-        // fallbacks
         const fallback = err?.message || "Failed to register organization.";
         showSnackbar({ message: fallback, severity: "error" });
         setGlobalError(fallback);
       }
 
-      // If backend returns per-field errors (object), set form errors via setError already implemented in your form flow
       if (detail && typeof detail === "object" && !messageFromApi) {
-        // example: { email: "already exists" }
         Object.entries(detail).forEach(([k, v]) => {
           setError(k as any, { type: "server", message: String(v) });
         });
@@ -98,19 +109,41 @@ export default function RegisterPage() {
     }
   }
 
-  const countries = [
-    { code: 'IN', label: 'India', phone: '91' },
-    { code: 'SA', label: 'Saudi Arabia', phone: '966' },
-    { code: 'AE', label: 'United Arab Emirates', phone: '971' },
-    { code: 'BD', label: 'Bangladesh', phone: '880' },
-    { code: 'PK', label: 'Pakistan', phone: '92' },
-  ];
-
   const [showPassword, setShowPassword] = React.useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault(); // Prevents focus loss when clicking the icon
+    event.preventDefault();
   };
+
+  React.useEffect(() => {
+    loadCountries();
+  }, []);
+
+ const loadCountries = async () => {
+  try {
+    
+    setCountryLoading(true);
+
+    const res = await getCountries();
+
+    const items = res.items || [];
+
+    setCountries(items);
+
+    const india =
+      items.find(
+        (x: any) => x.iso_code === "IN"
+      ) || items[0];
+
+    setSelectedCountry(india);
+    setSelectedPhoneCountry(india);
+
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setCountryLoading(false);
+  }
+};
 
   return (
     <Box
@@ -141,8 +174,8 @@ export default function RegisterPage() {
           </Typography>
         </Stack>
 
-        {globalError && <Alert severity="error">{globalError}</Alert>}
-        {successMessage && <Alert severity="success">{successMessage}</Alert>}
+        {globalError && <Alert severity="error" sx={{ mb: 2 }}>{globalError}</Alert>}
+        {successMessage && <Alert severity="success" sx={{ mb: 2 }}>{successMessage}</Alert>}
 
         {/* Form */}
         <Box component="form" onSubmit={handleSubmit(onSubmit)} mt={1} noValidate>
@@ -157,57 +190,6 @@ export default function RegisterPage() {
                   required
                   error={!!errors.organization_name}
                   helperText={errors.organization_name?.message ?? ''}
-                />
-              )}
-            />
-
-            <Controller
-              name="country_code"
-              control={control}
-              render={({ field: { onChange, value, ...field } }) => (
-                <Autocomplete
-                  {...field}
-                  options={countries}
-                  autoHighlight
-                  value={countries.find((c) => c.code === value) || null}
-                  onChange={(_, newValue) => {
-                    onChange(newValue ? newValue.code : '');
-                  }}
-                  getOptionLabel={(option) => option.label}
-                  renderOption={(props, option) => (
-                    <Box
-                      component="li"
-                      {...props}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        fontSize: '0.9rem',
-                        '& img': { mr: 2 },
-                      }}
-                    >
-                      <img
-                        loading="lazy"
-                        width="20"
-                        src={`https://flagcdn.com/w20/${option.code.toLowerCase()}.png`}
-                        srcSet={`https://flagcdn.com/w40/${option.code.toLowerCase()}.png 2x`}
-                        alt=""
-                      />
-                      {option.label} ({option.code}) +{option.phone}
-                    </Box>
-                  )}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Select Country"
-                      required
-                      error={!!errors.country_code}
-                      helperText={errors.country_code?.message ?? ''}
-                      inputProps={{
-                        ...params.inputProps,
-                        autoComplete: 'new-password',
-                      }}
-                    />
-                  )}
                 />
               )}
             />
@@ -241,18 +223,130 @@ export default function RegisterPage() {
               )}
             />
 
-            <Controller
-              name="mobile"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Mobile Number"
-                  error={!!errors.mobile}
-                  helperText={errors.mobile?.message ?? ''}
-                />
-              )}
-            />
+            {/* Profile Selection - Base Home Country */}
+           <Controller
+  name="country_code"
+  control={control}
+  render={({ field }) => (
+    <Autocomplete
+      options={countries}
+      loading={countryLoading}
+      value={selectedCountry}
+      isOptionEqualToValue={(option, value) =>
+        option.id === value?.id
+      }
+      getOptionLabel={(option) =>
+        option?.label || ""
+      }
+      onChange={(_, value) => {
+        setSelectedCountry(value);
+        field.onChange(value?.iso_code || "");
+      }}
+      renderOption={(props, option) => {
+  const { key, ...optionProps } = props;
+
+  return (
+    <Box
+      key={key}
+      component="li"
+      {...optionProps}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
+      }}
+    >
+      <img
+        src={option.flag_url}
+        width={20}
+        alt=""
+      />
+
+      {option.label} ({option.iso_code})
+    </Box>
+  );
+}}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label="Select Profile Country"
+          error={!!errors.country_code}
+          helperText={
+            errors.country_code?.message
+          }
+        />
+      )}
+    />
+  )}
+/>
+
+            {/* Prefix Selection + Raw Local Mobile Block */}
+            <Box display="flex" gap={1}>
+  <Autocomplete
+    sx={{
+      width: 220,
+      flexShrink: 0,
+    }}
+    options={countries}
+    loading={countryLoading}
+    value={selectedPhoneCountry}
+    isOptionEqualToValue={(option, value) =>
+      option.id === value?.id
+    }
+    getOptionLabel={(option) =>
+      option
+        ? `${option.label} (+${option.phone_code})`
+        : ""
+    }
+    onChange={(_, value) => {
+      setSelectedPhoneCountry(value);
+    }}
+    renderOption={(props, option) => {
+  const { key, ...optionProps } = props;
+
+  return (
+    <Box
+      key={key}
+      component="li"
+      {...optionProps}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
+      }}
+    >
+      <img
+        src={option.flag_url}
+        width={20}
+        alt=""
+      />
+
+      {option.label} ({option.iso_code})
+    </Box>
+  );
+}}
+    renderInput={(params) => (
+      <TextField
+        {...params}
+        label="Code"
+      />
+    )}
+  />
+
+  <Controller
+    name="mobile"
+    control={control}
+    render={({ field }) => (
+      <TextField
+        {...field}
+        fullWidth
+        label="Mobile Number"
+        error={!!errors.mobile}
+        helperText={errors.mobile?.message}
+      />
+    )}
+  />
+</Box>
 
             <Controller
               name="password"
@@ -264,7 +358,7 @@ export default function RegisterPage() {
                   type={showPassword ? 'text' : 'password'}
                   required
                   error={!!errors.password}
-                  helperText={errors.password?.message ?? 'Min 8 characters'}
+                  helperText={errors.password?.message ?? ''}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -278,6 +372,21 @@ export default function RegisterPage() {
                       </InputAdornment>
                     ),
                   }}
+                />
+              )}
+            />
+
+            <Controller
+              name="confirm_password"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Confirm Password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  error={!!errors.confirm_password}
+                  helperText={errors.confirm_password?.message ?? ''}
                 />
               )}
             />

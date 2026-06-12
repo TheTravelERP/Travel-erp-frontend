@@ -19,7 +19,7 @@ export const passwordValidator = z
 
 export const nameValidator = z
   .string()
-  .min(1, "This field is required")
+  .min(3, "Must be at least 3 characters")
   .max(200, "Too long");
 
 export const mobileValidator = z
@@ -37,6 +37,11 @@ export const registerOrgSchema = z.object({
   email: emailValidator,
   mobile: mobileValidator,
   password: passwordValidator,
+  confirm_password: z.string().min(1, "Confirm password is required"),
+})
+.refine((data) => data.password === data.confirm_password, {
+    message: "Password and confirm password does not match", 
+    path: ["confirm_password"], 
 });
 
 // type for TS convenience
