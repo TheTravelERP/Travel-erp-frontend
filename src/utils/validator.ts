@@ -24,10 +24,12 @@ export const nameValidator = z
 
 export const mobileValidator = z
   .string()
-  .optional()
-  .refine((v) => !v || /^[0-9+\-()\s]{6,20}$/.test(v), {
-    message: "Mobile looks invalid",
-  });
+  .min(7, "Mobile number is required")
+  .max(15, "Mobile number too long")
+  .regex(
+    /^[0-9]+$/,
+    "Only digits allowed"
+  );
 
 // full form schema (shape the frontend sends)
 export const registerOrgSchema = z.object({
