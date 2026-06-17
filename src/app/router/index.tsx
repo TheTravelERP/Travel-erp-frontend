@@ -7,6 +7,7 @@ import CrmRoutes from '../../pages/crm/crm.routes';
 import DashboardPage from '../../pages/dashboard/DashboardPage';
 import PermissionRoute from './PermissionRoute';
 import UnauthorizedPage from '../../pages/system/UnauthorizedPage';
+import VerifyOtpPage from "../../auth/pages/VerifyOtpPage";
 
 export default function AppRouter() {
   return (
@@ -14,6 +15,7 @@ export default function AppRouter() {
       {/* Public Routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/verify-otp" element={<VerifyOtpPage />}/>
 
       {/* Protected Layout */}
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>

@@ -3,6 +3,60 @@ import api from "../../services/api";
 import type { RegisterOrgInput } from "../../utils/validator";
 
 
+
+export async function requestRegistrationOtp(
+  payload: RegisterOrgInput
+) {
+  const body = {
+    organization: {
+      name: payload.organization_name,
+      country_code: payload.country_code,
+      max_users: 50,
+      max_bookings: 1000,
+    },
+    admin: {
+      admin_name: payload.admin_name,
+      email: payload.email,
+      mobile: payload.mobile,
+      password: payload.password,
+    },
+  };
+
+  const { data } = await api.post(
+    "/api/v1/auth/register/request-otp",
+    body
+  );
+
+  return data;
+}
+
+export async function verifyOtpApi(
+  payload: {
+    email: string;
+    otp: string;
+  }
+) {
+  const { data } = await api.post(
+    "/api/v1/auth/register/verify-otp",
+    payload
+  );
+
+  return data;
+}
+
+export async function resendOtpApi(
+  email: string
+) {
+  const { data } = await api.post(
+    "/api/v1/auth/register/resend-otp",
+    {
+      email,
+    }
+  );
+
+  return data;
+}
+
 export async function loginApi(payload: { email: string; password: string }) {
   try {
      const { data } = await api.post('/api/v1/auth/login', payload, {
@@ -14,8 +68,6 @@ export async function loginApi(payload: { email: string; password: string }) {
     throw err;
   }
 }
-
-
 
 export async function registerOrgApi(payload: RegisterOrgInput) {
   // Build backend payload shape expected by your FastAPI:
@@ -34,6 +86,14 @@ export async function registerOrgApi(payload: RegisterOrgInput) {
     },
   };
 
-  const { data } = await api.post("/api/v1/auth/register", body);
+  // const { data } = await api.post("/api/v1/auth/register", body);
+  const { data } = await api.post("/api/v1/auth/register/request-otp",body);
+
   return data;
 }
+
+
+
+
+
+

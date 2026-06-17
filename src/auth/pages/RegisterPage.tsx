@@ -17,7 +17,8 @@ import { styled } from "@mui/material/styles";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { registerOrgSchema, type RegisterOrgInput } from "../../utils/validator";
-import { registerOrgApi } from "../services/auth.service";
+// import { registerOrgApi } from "../services/auth.service";
+import { requestRegistrationOtp} from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "../../components/ui/SnackbarProvider";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
@@ -82,11 +83,16 @@ export default function RegisterPage() {
         payload.mobile = `+${cleanPhoneCode}${payload.mobile}`;
       }
 
-      const res = await registerOrgApi(payload);
+      const res = await requestRegistrationOtp(payload);
       const msg = res?.message || "Organization created — please login.";
       showSnackbar({ message: msg, severity: "success" });
       setSuccessMessage(msg);
-      setTimeout(() => navigate("/login", { replace: true }), 900);
+      navigate("/verify-otp",{
+        state: {
+            email: payload.email,
+          },
+        }
+      );
     } catch (err: any) {
       const detail = err?.response?.data;
       const messageFromApi =
