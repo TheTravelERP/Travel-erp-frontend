@@ -26,33 +26,50 @@ export const mobileValidator = z
   .string()
   .min(7, "Mobile number is required")
   .max(15, "Mobile number too long")
-  .regex(
-    /^[0-9]+$/,
-    "Only digits allowed"
-  );
+  .regex(/^[0-9]+$/, "Only digits allowed");
+
+export const countryCodeValidator = z
+  .string()
+  .length(2, "Country code must be exactly 2 characters")
+  .regex(/^[A-Z]{2}$/, "Country code must be 2 uppercase letters");
 
 // full form schema (shape the frontend sends)
-export const registerOrgSchema = z.object({
-  organization_name: nameValidator,
-  country_code: nameValidator,
-  admin_name: nameValidator,
-  email: emailValidator,
-  mobile: mobileValidator,
-  password: passwordValidator,
-  confirm_password: z.string().min(1, "Confirm password is required"),
-})
-.refine((data) => data.password === data.confirm_password, {
-    message: "Password and confirm password does not match", 
-    path: ["confirm_password"], 
-});
-
-// type for TS convenience
+export const registerOrgSchema = z
+  .object({
+    organization_name: nameValidator,
+    country_code: countryCodeValidator,
+    admin_name: nameValidator,
+    email: emailValidator,
+    mobile: mobileValidator,
+    password: passwordValidator,
+    confirm_password: z.string().min(1, "Confirm password is required"),
+  })
+  .refine((data) => data.password === data.confirm_password, {
+    message: "Password and confirm password does not match",
+    path: ["confirm_password"],
+  });
 export type RegisterOrgInput = z.infer<typeof registerOrgSchema>;
 
 export const loginSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Enter a valid email"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  email: emailValidator,
+  password: passwordValidator,
+});
+export type LoginInput = z.infer<typeof loginSchema>;
+
+export const forgotPasswordSchema = z.object({
+  email: emailValidator,
 });
 
+export const resetPasswordSchema = z
+  .object({
+    password: passwordValidator,
+    confirm_password: z.string().min(1, "Confirm password is required"),
+  })
+  .refine((data) => data.password === data.confirm_password, {
+    message: "Password and confirm password does not match",
+    path: ["confirm_password"],
+  });
 
-export type LoginInput = z.infer<typeof loginSchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;

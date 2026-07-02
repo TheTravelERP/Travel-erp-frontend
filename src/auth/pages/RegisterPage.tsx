@@ -1,11 +1,10 @@
 // src/auth/pages/RegisterPage.tsx
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Box,
   Button,
   Paper,
   TextField,
-  Typography,
   Stack,
   Divider,
   Alert,
@@ -13,31 +12,20 @@ import {
   InputAdornment,
   IconButton,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
-import { registerOrgSchema, type RegisterOrgInput } from "../../utils/validator";
-// import { registerOrgApi } from "../services/auth.service";
-import { requestRegistrationOtp} from "../services/auth.service";
+import {
+  registerOrgSchema,
+  type RegisterOrgInput,
+} from "../../utils/validator";
+import { requestRegistrationOtp, verifyOtpApi } from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "../../components/ui/SnackbarProvider";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { getCountries } from "../../services/public.service";
-
-const Root = styled("div")(({ theme }) => ({
-  minHeight: "100vh",
-  display: "grid",
-  placeItems: "center",
-  backgroundColor: theme.palette.background.default,
-  padding: theme.spacing(2),
-}));
-
-const Card = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(4),
-  width: "100%",
-  maxWidth: 480,
-  borderRadius: theme.shape.borderRadius * 1.5,
-}));
+import type { OtpInputHandle } from "../../components/common/OtpInput";
+import OtpInput from "../../components/common/OtpInput";
+import AuthCard from "../components/AuthCard";
+import PasswordField from "../../components/common/PasswordField";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -45,14 +33,25 @@ export default function RegisterPage() {
 
   const [countries, setCountries] = React.useState<any[]>([]);
   const [countryLoading, setCountryLoading] = React.useState(false);
-  const [selectedCountry, setSelectedCountry] = useState<any | null>(null);
-  const [selectedPhoneCountry, setSelectedPhoneCountry] = useState<any | null>(null);
+  const [selectedPhoneCountry, setSelectedPhoneCountry] = useState<any | null>(
+    null,
+  );
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const otpRef = useRef<OtpInputHandle>(null);
 
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  const [registrationPayload, setRegistrationPayload] =
+    useState<RegisterOrgInput | null>(null);
 
   const {
     control,
     handleSubmit,
     setError,
+    setValue,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<RegisterOrgInput>({
     resolver: zodResolver(registerOrgSchema),
@@ -68,7 +67,6 @@ export default function RegisterPage() {
   });
 
   const [globalError, setGlobalError] = React.useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
 
   async function onSubmit(data: RegisterOrgInput) {
     setGlobalError(null);
@@ -79,24 +77,24 @@ export default function RegisterPage() {
       // Append selected country phone code prefix to raw mobile sequence before delivery
       if (selectedPhoneCountry?.phone_code && payload.mobile) {
         // Strip out hyphens or spaces from complex codes (e.g., "1-684" -> "1684")
-        const cleanPhoneCode = selectedPhoneCountry.phone_code.replace(/[^0-9]/g, "");
+        const cleanPhoneCode = selectedPhoneCountry.phone_code.replace(
+          /[^0-9]/g,
+          "",
+        );
         payload.mobile = `+${cleanPhoneCode}${payload.mobile}`;
       }
 
-      const res = await requestRegistrationOtp(payload);
-      const msg = res?.message || "Organization created — please login.";
-      showSnackbar({ message: msg, severity: "success" });
-      setSuccessMessage(msg);
-      navigate("/verify-otp",{
-        state: {
-            email: payload.email,
-          },
-        }
-      );
+      await requestRegistrationOtp(payload);
+      setRegistrationPayload(payload);
+      setOtpSent(true);
+      setCountdown(60);
+      showSnackbar({ message: "OTP sent successfully", severity: "success" });
     } catch (err: any) {
       const detail = err?.response?.data;
       const messageFromApi =
-        detail?.detail || detail?.message || (typeof detail === "string" ? detail : null);
+        detail?.detail ||
+        detail?.message ||
+        (typeof detail === "string" ? detail : null);
 
       if (messageFromApi) {
         showSnackbar({ message: String(messageFromApi), severity: "error" });
@@ -115,76 +113,119 @@ export default function RegisterPage() {
     }
   }
 
-  const [showPassword, setShowPassword] = React.useState(false);
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
-  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-  };
-
   React.useEffect(() => {
     loadCountries();
   }, []);
 
- const loadCountries = async () => {
-  try {
-    
-    setCountryLoading(true);
+  const loadCountries = async () => {
+    try {
+      setCountryLoading(true);
+      const res = await getCountries();
+      const items = res.items || [];
+      setCountries(items);
+      const india = items.find((x) => x.iso_code === "IN") || items[0];
 
-    const res = await getCountries();
+      setValue("country_code", india.iso_code);
 
-    const items = res.items || [];
+      setSelectedPhoneCountry(india);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setCountryLoading(false);
+    }
+  };
 
-    setCountries(items);
+  React.useEffect(() => {
+    if (countdown <= 0) return;
+    const timer = setInterval(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [countdown]);
 
-    const india =
-      items.find(
-        (x: any) => x.iso_code === "IN"
-      ) || items[0];
+  const handleVerifyOtp = async () => {
+    try {
+      setOtpLoading(true);
+      const res = await verifyOtpApi({
+        email: registrationPayload?.email || "",
+        otp,
+      });
 
-    setSelectedCountry(india);
-    setSelectedPhoneCountry(india);
+      showSnackbar({ message: res.message, severity: "success" });
+      // Reset the form and OTP state after successful verification
+      reset();
+      setOtp("");
+      setOtpSent(false);
+      setRegistrationPayload(null);
+      setCountdown(0);
+      otpRef.current?.clear();
 
-  } catch (error) {
-    console.error(error);
-  } finally {
-    setCountryLoading(false);
-  }
-};
+      navigate("/login", {
+        replace: true,
+      });
+    } catch (err: any) {
+      const message = err?.response?.data?.detail || "OTP verification failed";
+      if (message === "Invalid OTP" || message === "OTP expired") {
+        setOtp("");
+
+        otpRef.current?.clear();
+        otpRef.current?.focus();
+      }
+      showSnackbar({ message, severity: "error" });
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (!registrationPayload) return;
+
+    try {
+      setResendLoading(true);
+      await requestRegistrationOtp(registrationPayload);
+      setCountdown(60);
+      setOtp("");
+      otpRef.current?.clear();
+
+      setTimeout(() => {
+        otpRef.current?.focus();
+      }, 50);
+      showSnackbar({ message: "OTP resent successfully", severity: "success" });
+    } catch (err: any) {
+      showSnackbar({
+        message: err?.response?.data?.detail || "Failed to resend OTP",
+        severity: "error",
+      });
+    } finally {
+      setResendLoading(false);
+      otpRef.current?.focus();
+    }
+  };
+
+  const isOtpComplete = otp.length === 6;
+  React.useEffect(() => {
+    if (!otpSent) return;
+
+    setTimeout(() => {
+      otpRef.current?.focus();
+    }, 100);
+  }, [otpSent]);
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'grid',
-        placeItems: 'center',
-        bgcolor: 'background.default',
-        px: 2,
-      }}
-    >
-      <Paper
-        variant="outlined"
-        sx={{
-          p: 3,
-          maxWidth: 520,
-          width: '100%',
-        }}
-      >
-        {/* Header */}
-        <Stack spacing={1.5} alignItems="center" mb={2}>
-          <Typography variant="h5" color="primary">
-            Travel ERP
-          </Typography>
+    <AuthCard title="Travel ERP" subtitle="Create your organization">
+      {globalError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {globalError}
+        </Alert>
+      )}
 
-          <Typography variant="body2" color="text.secondary">
-            Create your organization
-          </Typography>
-        </Stack>
-
-        {globalError && <Alert severity="error" sx={{ mb: 2 }}>{globalError}</Alert>}
-        {successMessage && <Alert severity="success" sx={{ mb: 2 }}>{successMessage}</Alert>}
-
-        {/* Form */}
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} mt={1} noValidate>
+      {!otpSent && (
+        <Box
+          component="form"
+          onSubmit={handleSubmit(onSubmit)}
+          mt={1}
+          noValidate
+        >
           <Stack spacing={2}>
             <Controller
               name="organization_name"
@@ -195,7 +236,7 @@ export default function RegisterPage() {
                   label="Organization Name"
                   required
                   error={!!errors.organization_name}
-                  helperText={errors.organization_name?.message ?? ''}
+                  helperText={errors.organization_name?.message ?? ""}
                 />
               )}
             />
@@ -209,7 +250,7 @@ export default function RegisterPage() {
                   label="Admin Full Name"
                   required
                   error={!!errors.admin_name}
-                  helperText={errors.admin_name?.message ?? ''}
+                  helperText={errors.admin_name?.message ?? ""}
                 />
               )}
             />
@@ -224,160 +265,126 @@ export default function RegisterPage() {
                   type="email"
                   required
                   error={!!errors.email}
-                  helperText={errors.email?.message ?? ''}
+                  helperText={errors.email?.message ?? ""}
                 />
               )}
             />
 
-            {/* Profile Selection - Base Home Country */}
-           <Controller
-  name="country_code"
-  control={control}
-  render={({ field }) => (
-    <Autocomplete
-      options={countries}
-      loading={countryLoading}
-      value={selectedCountry}
-      isOptionEqualToValue={(option, value) =>
-        option.id === value?.id
-      }
-      getOptionLabel={(option) =>
-        option?.label || ""
-      }
-      onChange={(_, value) => {
-        setSelectedCountry(value);
-        field.onChange(value?.iso_code || "");
-      }}
-      renderOption={(props, option) => {
-  const { key, ...optionProps } = props;
+            <Controller
+              name="country_code"
+              control={control}
+              render={({ field }) => (
+                <Autocomplete
+                  options={countries}
+                  loading={countryLoading}
+                  value={
+                    countries.find((x) => x.iso_code === field.value) || null
+                  }
+                  isOptionEqualToValue={(option, value) =>
+                    option.iso_code === value?.iso_code
+                  }
+                  getOptionLabel={(option) => option?.label || ""}
+                  onChange={(_, value) => {
+                    field.onChange(value?.iso_code || "");
+                  }}
+                  renderOption={(props, option) => {
+                    const { key, ...optionProps } = props;
 
-  return (
-    <Box
-      key={key}
-      component="li"
-      {...optionProps}
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        gap: 1,
-      }}
-    >
-      <img
-        src={option.flag_url}
-        width={20}
-        alt=""
-      />
+                    return (
+                      <Box
+                        key={key}
+                        component="li"
+                        {...optionProps}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                        }}
+                      >
+                        <img src={option.flag_url} width={20} alt="" />
+                        {option.label} ({option.iso_code})
+                      </Box>
+                    );
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Select Profile Country"
+                      error={!!errors.country_code}
+                      helperText={errors.country_code?.message}
+                    />
+                  )}
+                />
+              )}
+            />
 
-      {option.label} ({option.iso_code})
-    </Box>
-  );
-}}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label="Select Profile Country"
-          error={!!errors.country_code}
-          helperText={
-            errors.country_code?.message
-          }
-        />
-      )}
-    />
-  )}
-/>
-
-            {/* Prefix Selection + Raw Local Mobile Block */}
             <Box display="flex" gap={1}>
-  <Autocomplete
-    sx={{
-      width: 220,
-      flexShrink: 0,
-    }}
-    options={countries}
-    loading={countryLoading}
-    value={selectedPhoneCountry}
-    isOptionEqualToValue={(option, value) =>
-      option.id === value?.id
-    }
-    getOptionLabel={(option) =>
-      option
-        ? `${option.label} (+${option.phone_code})`
-        : ""
-    }
-    onChange={(_, value) => {
-      setSelectedPhoneCountry(value);
-    }}
-    renderOption={(props, option) => {
-  const { key, ...optionProps } = props;
+              <Autocomplete
+                sx={{
+                  width: 220,
+                  flexShrink: 0,
+                }}
+                options={countries}
+                loading={countryLoading}
+                value={selectedPhoneCountry}
+                isOptionEqualToValue={(option, value) =>
+                  option.id === value?.id
+                }
+                getOptionLabel={(option) =>
+                  option ? `${option.label} (+${option.phone_code})` : ""
+                }
+                onChange={(_, value) => {
+                  setSelectedPhoneCountry(value);
+                }}
+                renderOption={(props, option) => {
+                  const { key, ...optionProps } = props;
 
-  return (
-    <Box
-      key={key}
-      component="li"
-      {...optionProps}
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        gap: 1,
-      }}
-    >
-      <img
-        src={option.flag_url}
-        width={20}
-        alt=""
-      />
+                  return (
+                    <Box
+                      key={key}
+                      component="li"
+                      {...optionProps}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                      }}
+                    >
+                      <img src={option.flag_url} width={20} alt="" />
+                      {option.label} ({option.iso_code})
+                    </Box>
+                  );
+                }}
+                renderInput={(params) => <TextField {...params} label="Code" />}
+              />
 
-      {option.label} ({option.iso_code})
-    </Box>
-  );
-}}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        label="Code"
-      />
-    )}
-  />
-
-  <Controller
-    name="mobile"
-    control={control}
-    render={({ field }) => (
-      <TextField
-        {...field}
-        fullWidth
-        label="Mobile Number"
-        error={!!errors.mobile}
-        helperText={errors.mobile?.message}
-      />
-    )}
-  />
-</Box>
+              <Controller
+                name="mobile"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Mobile Number"
+                    error={!!errors.mobile}
+                    helperText={errors.mobile?.message}
+                  />
+                )}
+              />
+            </Box>
 
             <Controller
               name="password"
               control={control}
               render={({ field }) => (
-                <TextField
+                <PasswordField
                   {...field}
+                  fullWidth
                   label="Password"
-                  type={showPassword ? 'text' : 'password'}
                   required
                   error={!!errors.password}
-                  helperText={errors.password?.message ?? ''}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={handleClickShowPassword}
-                          onMouseDown={handleMouseDownPassword}
-                          edge="end"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
+                  helperText={errors.password?.message}
+                  autoComplete="new-password"
                 />
               )}
             />
@@ -386,13 +393,14 @@ export default function RegisterPage() {
               name="confirm_password"
               control={control}
               render={({ field }) => (
-                <TextField
+                <PasswordField
                   {...field}
+                  fullWidth
                   label="Confirm Password"
-                  type={showPassword ? 'text' : 'password'}
                   required
                   error={!!errors.confirm_password}
-                  helperText={errors.confirm_password?.message ?? ''}
+                  helperText={errors.confirm_password?.message}
+                  autoComplete="new-password"
                 />
               )}
             />
@@ -406,21 +414,66 @@ export default function RegisterPage() {
               disabled={isSubmitting}
               sx={{ minHeight: 56 }}
             >
-              {isSubmitting ? 'Creating...' : 'Register Organization'}
+              {isSubmitting ? "Creating..." : "Register Organization"}
             </Button>
 
             <Divider />
 
-            <Button
-              variant="text"
-              fullWidth
-              onClick={() => navigate('/login')}
-            >
+            <Button variant="text" fullWidth onClick={() => navigate("/login")}>
               Already have an account? Sign In
             </Button>
           </Stack>
         </Box>
-      </Paper>
-    </Box>
+      )}
+      {otpSent && (
+        <Stack spacing={2}>
+          <Alert severity="success">
+            We've sent a 6-digit verification code to{" "}
+            <strong>{registrationPayload?.email}</strong>. Please enter it below
+            to complete your registration.
+          </Alert>
+
+          <OtpInput
+            ref={otpRef}
+            value={otp}
+            onChange={setOtp}
+            disabled={otpLoading}
+          />
+
+          <Button
+            variant="contained"
+            disabled={!isOtpComplete || otpLoading}
+            onClick={handleVerifyOtp}
+          >
+            {otpLoading ? "Verifying..." : "Verify OTP"}
+          </Button>
+
+          <Button
+            variant="outlined"
+            disabled={resendLoading || countdown > 0}
+            onClick={handleResendOtp}
+          >
+            {resendLoading
+              ? "Sending..."
+              : countdown > 0
+                ? `Resend OTP (${countdown}s)`
+                : "Resend OTP"}
+          </Button>
+          <Button
+            variant="text"
+            fullWidth
+            onClick={() => {
+              setOtpSent(false);
+              setOtp("");
+              setCountdown(0);
+              setRegistrationPayload(null);
+              otpRef.current?.clear();
+            }}
+          >
+            ← Back to Registration
+          </Button>
+        </Stack>
+      )}
+    </AuthCard>
   );
 }
