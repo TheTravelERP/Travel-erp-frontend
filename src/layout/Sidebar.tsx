@@ -12,60 +12,30 @@ import {
   Box,
   useTheme,
   styled,
-} from '@mui/material';
+} from "@mui/material";
 
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { alpha } from '@mui/material/styles';
+import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { alpha } from "@mui/material/styles";
 
-import { useMenu } from '../context/MenuContext';
+import { useMenu } from "../context/MenuContext";
+import Icon from "@mui/material/Icon";
 
-// --- ICONS ---
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import PeopleIcon from '@mui/icons-material/People';
-import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import ShowChartIcon from '@mui/icons-material/ShowChart';
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import EmojiPeopleIcon from '@mui/icons-material/EmojiPeople';
-import LayersIcon from '@mui/icons-material/Layers';
-import HotelIcon from '@mui/icons-material/Hotel';
-import FlightIcon from '@mui/icons-material/Flight';
-import SupportAgentIcon from '@mui/icons-material/SupportAgent';
-import SettingsIcon from '@mui/icons-material/Settings';
-
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import Logo from '../assets/logo.png';
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import Logo from "../assets/logo.png";
 
 /* ---------------- ICON MAP ---------------- */
-
-const IconMap: any = {
-  Dashboard: DashboardIcon,
-  People: PeopleIcon,
-  EmojiPeople: EmojiPeopleIcon,
-  ShoppingBag: ShoppingBagIcon,
-  Layers: LayersIcon,
-  Inventory: InventoryIcon,
-  Hotel: HotelIcon,
-  Flight: FlightIcon,
-  AttachMoney: AttachMoneyIcon,
-  AccountBalance: AccountBalanceIcon,
-  ShowChart: ShowChartIcon,
-  SupportAgent: SupportAgentIcon,
-  Settings: SettingsIcon,
-};
 
 /* ---------------- STYLED COMPONENTS ---------------- */
 
 const StyledDrawer = styled(Drawer, {
-  shouldForwardProp: (prop) => prop !== 'drawerWidth',
+  shouldForwardProp: (prop) => prop !== "drawerWidth",
 })<{ drawerWidth: number }>(({ theme, drawerWidth }) => ({
   width: drawerWidth,
   flexShrink: 0,
 
-  '& .MuiDrawer-paper': {
+  "& .MuiDrawer-paper": {
     width: drawerWidth,
     borderRight: `1px dashed ${theme.palette.divider}`,
   },
@@ -74,14 +44,14 @@ const StyledDrawer = styled(Drawer, {
 const LogoToolbar = styled(Toolbar)(({ theme }) => ({
   paddingLeft: theme.spacing(2),
   paddingRight: theme.spacing(2),
-  display: 'flex',
-  alignItems: 'center',
-  cursor: 'pointer',
+  display: "flex",
+  alignItems: "center",
+  cursor: "pointer",
 }));
 
-const LogoImage = styled('img')({
+const LogoImage = styled("img")({
   height: 36,
-  width: 'auto',
+  width: "auto",
 });
 
 const MenuItemButton = styled(ListItemButton)(({ theme }) => ({
@@ -98,10 +68,7 @@ const SubMenuItemButton = styled(MenuItemButton)(({ theme }) => ({
 
 /* ---------------- COMPONENT ---------------- */
 
-export default function Sidebar({
-  open,
-  drawerWidth = 280,
-}: any) {
+export default function Sidebar({ open, drawerWidth = 280 }: any) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const theme = useTheme();
@@ -130,7 +97,7 @@ export default function Sidebar({
     menuItems.forEach((item) => {
       if (item.children) {
         const hasActiveChild = item.children.some(
-          (child: any) => child.path && pathname.startsWith(child.path)
+          (child: any) => child.path && pathname.startsWith(child.path),
         );
         if (hasActiveChild && !manualToggle) {
           setOpenSubmenu(item.id);
@@ -153,7 +120,6 @@ export default function Sidebar({
   }
 
   const renderItem = (item: any, isSubItem = false) => {
-    const IconComponent = IconMap[item.icon];
     const hasChildren = item.children?.length > 0;
     const isCurrentOpen = openSubmenu === item.id;
     const isActive = item.path ? pathname === item.path : false;
@@ -161,7 +127,7 @@ export default function Sidebar({
     const isParentActive =
       hasChildren &&
       item.children.some(
-        (child: any) => child.path && pathname.startsWith(child.path)
+        (child: any) => child.path && pathname.startsWith(child.path),
       );
 
     const itemColor =
@@ -171,11 +137,9 @@ export default function Sidebar({
 
     const itemBg = isActive
       ? alpha(theme.palette.primary.main, 0.1)
-      : 'transparent';
+      : "transparent";
 
-    const ButtonComponent = isSubItem
-      ? SubMenuItemButton
-      : MenuItemButton;
+    const ButtonComponent = isSubItem ? SubMenuItemButton : MenuItemButton;
 
     return (
       <Box key={item.id}>
@@ -188,9 +152,21 @@ export default function Sidebar({
             backgroundColor: itemBg,
           }}
         >
-          {!isSubItem && IconComponent && (
-            <ListItemIcon sx={{ minWidth: 36, color: itemColor }}>
-              <IconComponent fontSize="small" />
+          {item.icon && (
+            <ListItemIcon
+              sx={{
+                minWidth: isSubItem ? 34 : 40,
+                color: itemColor,
+              }}
+            >
+              <Icon
+                baseClassName="material-symbols-rounded"
+                sx={{
+                  fontSize: isSubItem ? 20 : 22,
+                }}
+              >
+                {item.icon}
+              </Icon>
             </ListItemIcon>
           )}
 
@@ -216,12 +192,8 @@ export default function Sidebar({
   };
 
   return (
-    <StyledDrawer
-      variant="persistent"
-      open={open}
-      drawerWidth={drawerWidth}
-    >
-      <LogoToolbar onClick={() => navigate('/app/dashboard')}>
+    <StyledDrawer variant="persistent" open={open} drawerWidth={drawerWidth}>
+      <LogoToolbar onClick={() => navigate("/app/dashboard")}>
         <LogoImage src={Logo} alt="Travel ERP" />
       </LogoToolbar>
 

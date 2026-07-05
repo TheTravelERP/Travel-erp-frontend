@@ -1,19 +1,20 @@
-import type { Components } from '@mui/material/styles';
-import { tokens } from './tokens';
+// src/theme/components.ts
+
+import type { Components } from "@mui/material/styles";
+
 
 const components: Components = {
   /* Layout */
 
   MuiPaper: {
     defaultProps: {
-      variant: 'outlined',
+      variant: "outlined",
     },
   },
 
   MuiToolbar: {
     styleOverrides: {
       root: {
-        
         paddingLeft: 16,
         paddingRight: 16,
       },
@@ -28,7 +29,7 @@ const components: Components = {
     },
   },
 
-  /* Icons & avatars are safe */
+  /* Icons & Avatars */
 
   MuiIconButton: {
     styleOverrides: {
@@ -43,6 +44,23 @@ const components: Components = {
       root: {
         width: 36,
         height: 36,
+      },
+    },
+  },
+
+  /* Buttons */
+
+  MuiButton: {
+    defaultProps: {
+      disableElevation: true,
+    },
+    styleOverrides: {
+      root: {
+        minHeight: 56,
+        borderRadius: 2,
+        textTransform: "none",
+        fontWeight: 600,
+        paddingInline: 20,
       },
     },
   },

@@ -7,6 +7,7 @@ import {
   Divider,
   InputAdornment,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
@@ -100,37 +101,40 @@ export default function LoginPage() {
             variant="contained"
             fullWidth
             disabled={isSubmitting}
-            sx={{ minHeight: 56 }}
           >
-            {isSubmitting ? "Signing in..." : "Sign In"}
+            {isSubmitting ? (
+              <>
+                <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />
+                Sign In...
+              </>
+            ) : (
+              "Sign In"
+            )}
           </Button>
 
-          <Divider />
-          {/* Forgot Password */}
-          <button
-            type="button"
-            onClick={() => navigate("/forgot-password")}
-            style={{
-              background: "none",
-              border: "none",
-              color: "#1976d2",
-              cursor: "pointer",
-              textDecoration: "underline",
-              padding: 0,
-              fontSize: "0.875rem",
-            }}
-          >
-            Forgot Password?
-          </button>
+          <Divider sx={{ my: 2 }} />
 
-          {/* Register */}
-          <Button
-            variant="text"
-            fullWidth
-            onClick={() => navigate("/register")}
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
           >
-            Don&apos;t have an account? Register
-          </Button>
+            <Button
+              variant="text"
+              size="small"
+              onClick={() => navigate("/forgot-password")}
+            >
+              Forgot your password?
+            </Button>
+
+            <Button
+              variant="text"
+              size="small"
+              onClick={() => navigate("/register")}
+            >
+              Create account
+            </Button>
+          </Box>
         </Stack>
       </Box>
     </AuthCard>

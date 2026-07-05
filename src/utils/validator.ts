@@ -9,16 +9,23 @@ import { z } from "zod";
 // simple reusable pieces
 export const emailValidator = z
   .string()
+  .trim()
+  .toLowerCase()
   .min(1, "Email is required")
   .email("Enter a valid email");
 
 export const passwordValidator = z
   .string()
-  .min(8, "Password must be at least 8 characters")
-  .max(72, "Password too long (max 72 chars)"); // bcrypt limit
+  .min(6, "Password must be at least 8 characters")
+  .max(36, "Password cannot exceed 36 characters")
+  .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+  .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+  .regex(/[0-9]/, "Password must contain at least one number");
+
 
 export const nameValidator = z
   .string()
+  .trim()
   .min(3, "Must be at least 3 characters")
   .max(200, "Too long");
 
@@ -32,6 +39,21 @@ export const countryCodeValidator = z
   .string()
   .length(2, "Country code must be exactly 2 characters")
   .regex(/^[A-Z]{2}$/, "Country code must be 2 uppercase letters");
+
+export const internationalMobileValidator = z
+  .string()
+  .trim()
+  .regex(
+    /^\+[1-9][0-9]{6,14}$/,
+    "Enter a valid international mobile number (e.g. +919876543210)"
+  );
+
+
+export const otpValidator = z
+  .string()
+  .length(6, "OTP must be exactly 6 digits")
+  .regex(/^\d{6}$/, "OTP must contain only digits");
+
 
 // full form schema (shape the frontend sends)
 export const registerOrgSchema = z
@@ -73,3 +95,7 @@ export const resetPasswordSchema = z
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+
+
+

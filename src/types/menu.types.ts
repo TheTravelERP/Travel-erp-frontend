@@ -1,3 +1,4 @@
+// src/types/menu.types.ts
 export type MenuPermission = {
   can_view: boolean;
   can_create: boolean;

@@ -3,14 +3,12 @@ import React, { useRef, useState } from "react";
 import {
   Box,
   Button,
-  Paper,
   TextField,
   Stack,
   Divider,
   Alert,
   Autocomplete,
-  InputAdornment,
-  IconButton,
+  CircularProgress,
 } from "@mui/material";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
@@ -73,7 +71,6 @@ export default function RegisterPage() {
     try {
       // Create a shallow copy of the form data
       const payload = { ...data };
-
       // Append selected country phone code prefix to raw mobile sequence before delivery
       if (selectedPhoneCountry?.phone_code && payload.mobile) {
         // Strip out hyphens or spaces from complex codes (e.g., "1-684" -> "1684")
@@ -368,6 +365,13 @@ export default function RegisterPage() {
                     label="Mobile Number"
                     error={!!errors.mobile}
                     helperText={errors.mobile?.message}
+                    inputProps={{
+                      inputMode: "numeric",
+                      pattern: "[0-9]*",
+                      minLength: 6,
+                      maxLength: 15,
+                    }}
+
                   />
                 )}
               />
@@ -412,9 +416,15 @@ export default function RegisterPage() {
               fullWidth
               size="large"
               disabled={isSubmitting}
-              sx={{ minHeight: 56 }}
             >
-              {isSubmitting ? "Creating..." : "Register Organization"}
+              {isSubmitting ? (
+                <>
+                  <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />
+                  Creating...
+                </>
+              ) : (
+                "Register Organization"
+              )}
             </Button>
 
             <Divider />
@@ -445,7 +455,14 @@ export default function RegisterPage() {
             disabled={!isOtpComplete || otpLoading}
             onClick={handleVerifyOtp}
           >
-            {otpLoading ? "Verifying..." : "Verify OTP"}
+            {otpLoading ? (
+              <>
+                <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />
+                Verifying...
+              </>
+            ) : (
+              "Verify OTP"
+            )}
           </Button>
 
           <Button
@@ -453,11 +470,16 @@ export default function RegisterPage() {
             disabled={resendLoading || countdown > 0}
             onClick={handleResendOtp}
           >
-            {resendLoading
-              ? "Sending..."
-              : countdown > 0
-                ? `Resend OTP (${countdown}s)`
-                : "Resend OTP"}
+            {resendLoading ? (
+              <>
+                <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />
+                Sending...
+              </>
+            ) : countdown > 0 ? (
+              `Resend OTP (${countdown}s)`
+            ) : (
+              "Resend OTP"
+            )}
           </Button>
           <Button
             variant="text"
