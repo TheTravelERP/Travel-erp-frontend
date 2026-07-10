@@ -18,7 +18,7 @@ export interface EnquiryFilterValues {
   from_date?: string;
   to_date?: string;
   lead_source?: string;
-  priority?: string;
+  enquiry_priority?: string;
 }
 
 interface EnquiryFiltersProps {
@@ -108,14 +108,14 @@ export default function EnquiryFilters({
           />
         </Grid>
 
-         {/* priority */}
+         {/* enquiry_priority */}
         <Grid size={{ xs: 12, md: 3 }}>
           <DropdownAutocomplete
-            name="priority"                 
+            name="enquiry_priority"                 
             label="Enquiry Priority"
-            value={value.priority ?? null}
+            value={value.enquiry_priority ?? null}
             onChange={(val: string | null) =>
-              onChange({ priority: val || undefined })
+              onChange({ enquiry_priority: val || undefined })
             }
             useForm={false}                 
             allowAdd={false}                 

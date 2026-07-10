@@ -52,7 +52,7 @@ export default function EnquiryListPage() {
   const appliedFilters: EnquiryFilterValues = {
     search: searchParams.get('search') || '',
     conversion_status: searchParams.get('conversion_status') || '',
-    priority: searchParams.get('priority') || '',
+    enquiry_priority: searchParams.get('enquiry_priority') || '',
     lead_source: searchParams.get('lead_source') || '',
     from_date: searchParams.get('from_date') || '',
     to_date: searchParams.get('to_date') || '',

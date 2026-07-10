@@ -158,12 +158,12 @@ export default function EnquiryTable({
                   <TableCell padding="checkbox">
                     <Checkbox />
                   </TableCell>
-                  <TableCell>#{row.id}</TableCell>
+                  <TableCell>{row.enquiry_no}</TableCell>
                   <TableCell>{row.customer_name}</TableCell>
                   <TableCell>{row.customer_mobile}</TableCell>
                   <TableCell>{row.package_name}</TableCell>
                   <TableCell align="center">{row.pax_count}</TableCell>
-                  <TableCell>{row.priority}</TableCell>
+                  <TableCell>{row.enquiry_priority}</TableCell>
                   <TableCell>{row.conversion_status}</TableCell>
                   <TableCell>{row.agent_name}</TableCell>
                   <TableCell>

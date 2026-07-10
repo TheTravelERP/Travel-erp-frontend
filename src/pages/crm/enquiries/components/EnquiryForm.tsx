@@ -22,7 +22,6 @@ import PackageSelector from './PackageSelector';
 export type EnquiryFormInput = z.infer<typeof enquirySchema>;
 
 import DropdownAutocomplete from '../../../../components/common/DropdownAutocomplete';
-import { useDropdownOptions } from '../../../../hooks/useDropdownOptions';
 
 
 
@@ -57,13 +56,12 @@ export default function EnquiryForm({
       package_name: '',
       lead_source: '',
       pax_count: 1,
-      priority: '',
-      conversion_status: 'PENDING',
+      enquiry_priority: '',
+      conversion_status: 'Pending',
       description: '',
       ...defaultValues,
     },
   });
-  const { options: priorityOptions } = useDropdownOptions("priority");
 
   /* ---------------- RENDER ---------------- */
   return (
@@ -117,22 +115,18 @@ export default function EnquiryForm({
                   pagination
                 />
               </Grid>
-             
               <Grid size={{ xs: 12, sm: 3 }}>
-                <Controller
-                  name="priority"
+                <DropdownAutocomplete
+                  name="enquiry_priority"
+                  label="Enquiry Priority"
                   control={control}
-                  render={({ field }) => (
-                    <TextField {...field} select label="Enquiry Priority" fullWidth>
-                      {priorityOptions.map((opt) => (
-                        <MenuItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  )}
+                  useForm={true}
+                  allowAdd={true}
+                  pagination
                 />
               </Grid>
+             
+             
               <Grid size={{ xs: 12 }}>
                 <Controller
                   name="description"

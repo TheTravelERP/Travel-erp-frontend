@@ -1,5 +1,4 @@
 // src/types/enquiry.types.ts
-import { ConversionStatus, EnquiryStatus } from "../constants/enquiry.constants";
 
 export interface Enquiry {
   id: number;
@@ -9,8 +8,8 @@ export interface Enquiry {
   customer_mobile: string;
   customer_email?: string | null;
 
-  status: EnquiryStatus;
-  conversion_status: ConversionStatus;
+  status: string;
+  conversion_status: string;
 
   pax_count: number;
   quote_amount: number;
@@ -24,15 +23,15 @@ export interface Enquiry {
 
 export interface EnquiryListItem {
   id: number;
-
+  enquiry_no: string;
   customer_name: string;
   customer_mobile: string;
 
   package_name: string;
 
   pax_count: number;
-  priority: string;
-  conversion_status: ConversionStatus;
+  enquiry_priority: string;
+  conversion_status: string;
 
   agent_name: string;
   created_at: string;
