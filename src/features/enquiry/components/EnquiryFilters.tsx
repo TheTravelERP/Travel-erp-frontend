@@ -1,4 +1,4 @@
-// src/pages/crm/enquiries/components/EnquiryFilters.tsx
+// src/features/enquiry/components/EnquiryFilters.tsx
 
 import {
   Box,
@@ -9,7 +9,8 @@ import {
   Typography,
   Stack,
 } from "@mui/material";
-import DropdownAutocomplete from "../../../../components/common/DropdownAutocomplete";
+import DropdownAutocomplete from "../../../components/common/DropdownAutocomplete";
+
 /* ================= TYPES ================= */
 
 export interface EnquiryFilterValues {

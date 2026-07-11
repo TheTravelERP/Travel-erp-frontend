@@ -1,4 +1,4 @@
-// src/pages/crm/enquiries/components/PackageSelector.tsx
+// src/features/package/components/PackageSelector.tsx
 import { useState } from 'react';
 import {
   Box,
@@ -18,11 +18,6 @@ import type { Control, UseFormSetValue } from 'react-hook-form';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 
-/* ---------------- MOCK DATA (replace with API later) ---------------- */
-const MOCK_PACKAGES = [
-  { id: 101, name: 'Umrah Economy 2025' },
-  { id: 102, name: 'Turkey Tour 7D/6N' },
-];
 
 /* ---------------- TYPES ---------------- */
 interface PackageSelectorProps {

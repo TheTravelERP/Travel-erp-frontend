@@ -1,8 +1,8 @@
-// src/pages/crm/enquiries/componenets/EnquiryForm.tsx
+// src/features/enquiry/components/EnquiryForm.tsx
+
 import {
   Box,
   Button,
-  MenuItem,
   TextField,
   Typography,
   InputAdornment,
@@ -11,17 +11,18 @@ import {
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { Controller, useForm } from 'react-hook-form';
+import { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import GroupIcon from '@mui/icons-material/Group';
 import { enquirySchema } from '../enquiry.schema';
 import type { z } from 'zod';
-import CustomerSelector from './CustomerSelector';
-import PackageSelector from './PackageSelector';
+import CustomerSelector from '../../customer/components/CustomerSelector';
+import PackageSelector from '../../package/components/PackageSelector';
 
 export type EnquiryFormInput = z.infer<typeof enquirySchema>;
 
-import DropdownAutocomplete from '../../../../components/common/DropdownAutocomplete';
+import DropdownAutocomplete from '../../../components/common/DropdownAutocomplete';
 
 
 
@@ -31,6 +32,7 @@ interface EnquiryFormProps {
   onSubmit: (data: EnquiryFormInput) => Promise<void>;
   loading?: boolean;
 }
+
 
 export default function EnquiryForm({
   defaultValues,
@@ -62,6 +64,26 @@ export default function EnquiryForm({
       ...defaultValues,
     },
   });
+
+
+  useEffect(() => {
+  if (defaultValues) {
+    reset({
+      cust_id: null,
+      customer_name: '',
+      customer_mobile: '',
+      customer_email: '',
+      pkg_id: null,
+      package_name: '',
+      lead_source: '',
+      pax_count: 1,
+      enquiry_priority: '',
+      conversion_status: 'Pending',
+      description: '',
+      ...defaultValues,
+    });
+  }
+}, [defaultValues, reset]);
 
   /* ---------------- RENDER ---------------- */
   return (

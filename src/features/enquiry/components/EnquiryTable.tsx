@@ -1,6 +1,7 @@
-// src/pages/crm/enquiries/components/EnquiryTable.tsx
+// src/features/enquiry/components/EnquiryTable.tsx
 
-import React, { useState } from 'react';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Table,
@@ -13,30 +14,23 @@ import {
   Chip,
   useTheme,
   useMediaQuery,
-  Card,
   CardContent,
   Typography,
   TablePagination,
   Divider,
-  Tooltip,
   Stack,
   Skeleton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button,
   Paper,
   IconButton,
-} from '@mui/material';
+} from "@mui/material";
 
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import InboxIcon from '@mui/icons-material/Inbox';
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import InboxIcon from "@mui/icons-material/Inbox";
+import type { EnquiryListItem } from "../../../types/enquiry.types";
+import { formatDate } from "../../../utils/formatters/date";
 
-import type { EnquiryListItem } from '../../../../types/enquiry.types';
-import { enquiryColumns } from '../enquiry.columns';
 /* ================= TYPES ================= */
 
 interface Props {
@@ -47,6 +41,101 @@ interface Props {
   total: number;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
+}
+
+interface TableColumn {
+  id: keyof EnquiryListItem | string;
+  label: string;
+  sortable?: boolean;
+  align?: "left" | "center" | "right";
+  minWidth?: number;
+  format?: "date" | "currency" | "chip";
+}
+
+/* ================= COLUMNS, COLORS ================= */
+
+const columns: TableColumn[] = [
+  {
+    id: "enquiry_no",
+    label: "Enquiry No.",
+    sortable: true,
+    minWidth: 90,
+  },
+  {
+    id: "customer_name",
+    label: "Customer",
+    sortable: true,
+    minWidth: 200,
+  },
+  {
+    id: "customer_mobile",
+    label: "Mobile",
+    sortable: true,
+    minWidth: 200,
+  },
+  {
+    id: "package_name",
+    label: "Package",
+    sortable: true,
+    minWidth: 220,
+  },
+  {
+    id: "pax_count",
+    label: "PAX",
+    sortable: true,
+    align: "center",
+    minWidth: 80,
+  },
+  {
+    id: "enquiry_priority",
+    label: "Priority",
+    sortable: true,
+    format: "chip",
+    minWidth: 110,
+  },
+  {
+    id: "conversion_status",
+    label: "Conversion",
+    sortable: true,
+    format: "chip",
+    minWidth: 120,
+  },
+  {
+    id: "agent_name",
+    label: "Agent",
+    sortable: true,
+    minWidth: 160,
+  },
+  {
+    id: "created_at",
+    label: "Created On",
+    sortable: true,
+    format: "date",
+    minWidth: 140,
+  },
+];
+
+const STATUS_COLORS = {
+  Pending: "warning",
+  FollowUp: "info",
+  Converted: "success",
+  Lost: "error",
+  Cancelled: "default",
+} as const;
+
+const PRIORITY_COLORS = {
+  Low: "success",
+  Medium: "info",
+  High: "warning",
+  Urgent: "error",
+} as const;
+
+function renderStatusChip(status: string) {
+  return <Chip size="small" label={status} />;
+}
+
+function renderPriorityChip(priority: string) {
+  return <Chip size="small" label={priority} />;
 }
 
 /* ================= COMPONENT ================= */
@@ -61,10 +150,9 @@ export default function EnquiryTable({
   onPageSizeChange,
 }: Props) {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const navigate = useNavigate();
   const [deleteId, setDeleteId] = useState<number | null>(null);
-
-  const totalPages = Math.ceil(total / pageSize);
 
   /* ---------- MOBILE ---------- */
   if (isMobile) {
@@ -75,23 +163,15 @@ export default function EnquiryTable({
             <Skeleton key={i} height={120} sx={{ mb: 2 }} />
           ))
         ) : rows.length ? (
-          rows.map(row => (
+          rows.map((row) => (
             <Paper key={row.id} sx={{ mb: 1 }}>
               <CardContent>
                 <Stack direction="row" justifyContent="space-between">
-                  <Typography fontWeight={600}>
-                    {row.customer_name}
-                  </Typography>
-                  <Chip
-                    size="small"
-                    label={row.conversion_status}
-                    color={CONVERSION_STATUS_COLOR_MAP[row.conversion_status]}
-                  />
+                  <Typography fontWeight={600}>{row.customer_name}</Typography>
+                  {renderStatusChip(row.conversion_status)}
                 </Stack>
 
-                <Typography variant="caption">
-                  {row.package_name}
-                </Typography>
+                <Typography variant="caption">{row.package_name}</Typography>
 
                 <Divider sx={{ my: 1 }} />
 
@@ -100,7 +180,7 @@ export default function EnquiryTable({
                     Pax: {row.pax_count}
                   </Typography>
                   <Typography variant="caption">
-                    {new Date(row.created_at).toLocaleDateString()}
+                    {formatDate(row.created_at)}
                   </Typography>
                 </Stack>
               </CardContent>
@@ -135,7 +215,7 @@ export default function EnquiryTable({
           <TableHead>
             <TableRow>
               <TableCell padding="checkbox" />
-              {enquiryColumns.map(col => (
+              {columns.map((col) => (
                 <TableCell key={col.id}>{col.label}</TableCell>
               ))}
               <TableCell align="right">Actions</TableCell>
@@ -153,7 +233,7 @@ export default function EnquiryTable({
               ))}
 
             {!loading &&
-              rows.map(row => (
+              rows.map((row) => (
                 <TableRow key={row.id} hover>
                   <TableCell padding="checkbox">
                     <Checkbox />
@@ -163,14 +243,28 @@ export default function EnquiryTable({
                   <TableCell>{row.customer_mobile}</TableCell>
                   <TableCell>{row.package_name}</TableCell>
                   <TableCell align="center">{row.pax_count}</TableCell>
-                  <TableCell>{row.enquiry_priority}</TableCell>
-                  <TableCell>{row.conversion_status}</TableCell>
+                  <TableCell>
+                    {renderPriorityChip(row.enquiry_priority)}
+                  </TableCell>
+                  <TableCell>
+                    {renderStatusChip(row.conversion_status)}
+                  </TableCell>
                   <TableCell>{row.agent_name}</TableCell>
                   <TableCell>
                     {new Date(row.created_at).toLocaleDateString()}
                   </TableCell>
                   <TableCell align="right">
-                    <IconButton size="small">
+                    <IconButton
+                      size="small"
+                      onClick={() => navigate(`/app/enquiries/${row.id}`)}
+                    >
+                      <VisibilityIcon fontSize="small" />
+                    </IconButton>
+
+                    <IconButton
+                      size="small"
+                      onClick={() => navigate(`/app/enquiries/${row.id}/edit`)}
+                    >
                       <EditIcon fontSize="small" />
                     </IconButton>
                     <IconButton

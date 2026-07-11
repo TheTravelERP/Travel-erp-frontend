@@ -1,4 +1,5 @@
-// src/pages/crm/enquiries/componenets/CustomerSelector.tsx
+// src/features/customer/components/CustomerSelector.tsx
+
 import { useState } from 'react';
 import {
   Box,
@@ -19,13 +20,7 @@ import type { Control, UseFormSetValue } from 'react-hook-form';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 
-import EntityAutocomplete from '../../../../components/common/EntityAutocomplete';
-
-/* ---------------- MOCK DATA ---------------- */
-// const MOCK_CUSTOMERS = [
-//   { id: 1, name: 'John Doe', mobile: '9999999999' },
-//   { id: 2, name: 'Aadil Hussain', mobile: '8888888888' },
-// ];
+import EntityAutocomplete from '../../../components/common/EntityAutocomplete';
 
 /* ---------------- TYPES ---------------- */
 interface CustomerSelectorProps {

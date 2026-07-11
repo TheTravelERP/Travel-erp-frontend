@@ -1,13 +1,17 @@
+// src/app/router/index.tsx
+
 import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 import LoginPage from '../../auth/pages/LoginPage';
 import RegisterPage from '../../auth/pages/RegisterPage';
 import AppLayout from '../../layout/AppLayout';
-import CrmRoutes from '../../pages/crm/crm.routes';
-import DashboardPage from '../../pages/dashboard/DashboardPage';
+import DashboardPage from '../../features/dashboard/pages/DashboardPage';
 import PermissionRoute from './PermissionRoute';
-import UnauthorizedPage from '../../pages/system/UnauthorizedPage';
+import UnauthorizedPage from '../../pages/errors/UnauthorizedPage';
 import ForgotPasswordPage from '../../auth/pages/ForgotPasswordPage';
+import EnquiryRoutes from '../../features/enquiry/enquiry.routes';
+
+
 
 export default function AppRouter() {
   return (
@@ -33,8 +37,8 @@ export default function AppRouter() {
           }
         />
 
-        {/* CRM */}
-        <Route path="/app/crm/*" element={<CrmRoutes />} />
+  
+        <Route path="/app/enquiries/*" element={<EnquiryRoutes />} />
 
         {/* Unauthorized */}
         <Route path="/app/unauthorized" element={<UnauthorizedPage />} />

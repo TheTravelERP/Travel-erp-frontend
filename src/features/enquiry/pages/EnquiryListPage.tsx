@@ -1,5 +1,5 @@
-// src/pages/crm/enquiries/EnquiryListPage.tsx
-import React, { useEffect, useState, useRef } from 'react';
+// src/features/enquiry/pages/EnquiryListPage.tsx
+import { useEffect, useState, useRef } from 'react';
 import {
   Box,
   Button,
@@ -23,20 +23,20 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { SearchInput } from '../../../components/ui/SearchInput';
-import EnquiryTable from './components/EnquiryTable';
+import EnquiryTable from '../components/EnquiryTable';
 import EnquiryFilters, {
   type EnquiryFilterValues,
-} from './components/EnquiryFilters';
+} from '../components/EnquiryFilters';
 
 import { usePermission } from '../../../hooks/usePermission';
-import { getEnquiries } from '../../../services/enquiry.service';
+import { getEnquiries } from '../enquiry.api';
 import type { EnquiryListItem } from '../../../types/enquiry.types';
 
 /* ================= COMPONENT ================= */
 
 export default function EnquiryListPage() {
   const navigate = useNavigate();
-  const perms = usePermission('crm.enquiries');
+  const perms = usePermission('enquiries');
   const [searchParams, setSearchParams] = useSearchParams();
 
   /* ---------- UI ---------- */
@@ -123,7 +123,7 @@ export default function EnquiryListPage() {
     params.set("format", format);
 
     window.open(
-      `${import.meta.env.VITE_API_BASE_URL}/api/v1/crm/enquiries/export?${params}`,
+      `${import.meta.env.VITE_API_BASE_URL}/api/v1/enquiries/export?${params}`,
       "_blank"
     );
 
@@ -135,7 +135,7 @@ export default function EnquiryListPage() {
     const formData = new FormData();
     formData.append("file", file);
 
-    const res = await fetch("/api/v1/crm/enquiries/import", {
+    const res = await fetch("/api/v1/enquiries/import", {
       method: "POST",
       body: formData,
       credentials: "include",
@@ -180,7 +180,7 @@ export default function EnquiryListPage() {
             <Button
               variant="contained"
               startIcon={<AddIcon />}
-              onClick={() => navigate('/app/crm/enquiries/create')}
+              onClick={() => navigate('/app/enquiries/create')}
             >
               Add Enquiry
             </Button>

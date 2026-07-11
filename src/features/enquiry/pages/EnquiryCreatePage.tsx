@@ -1,4 +1,4 @@
-// src/pages/crm/enquiries/EnquiryCreatePage.tsx
+// src/features/enquiry/pages/EnquiryCreatePage.tsx
 import {
   Box,
   Breadcrumbs,
@@ -8,8 +8,9 @@ import {
 } from '@mui/material';
 import { Navigate, useNavigate } from 'react-router-dom';
 
-import EnquiryForm, { type EnquiryFormInput } from './components/EnquiryForm';
-import { createEnquiry } from '../../../services/enquiry.service';
+import EnquiryForm from '../components/EnquiryForm';
+import type { EnquiryFormInput } from "../enquiry.types";
+import { createEnquiry}from '../enquiry.api';
 import { usePermission } from '../../../hooks/usePermission';
 import { useSnackbar } from '../../../components/ui/SnackbarProvider';
 import { Link as RouterLink } from 'react-router-dom';
@@ -18,7 +19,7 @@ export default function EnquiryCreatePage() {
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
 
-  const perms = usePermission('crm.enquiries');
+  const perms = usePermission('enquiries');
 
   // 🚫 Permission Guard
   if (!perms.can_create) {
@@ -29,7 +30,7 @@ export default function EnquiryCreatePage() {
     try {
       await createEnquiry(data);
       showSnackbar({ message: 'Enquiry created successfully', severity: 'success' });
-      navigate('/app/crm/enquiries');
+      navigate('/app/enquiries');
     } catch (err: any) {
       const msg =
         err?.response?.data?.message ||
@@ -52,7 +53,7 @@ export default function EnquiryCreatePage() {
         <Link component={RouterLink} to="/app/dashboard" underline="hover">
           Dashboard
         </Link>
-        <Link component={RouterLink} to="/app/crm/enquiries" underline="hover">
+        <Link component={RouterLink} to="/app/enquiries" underline="hover">
           Enquiries
         </Link>
         <Typography color="text.primary">Create</Typography>

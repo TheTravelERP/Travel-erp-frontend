@@ -1,5 +1,5 @@
 import { Typography, Box } from '@mui/material';
-import Loader from '../../components/common/Loader';
+import Loader from '../../../components/common/Loader';
 
 
 export default function DashboardPage() {

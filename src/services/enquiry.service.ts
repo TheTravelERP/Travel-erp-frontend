@@ -1,13 +1,13 @@
 // src/services/enquiry.services.ts
 import api from './api';
-import type { EnquiryFormInput } from '../pages/crm/enquiries/components/EnquiryForm';
+import type { EnquiryFormInput } from '../features/enquiry/pages/EnquiryCreatePage';
 
 import type { EnquiryListItem } from "../types/enquiry.types";
 import type { GetEnquiriesParams } from "./enquiry.service";
 
 
 export async function createEnquiry(payload: EnquiryFormInput) {
-  const { data } = await api.post('/api/v1/crm/enquiries', payload);
+  const { data } = await api.post('/api/v1/enquiries', payload);
   return data;
 }
 
@@ -36,7 +36,7 @@ export const getEnquiries = async (
   params: GetEnquiriesParams
 ): Promise<EnquiryListApiResponse> => {
   const { data } = await api.get<EnquiryListApiResponse>(
-    '/api/v1/crm/enquiries',
+    '/api/v1/enquiries',
     {
       params,
       withCredentials: true,
