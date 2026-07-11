@@ -1,0 +1,11 @@
+// src/pages/crm/crm.routes.tsx
+import { Routes, Route, Navigate } from 'react-router-dom';
+
+export default function CrmRoutes() {
+  return (
+    <Routes>
+      <Route index element={<Navigate to="enquiries" replace />} />
+      <Route path="enquiries/*" element={<EnquiryRoutes />} />
+    </Routes>
+  );
+}
