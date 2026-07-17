@@ -30,6 +30,7 @@ export interface EnquiryFormInput {
 
 export interface EnquiryListItem {
   id: number;
+  uuid: string;
 
   enquiry_no: string;
 
@@ -65,6 +66,7 @@ export interface GetEnquiriesParams {
 
   from_date?: string;
   to_date?: string;
+  is_deleted?: boolean;
 }
 
 /* ==========================================================

@@ -17,15 +17,15 @@ import EnquiryForm from "../components/EnquiryForm";
 import type { EnquiryFormInput } from "../enquiry.types";
 
 import {
-  getEnquiryById,
-  updateEnquiryById,
+  getEnquiryByUuid,
+  updateEnquiryByUuid,
 } from "../enquiry.api";
 
 import { usePermission } from "../../../hooks/usePermission";
 import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 
 export default function EnquiryEditPage() {
-  const { id } = useParams();
+  const { uuid } = useParams();
 
   const navigate = useNavigate();
 
@@ -48,7 +48,7 @@ export default function EnquiryEditPage() {
 
   async function loadEnquiry() {
     try {
-      const data = await getEnquiryById(Number(id));
+      const data = await getEnquiryByUuid(uuid!)
 
       setDefaultValues(data);
     } catch (err: any) {
@@ -65,7 +65,7 @@ export default function EnquiryEditPage() {
 
   async function handleUpdate(data: EnquiryFormInput) {
     try {
-      await updateEnquiryById(Number(id), data);
+      await updateEnquiryByUuid(uuid!, data);
 
       showSnackbar({
         message: "Enquiry updated successfully",

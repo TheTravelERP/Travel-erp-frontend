@@ -28,8 +28,12 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import InboxIcon from "@mui/icons-material/Inbox";
-import type { EnquiryListItem } from "../../../types/enquiry.types";
+import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
+import type { EnquiryListItem } from "../enquiry.types";
 import { formatDate } from "../../../utils/formatters/date";
+import ConfirmDialog from "../../../components/common/ConfirmDialog";
+import { deleteEnquiryByUuid, restoreEnquiryByUuid } from "../enquiry.api";
+import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 
 /* ================= TYPES ================= */
 
@@ -39,6 +43,7 @@ interface Props {
   page: number;
   pageSize: number;
   total: number;
+  isTrash: boolean;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
 }
@@ -101,12 +106,6 @@ const columns: TableColumn[] = [
     minWidth: 120,
   },
   {
-    id: "agent_name",
-    label: "Agent",
-    sortable: true,
-    minWidth: 160,
-  },
-  {
     id: "created_at",
     label: "Created On",
     sortable: true,
@@ -146,13 +145,44 @@ export default function EnquiryTable({
   page,
   pageSize,
   total,
+  isTrash,
   onPageChange,
   onPageSizeChange,
 }: Props) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate();
-  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleteUuid, setDeleteUuid] = useState<string | null>(null);
+  const { showSnackbar } = useSnackbar();
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // FUnctions
+
+  async function handleDelete() {
+    if (!deleteUuid) return;
+
+    try {
+      setDeleteLoading(true);
+
+      await deleteEnquiryByUuid(deleteUuid);
+
+      showSnackbar({
+        message: "Enquiry deleted successfully",
+        severity: "success",
+      });
+
+      //window.location.reload();
+      onPageChange(page);
+    } catch (err: any) {
+      showSnackbar({
+        message: err?.response?.data?.detail ?? "Failed to delete enquiry",
+        severity: "error",
+      });
+    } finally {
+      setDeleteLoading(false);
+      setDeleteUuid(null);
+    }
+  }
 
   /* ---------- MOBILE ---------- */
   if (isMobile) {
@@ -203,6 +233,15 @@ export default function EnquiryTable({
             onPageSizeChange(parseInt(e.target.value, 10))
           }
         />
+        <ConfirmDialog
+          open={Boolean(deleteUuid)}
+          title="Delete Enquiry"
+          message="Are you sure you want to delete this enquiry?"
+          confirmText="Delete"
+          loading={deleteLoading}
+          onClose={() => setDeleteUuid(null)}
+          onConfirm={handleDelete}
+        />
       </Box>
     );
   }
@@ -249,31 +288,56 @@ export default function EnquiryTable({
                   <TableCell>
                     {renderStatusChip(row.conversion_status)}
                   </TableCell>
-                  <TableCell>{row.agent_name}</TableCell>
                   <TableCell>
                     {new Date(row.created_at).toLocaleDateString()}
                   </TableCell>
                   <TableCell align="right">
+                    {/* View - always visible */}
                     <IconButton
                       size="small"
-                      onClick={() => navigate(`/app/enquiries/${row.id}`)}
+                      onClick={() =>
+                        navigate(
+                          isTrash
+                            ? `/app/enquiries/${row.uuid}?is_deleted=true`
+                            : `/app/enquiries/${row.uuid}`,
+                        )
+                      }
                     >
                       <VisibilityIcon fontSize="small" />
                     </IconButton>
 
-                    <IconButton
-                      size="small"
-                      onClick={() => navigate(`/app/enquiries/${row.id}/edit`)}
-                    >
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      color="error"
-                      onClick={() => setDeleteId(row.id)}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
+                    {/* Active Enquiries */}
+                    {!isTrash && (
+                      <>
+                        <IconButton
+                          size="small"
+                          onClick={() =>
+                            navigate(`/app/enquiries/${row.uuid}/edit`)
+                          }
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => setDeleteUuid(row.uuid)}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </>
+                    )}
+
+                    {/* Trash */}
+                    {isTrash && (
+                      <IconButton
+                        size="small"
+                        color="success"
+                        onClick={async () => await restoreEnquiryByUuid(row.uuid)}
+                      >
+                        <RestoreFromTrashIcon fontSize="small" />
+                      </IconButton>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
@@ -290,6 +354,15 @@ export default function EnquiryTable({
         onRowsPerPageChange={(e) =>
           onPageSizeChange(parseInt(e.target.value, 10))
         }
+      />
+      <ConfirmDialog
+        open={Boolean(deleteUuid)}
+        title={isTrash ? "Restore Enquiry" : "Delete Enquiry"}
+        message={isTrash ? "Restore this enquiry?" : "Delete this enquiry?"}
+        confirmText={isTrash ? "Restore" : "Delete"}
+        loading={deleteLoading}
+        onClose={() => setDeleteUuid(null)}
+        onConfirm={handleDelete}
       />
     </>
   );

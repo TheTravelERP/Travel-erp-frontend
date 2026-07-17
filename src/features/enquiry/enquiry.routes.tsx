@@ -30,7 +30,7 @@ export default function EnquiryRoutes() {
       />
 
       <Route
-        path=":id"
+        path=":uuid"
         element={
           <PermissionRoute menuId="enquiries" action="can_view">
             <EnquiryViewPage />
@@ -39,7 +39,7 @@ export default function EnquiryRoutes() {
       />
 
       <Route
-        path=":id/edit"
+        path=":uuid/edit"
         element={
           <PermissionRoute menuId="enquiries" action="can_edit">
             <EnquiryEditPage />

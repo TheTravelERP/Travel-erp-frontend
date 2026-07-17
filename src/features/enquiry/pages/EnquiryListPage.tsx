@@ -1,5 +1,5 @@
 // src/features/enquiry/pages/EnquiryListPage.tsx
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from "react";
 import {
   Box,
   Button,
@@ -12,31 +12,31 @@ import {
   Link,
   Paper,
   Collapse,
-} from '@mui/material';
+} from "@mui/material";
 
-import AddIcon from '@mui/icons-material/Add';
-import UploadIcon from '@mui/icons-material/Upload';
-import DownloadIcon from '@mui/icons-material/Download';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import FilterListIcon from '@mui/icons-material/FilterList';
+import AddIcon from "@mui/icons-material/Add";
+import UploadIcon from "@mui/icons-material/Upload";
+import DownloadIcon from "@mui/icons-material/Download";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import FilterListIcon from "@mui/icons-material/FilterList";
 
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from "react-router-dom";
 
-import { SearchInput } from '../../../components/ui/SearchInput';
-import EnquiryTable from '../components/EnquiryTable';
+import { SearchInput } from "../../../components/ui/SearchInput";
+import EnquiryTable from "../components/EnquiryTable";
 import EnquiryFilters, {
   type EnquiryFilterValues,
-} from '../components/EnquiryFilters';
+} from "../components/EnquiryFilters";
 
-import { usePermission } from '../../../hooks/usePermission';
-import { getEnquiries } from '../enquiry.api';
-import type { EnquiryListItem } from '../../../types/enquiry.types';
+import { usePermission } from "../../../hooks/usePermission";
+import { getEnquiries } from "../enquiry.api";
+import type { EnquiryListItem } from "../enquiry.types";
 
 /* ================= COMPONENT ================= */
 
 export default function EnquiryListPage() {
   const navigate = useNavigate();
-  const perms = usePermission('enquiries');
+  const perms = usePermission("enquiries");
   const [searchParams, setSearchParams] = useSearchParams();
 
   /* ---------- UI ---------- */
@@ -45,17 +45,20 @@ export default function EnquiryListPage() {
   const [moreAnchor, setMoreAnchor] = useState<null | HTMLElement>(null);
 
   /* ---------- PAGINATION (URL SOURCE OF TRUTH) ---------- */
-  const page = Number(searchParams.get('page') || 1);
-  const pageSize = Number(searchParams.get('page_size') || 10);
+  const page = Number(searchParams.get("page") || 1);
+  const pageSize = Number(searchParams.get("page_size") || 10);
+
+  /* ---------- CURRENT VIEW ---------- */
+  const isTrash = searchParams.get("is_deleted") === "true";
 
   /* ---------- APPLIED FILTERS (FROM URL) ---------- */
   const appliedFilters: EnquiryFilterValues = {
-    search: searchParams.get('search') || '',
-    conversion_status: searchParams.get('conversion_status') || '',
-    enquiry_priority: searchParams.get('enquiry_priority') || '',
-    lead_source: searchParams.get('lead_source') || '',
-    from_date: searchParams.get('from_date') || '',
-    to_date: searchParams.get('to_date') || '',
+    search: searchParams.get("search") || "",
+    conversion_status: searchParams.get("conversion_status") || "",
+    enquiry_priority: searchParams.get("enquiry_priority") || "",
+    lead_source: searchParams.get("lead_source") || "",
+    from_date: searchParams.get("from_date") || "",
+    to_date: searchParams.get("to_date") || "",
   };
 
   /* ---------- DRAFT FILTERS (UI ONLY) ---------- */
@@ -70,7 +73,7 @@ export default function EnquiryListPage() {
   };
 
   const clearWildSearch = () => {
-    setDraftFilters((prev) => ({ ...prev, search: '' }));
+    setDraftFilters((prev) => ({ ...prev, search: "" }));
 
     updateURL({
       search: undefined,
@@ -92,6 +95,7 @@ export default function EnquiryListPage() {
         const res = await getEnquiries({
           page,
           page_size: pageSize,
+          is_deleted: isTrash,
           ...appliedFilters,
         });
 
@@ -124,14 +128,14 @@ export default function EnquiryListPage() {
 
     window.open(
       `${import.meta.env.VITE_API_BASE_URL}/api/v1/enquiries/export?${params}`,
-      "_blank"
+      "_blank",
     );
 
     setExportAnchor(null);
   };
 
   /* ------------- IMPORT -------------------- */
-   const handleImport = async (file: File) => {
+  const handleImport = async (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
 
@@ -154,8 +158,6 @@ export default function EnquiryListPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
- 
-
   /* ================= RENDER ================= */
 
   return (
@@ -164,14 +166,17 @@ export default function EnquiryListPage() {
       <Box display="flex" justifyContent="space-between" mb={1}>
         <Box>
           <Typography variant="h6" fontWeight={700}>
-            Enquiries
+            {isTrash ? "Enquiry Trash" : "Enquiries"}
           </Typography>
 
           <Breadcrumbs separator="•" sx={{ mt: 0.5 }}>
             <Link underline="hover" color="inherit" href="/app/dashboard">
               Dashboard
             </Link>
-            <Typography color="text.primary">Enquiries</Typography>
+
+            <Typography color="text.primary">
+              {isTrash ? "Enquiry Trash" : "Enquiries"}
+            </Typography>
           </Breadcrumbs>
         </Box>
 
@@ -180,16 +185,16 @@ export default function EnquiryListPage() {
             <Button
               variant="contained"
               startIcon={<AddIcon />}
-              onClick={() => navigate('/app/enquiries/create')}
+              onClick={() => navigate("/app/enquiries/create")}
             >
               Add Enquiry
             </Button>
           )}
 
           <Button
-            variant={showFilters ? 'contained' : 'outlined'}
+            variant={showFilters ? "contained" : "outlined"}
             startIcon={<FilterListIcon />}
-            onClick={() => setShowFilters(v => !v)}
+            onClick={() => setShowFilters((v) => !v)}
           >
             Filters
           </Button>
@@ -208,9 +213,15 @@ export default function EnquiryListPage() {
                 open={Boolean(exportAnchor)}
                 onClose={() => setExportAnchor(null)}
               >
-                <MenuItem onClick={() => handleExport("csv")}>Export CSV</MenuItem>
-                <MenuItem onClick={() => handleExport("excel")}>Export Excel</MenuItem>
-                <MenuItem onClick={() => handleExport("pdf")}>Export PDF</MenuItem>
+                <MenuItem onClick={() => handleExport("csv")}>
+                  Export CSV
+                </MenuItem>
+                <MenuItem onClick={() => handleExport("excel")}>
+                  Export Excel
+                </MenuItem>
+                <MenuItem onClick={() => handleExport("pdf")}>
+                  Export PDF
+                </MenuItem>
               </Menu>
             </>
           )}
@@ -234,13 +245,39 @@ export default function EnquiryListPage() {
             onClose={() => setMoreAnchor(null)}
           >
             <MenuItem startIcon={<UploadIcon />}>Import</MenuItem>
+            {perms.can_delete && (
+              <MenuItem
+                onClick={() => {
+                  updateURL({
+                    is_deleted: true,
+                    page: 1,
+                  });
+
+                  setMoreAnchor(null);
+                }}
+              >
+                View Trash
+              </MenuItem>
+            )}
+            {isTrash && (
+              <MenuItem
+                onClick={() => {
+                  updateURL({
+                    is_deleted: undefined,
+                    page: 1,
+                  });
+
+                  setMoreAnchor(null);
+                }}
+              >
+                Back to Active
+              </MenuItem>
+            )}
             <MenuItem>Bulk Assign</MenuItem>
             <MenuItem>Bulk Delete</MenuItem>
           </Menu>
         </Stack>
       </Box>
-
-      
 
       {/* CONTENT */}
       <Paper sx={{ p: 2 }}>
@@ -259,15 +296,13 @@ export default function EnquiryListPage() {
         <Collapse in={showFilters}>
           <EnquiryFilters
             value={draftFilters}
-            onChange={(v) =>
-              setDraftFilters((prev) => ({ ...prev, ...v }))
-            }
+            onChange={(v) => setDraftFilters((prev) => ({ ...prev, ...v }))}
             onApply={() => {
               updateURL({ ...draftFilters, page: 1 });
             }}
             onReset={() => {
               setDraftFilters({});
-              setSearchParams({ page: '1', page_size: String(pageSize) });
+              setSearchParams({ page: "1", page_size: String(pageSize) });
             }}
           />
         </Collapse>
@@ -275,7 +310,7 @@ export default function EnquiryListPage() {
         {/* WILD SEARCH */}
         <SearchInput
           placeholder="Search by customer, mobile, package..."
-          value={draftFilters.search || ''}
+          value={draftFilters.search || ""}
           onChange={(e) =>
             setDraftFilters({ ...draftFilters, search: e.target.value })
           }
@@ -290,10 +325,9 @@ export default function EnquiryListPage() {
           page={page}
           pageSize={pageSize}
           total={total}
+          isTrash={isTrash}
           onPageChange={(p) => updateURL({ page: p })}
-          onPageSizeChange={(s) =>
-            updateURL({ page_size: s, page: 1 })
-          }
+          onPageSizeChange={(s) => updateURL({ page_size: s, page: 1 })}
         />
       </Paper>
     </Box>

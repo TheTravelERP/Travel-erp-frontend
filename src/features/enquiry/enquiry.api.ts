@@ -38,8 +38,14 @@ export async function getEnquiries(
    VIEW
 ========================================================== */
 
-export async function getEnquiryById(id: number) {
-  const { data } = await api.get(`/api/v1/enquiries/${id}`, {
+export async function getEnquiryByUuid(
+  uuid: string,
+  isDeleted: boolean = false,
+) {
+  const { data } = await api.get(`/api/v1/enquiries/${uuid}`, {
+    params: {
+      is_deleted: isDeleted,
+    },
     withCredentials: true,
   });
 
@@ -50,8 +56,11 @@ export async function getEnquiryById(id: number) {
    UPDATE
 ========================================================== */
 
-export async function updateEnquiryById(id: number, payload: EnquiryFormInput) {
-  const { data } = await api.put(`/api/v1/enquiries/${id}`, payload, {
+export async function updateEnquiryByUuid(
+  uuid: string,
+  payload: EnquiryFormInput,
+) {
+  const { data } = await api.put(`/api/v1/enquiries/${uuid}`, payload, {
     withCredentials: true,
   });
 
@@ -62,10 +71,27 @@ export async function updateEnquiryById(id: number, payload: EnquiryFormInput) {
    DELETE
 ========================================================== */
 
-export async function deleteEnquiryById(id: number) {
-  const { data } = await api.delete(`/api/v1/enquiries/${id}`, {
+export async function deleteEnquiryByUuid(uuid: string) {
+  const { data } = await api.delete(`/api/v1/enquiries/${uuid}`, {
     withCredentials: true,
   });
+
+  return data;
+}
+
+
+/* ==========================================================
+   RESTORE
+========================================================== */
+
+export async function restoreEnquiryByUuid(uuid: string) {
+  const { data } = await api.put(
+    `/api/v1/enquiries/${uuid}/restore`,
+    {},
+    {
+      withCredentials: true,
+    }
+  );
 
   return data;
 }

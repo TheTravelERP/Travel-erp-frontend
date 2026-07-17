@@ -8,24 +8,22 @@ import {
   InputAdornment,
   Paper,
   Divider,
-} from '@mui/material';
-import Grid from '@mui/material/Grid';
-import { Controller, useForm } from 'react-hook-form';
-import { useEffect } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
+import { Controller, useForm } from "react-hook-form";
+import { useEffect } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import GroupIcon from '@mui/icons-material/Group';
-import { enquirySchema } from '../enquiry.schema';
-import type { z } from 'zod';
-import CustomerSelector from '../../customer/components/CustomerSelector';
-import PackageSelector from '../../package/components/PackageSelector';
+import GroupIcon from "@mui/icons-material/Group";
+import { enquirySchema } from "../enquiry.schema";
+import type { z } from "zod";
+import CustomerSelector from "../../customer/components/CustomerSelector";
+import PackageSelector from "../../package/components/PackageSelector";
 
 export type EnquiryFormInput = z.infer<typeof enquirySchema>;
 
-import DropdownAutocomplete from '../../../components/common/DropdownAutocomplete';
-
-
-
+import DropdownAutocomplete from "../../../components/common/DropdownAutocomplete";
+import { useNavigate } from "react-router-dom";
 
 interface EnquiryFormProps {
   defaultValues?: Partial<EnquiryFormInput>;
@@ -33,13 +31,11 @@ interface EnquiryFormProps {
   loading?: boolean;
 }
 
-
 export default function EnquiryForm({
   defaultValues,
   onSubmit,
   loading = false,
 }: EnquiryFormProps) {
-
   /* ---------------- FORM ---------------- */
   const {
     control,
@@ -51,61 +47,67 @@ export default function EnquiryForm({
     resolver: zodResolver(enquirySchema),
     defaultValues: {
       cust_id: null,
-      customer_name: '',
-      customer_mobile: '',
-      customer_email: '',
+      customer_name: "",
+      customer_mobile: "",
+      customer_email: "",
       pkg_id: null,
-      package_name: '',
-      lead_source: '',
+      package_name: "",
+      lead_source: "",
       pax_count: 1,
-      enquiry_priority: '',
-      conversion_status: 'Pending',
-      description: '',
+      enquiry_priority: "",
+      conversion_status: "Pending",
+      description: "",
       ...defaultValues,
     },
   });
 
+  const navigate = useNavigate();
 
   useEffect(() => {
-  if (defaultValues) {
-    reset({
-      cust_id: null,
-      customer_name: '',
-      customer_mobile: '',
-      customer_email: '',
-      pkg_id: null,
-      package_name: '',
-      lead_source: '',
-      pax_count: 1,
-      enquiry_priority: '',
-      conversion_status: 'Pending',
-      description: '',
-      ...defaultValues,
-    });
-  }
-}, [defaultValues, reset]);
+    if (defaultValues) {
+      reset({
+        cust_id: null,
+        customer_name: "",
+        customer_mobile: "",
+        customer_email: "",
+        pkg_id: null,
+        package_name: "",
+        lead_source: "",
+        pax_count: 1,
+        enquiry_priority: "",
+        conversion_status: "Pending",
+        description: "",
+        ...defaultValues,
+      });
+    }
+  }, [defaultValues, reset]);
 
   /* ---------------- RENDER ---------------- */
   return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ flexGrow: 1 }}>
+    <Box
+      component="form"
+      onSubmit={handleSubmit(onSubmit)}
+      noValidate
+      sx={{ flexGrow: 1 }}
+    >
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 8 }}>
           <CustomerSelector control={control} setValue={setValue} />
         </Grid>
 
         <Grid size={{ xs: 12, md: 4 }}>
-         <PackageSelector control={control} setValue={setValue} />
+          <PackageSelector control={control} setValue={setValue} />
         </Grid>
 
         {/* ENQUIRY DETAILS */}
         <Grid size={{ xs: 12, md: 12 }}>
-          <Paper variant="outlined" sx={{ p:  2 }}>
+          <Paper variant="outlined" sx={{ p: 2 }}>
             <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
               Enquiry Details
             </Typography>
 
             <Grid container spacing={2}>
-               <Grid size={{ xs: 12, sm: 2 }}>
+              <Grid size={{ xs: 12, sm: 2 }}>
                 <Controller
                   name="pax_count"
                   control={control}
@@ -147,14 +149,19 @@ export default function EnquiryForm({
                   pagination
                 />
               </Grid>
-             
-             
+
               <Grid size={{ xs: 12 }}>
                 <Controller
                   name="description"
                   control={control}
                   render={({ field }) => (
-                    <TextField {...field} label="Notes" multiline rows={2} fullWidth />
+                    <TextField
+                      {...field}
+                      label="Notes"
+                      multiline
+                      rows={2}
+                      fullWidth
+                    />
                   )}
                 />
               </Grid>
@@ -165,27 +172,33 @@ export default function EnquiryForm({
         {/* ================= ROW 3: ACTIONS ================= */}
         <Grid size={{ xs: 12 }}>
           <Divider sx={{ my: 2 }} />
-          <Box display="flex" justifyContent="flex-end" gap={2}>
-            <Button 
-              variant="outlined" 
-              color="error" 
-              onClick={() => reset()}
-              size="large"
-            >
-              Discard
+
+          <Box display="flex" justifyContent="space-between">
+            <Button variant="outlined" onClick={() => navigate("/app/enquiries")}>
+              Back
             </Button>
 
-            <Button
-              type="submit"
-              variant="contained"
-              size="large"
-              disabled={isSubmitting || loading}
-            >
-              {isSubmitting || loading ? 'Saving...' : 'Save Enquiry'}
-            </Button>
+            <Box display="flex" gap={2}>
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={() => reset()}
+                size="large"
+              >
+                Discard
+              </Button>
+
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                disabled={isSubmitting || loading}
+              >
+                {isSubmitting || loading ? "Saving..." : "Save Enquiry"}
+              </Button>
+            </Box>
           </Box>
         </Grid>
-
       </Grid>
     </Box>
   );
