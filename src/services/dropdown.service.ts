@@ -4,6 +4,8 @@ import api from './api';
 export interface DropdownOption {
   label: string;
   value: string;
+  color_code?: string | null;
+  icon?: string | null;
 }
 
 /* ---------------- GET OPTIONS ---------------- */
@@ -16,11 +18,12 @@ export interface GetDropdownParams {
 }
 
 export const getDropdownOptions = async (
-  params: GetDropdownParams
+  params: GetDropdownParams,
+  signal?: AbortSignal
 ): Promise<DropdownOption[]> => {
   const { data } = await api.get('/api/v1/common/dropdowns', {
     params,
-    withCredentials: true,
+    signal,
   });
 
   return data;
@@ -41,15 +44,18 @@ export const createDropdownOption = async (
   return data;
 };
 
-export const getEntityDropdownOptions = async (params: {
-  dropdown_name: string;
-  search?: string;
-  page?: number;
-  page_size?: number;
-}) => {
+export const getEntityDropdownOptions = async (
+  params: {
+    dropdown_name: string;
+    search?: string;
+    page?: number;
+    page_size?: number;
+  },
+  signal?: AbortSignal
+) => {
   const { data } = await api.get('/api/v1/common/dropdowns/entity', {
     params,
-    withCredentials: true,
+    signal,
   });
 
   return data;

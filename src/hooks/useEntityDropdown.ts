@@ -1,5 +1,6 @@
 // src/hooks/useEntityDropdown.ts
 import { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import { getEntityDropdownOptions } from "../services/dropdown.service";
 
 export const useEntityDropdown = ({
@@ -17,17 +18,25 @@ export const useEntityDropdown = ({
 
   const requestRef = useRef(0);
 
-  const fetchData = async (searchValue: string, pageNumber: number, reset = false) => {
+  const fetchData = async (
+    searchValue: string,
+    pageNumber: number,
+    reset = false,
+    signal?: AbortSignal,
+  ) => {
     const requestId = ++requestRef.current;
     setLoading(true);
 
     try {
-      const res = await getEntityDropdownOptions({
-        dropdown_name: dropdownName,
-        search: searchValue,
-        page: pageNumber,
-        page_size: pageSize,
-      });
+      const res = await getEntityDropdownOptions(
+        {
+          dropdown_name: dropdownName,
+          search: searchValue,
+          page: pageNumber,
+          page_size: pageSize,
+        },
+        signal,
+      );
 
       if (requestId !== requestRef.current) return;
 
@@ -35,14 +44,18 @@ export const useEntityDropdown = ({
 
       setOptions(prev => (reset ? newItems : [...prev, ...newItems]));
       setHasMore((pageNumber * pageSize) < res.total);
+    } catch (err) {
+      if (!axios.isCancel(err)) throw err;
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   };
 
   useEffect(() => {
+    const controller = new AbortController();
     setPage(1);
-    fetchData(search, 1, true);
+    fetchData(search, 1, true, controller.signal);
+    return () => controller.abort();
   }, [search]);
 
   const loadMore = () => {

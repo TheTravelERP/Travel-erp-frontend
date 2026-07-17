@@ -10,6 +10,8 @@ import PermissionRoute from './PermissionRoute';
 import UnauthorizedPage from '../../pages/errors/UnauthorizedPage';
 import ForgotPasswordPage from '../../auth/pages/ForgotPasswordPage';
 import EnquiryRoutes from '../../features/enquiry/enquiry.routes';
+import SettingsPage from '../../features/settings';
+import ChangePasswordPage from '../../features/profile/pages/ChangePasswordPage';
 
 
 
@@ -39,6 +41,8 @@ export default function AppRouter() {
 
   
         <Route path="/app/enquiries/*" element={<EnquiryRoutes />} />
+        <Route path="/app/settings/theme-color" element={<SettingsPage />} />
+        <Route path="/app/profile/change-password" element={<ChangePasswordPage />} />
 
         {/* Unauthorized */}
         <Route path="/app/unauthorized" element={<UnauthorizedPage />} />

@@ -16,9 +16,9 @@ export const enquirySchema = z
 
     // enquiry core
     pax_count: z.coerce.number().min(1, 'Minimum 1 PAX'),
-    lead_source: z.string().trim().optional(),
-    enquiry_priority: z.string().trim().optional(),
-    conversion_status: z.string().trim().optional(),
+    lead_source: z.string().trim().min(1, 'Lead source is required'),
+    enquiry_priority: z.string().trim().min(1, 'Priority is required'),
+    conversion_status: z.string().trim().min(1, 'Conversion status is required'),
     description: z.string().optional(),
   })
   .refine(

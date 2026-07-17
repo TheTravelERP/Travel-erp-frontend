@@ -3,7 +3,6 @@
 import {
   Box,
   TextField,
-  MenuItem,
   Button,
   Grid,
   Typography,
@@ -14,8 +13,8 @@ import DropdownAutocomplete from "../../../components/common/DropdownAutocomplet
 /* ================= TYPES ================= */
 
 export interface EnquiryFilterValues {
+  search?: string;
   conversion_status?: string;
-  agent_name?: string;
   from_date?: string;
   to_date?: string;
   lead_source?: string;
@@ -85,7 +84,7 @@ export default function EnquiryFilters({
             name="conversion_status"
             label="Conversion Status"
             value={value.conversion_status ?? null}
-            onChange={(val) =>
+            onChange={(val: string | null) =>
               onChange({ conversion_status: val || undefined })
             }
             useForm={false}
@@ -121,16 +120,6 @@ export default function EnquiryFilters({
             useForm={false}                 
             allowAdd={false}                 
             pagination={false}              
-          />
-        </Grid>
-
-        {/* Agent */}
-        <Grid size={{ xs: 12, md: 3 }}>
-          <TextField
-            label="Agent Name"
-            fullWidth
-            value={value.agent_name ?? ""}
-            onChange={(e) => onChange({ agent_name: e.target.value })}
           />
         </Grid>
 

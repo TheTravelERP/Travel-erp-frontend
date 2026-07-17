@@ -38,6 +38,8 @@ export default function EnquiryEditPage() {
   const [defaultValues, setDefaultValues] =
     useState<EnquiryFormInput>();
 
+  const [versionNo, setVersionNo] = useState<number>();
+
   if (!perms.can_edit) {
     return <Navigate to="/app/unauthorized" replace />;
   }
@@ -51,6 +53,7 @@ export default function EnquiryEditPage() {
       const data = await getEnquiryByUuid(uuid!)
 
       setDefaultValues(data);
+      setVersionNo(data.version_no);
     } catch (err: any) {
       showSnackbar({
         message: "Failed to load enquiry",
@@ -65,7 +68,7 @@ export default function EnquiryEditPage() {
 
   async function handleUpdate(data: EnquiryFormInput) {
     try {
-      await updateEnquiryByUuid(uuid!, data);
+      await updateEnquiryByUuid(uuid!, { ...data, version_no: versionNo! });
 
       showSnackbar({
         message: "Enquiry updated successfully",
@@ -74,9 +77,19 @@ export default function EnquiryEditPage() {
 
       navigate("/app/enquiries");
     } catch (err: any) {
+      if (err?.response?.status === 409) {
+        showSnackbar({
+          message:
+            err?.response?.data?.detail ??
+            "This enquiry was updated by someone else. Please reload and try again.",
+          severity: "error",
+        });
+        return;
+      }
+
       showSnackbar({
         message:
-          err?.response?.data?.message ??
+          err?.response?.data?.detail ??
           "Failed to update enquiry",
         severity: "error",
       });

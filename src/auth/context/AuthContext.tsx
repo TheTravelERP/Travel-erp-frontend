@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import axios from "axios";
 import api from "../../services/api";
 
 export type Session = {
@@ -25,17 +26,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // 1️⃣ Load user session from backend cookie
   useEffect(() => {
+    const controller = new AbortController();
+
     async function loadUser() {
       try {
-        const res = await api.get("/api/v1/auth/me", { withCredentials: true });
+        const res = await api.get("/api/v1/auth/me", {
+          signal: controller.signal,
+        });
         setSession(res.data);
-      } catch {
-        setSession(null);
+      } catch (err) {
+        if (!axios.isCancel(err)) setSession(null);
       } finally {
-        setLoading(false);
+        // Don't flip loading off for a stale/aborted run (e.g. StrictMode's
+        // dev-only double-invoke) — only the run that actually finished should.
+        if (!controller.signal.aborted) setLoading(false);
       }
     }
+
     loadUser();
+
+    return () => controller.abort();
   }, []);
 
   const login = (s: Session) => setSession(s);

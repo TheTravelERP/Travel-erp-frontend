@@ -6,7 +6,6 @@ import {
   Box,
   Breadcrumbs,
   Button,
-  Chip,
   Divider,
   Link,
   Paper,
@@ -24,6 +23,7 @@ import {
 import { getEnquiryByUuid } from "../enquiry.api";
 import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 import { usePermission } from "../../../hooks/usePermission";
+import DropdownColorChip from "../../../components/common/DropdownColorChip";
 
 import type { EnquiryFormInput } from "../enquiry.types";
 
@@ -165,10 +165,9 @@ export default function EnquiryViewPage() {
               <Typography variant="caption">Priority</Typography>
 
               <Box mt={0.5}>
-                <Chip
-                  label={enquiry.enquiry_priority}
-                  color="warning"
-                  size="small"
+                <DropdownColorChip
+                  dropdownName="enquiry_priority"
+                  value={enquiry.enquiry_priority}
                 />
               </Box>
             </Grid>
@@ -177,10 +176,9 @@ export default function EnquiryViewPage() {
               <Typography variant="caption">Status</Typography>
 
               <Box mt={0.5}>
-                <Chip
-                  label={enquiry.conversion_status}
-                  color="info"
-                  size="small"
+                <DropdownColorChip
+                  dropdownName="enquiry_status"
+                  value={enquiry.conversion_status}
                 />
               </Box>
             </Grid>

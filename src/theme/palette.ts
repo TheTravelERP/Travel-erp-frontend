@@ -1,11 +1,11 @@
 // src/theme/palette.ts
 import type { PaletteOptions } from '@mui/material/styles';
 
-const palette: PaletteOptions = {
+export const DEFAULT_PRIMARY_COLOR = '#30a435';
+
+const getPalette = (primaryColor: string = DEFAULT_PRIMARY_COLOR): PaletteOptions => ({
   primary: {
-    main: '#30a435',
-    light: '#5bdc60',
-    dark: '#2cac35',
+    main: primaryColor,
   },
   secondary: {
     main: '#9c27b0',
@@ -22,6 +22,6 @@ const palette: PaletteOptions = {
     primary: '#1a1a1a',
     secondary: '#707070',
   },
-};
+});
 
-export default palette;
+export default getPalette;

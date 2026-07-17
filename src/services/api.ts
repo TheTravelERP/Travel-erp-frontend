@@ -17,7 +17,15 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use((resp) => {
   return resp;
 }, (err) => {
-  console.error("AXIOS RESP ERROR:", err);
+  // Cancelled requests (e.g. effect cleanup on unmount) and 401s from
+  // expected "am I logged in?" checks aren't real failures — don't log them.
+  const isCancelled = axios.isCancel(err);
+  const isUnauthorized = err?.response?.status === 401;
+
+  if (!isCancelled && !isUnauthorized) {
+    console.error("AXIOS RESP ERROR:", err);
+  }
+
   return Promise.reject(err);
 });
 

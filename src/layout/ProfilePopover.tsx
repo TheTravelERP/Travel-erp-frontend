@@ -82,8 +82,8 @@ const MENU_OPTIONS = [
   { label: 'Profile', icon: PersonIcon, path: '/profile' },
   { label: 'Projects', icon: FolderSharedIcon, path: '/projects', badge: 3 },
   { label: 'Subscription', icon: AttachMoneyIcon, path: '/subscription' },
-  { label: 'Security', icon: SecurityIcon, path: '/security' },
-  { label: 'Account settings', icon: SettingsIcon, path: '/settings' },
+  { label: 'Change Password', icon: SecurityIcon, path: '/app/profile/change-password' },
+  { label: 'Theme Color', icon: SettingsIcon, path: '/app/settings/theme-color' },
 ];
 
 interface ProfilePopoverProps {

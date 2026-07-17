@@ -96,6 +96,19 @@ export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 
+export const changePasswordSchema = z
+  .object({
+    old_password: z.string().min(1, "Current password is required"),
+    new_password: passwordValidator,
+    confirm_password: z.string().min(1, "Confirm password is required"),
+  })
+  .refine((data) => data.new_password === data.confirm_password, {
+    message: "Password and confirm password does not match",
+    path: ["confirm_password"],
+  });
+
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
 
 
 

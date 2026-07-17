@@ -1,6 +1,6 @@
 // src/features/enquiry/components/EnquiryTable.tsx
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -11,7 +11,6 @@ import {
   TableHead,
   TableRow,
   Checkbox,
-  Chip,
   useTheme,
   useMediaQuery,
   CardContent,
@@ -22,6 +21,7 @@ import {
   Skeleton,
   Paper,
   IconButton,
+  Button,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -32,7 +32,13 @@ import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import type { EnquiryListItem } from "../enquiry.types";
 import { formatDate } from "../../../utils/formatters/date";
 import ConfirmDialog from "../../../components/common/ConfirmDialog";
-import { deleteEnquiryByUuid, restoreEnquiryByUuid } from "../enquiry.api";
+import DropdownColorChip from "../../../components/common/DropdownColorChip";
+import {
+  bulkDeleteEnquiries,
+  bulkRestoreEnquiries,
+  deleteEnquiryByUuid,
+  restoreEnquiryByUuid,
+} from "../enquiry.api";
 import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 
 /* ================= TYPES ================= */
@@ -46,6 +52,7 @@ interface Props {
   isTrash: boolean;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
+  onRefresh: () => void;
 }
 
 interface TableColumn {
@@ -114,27 +121,12 @@ const columns: TableColumn[] = [
   },
 ];
 
-const STATUS_COLORS = {
-  Pending: "warning",
-  FollowUp: "info",
-  Converted: "success",
-  Lost: "error",
-  Cancelled: "default",
-} as const;
-
-const PRIORITY_COLORS = {
-  Low: "success",
-  Medium: "info",
-  High: "warning",
-  Urgent: "error",
-} as const;
-
 function renderStatusChip(status: string) {
-  return <Chip size="small" label={status} />;
+  return <DropdownColorChip dropdownName="enquiry_status" value={status} />;
 }
 
 function renderPriorityChip(priority: string) {
-  return <Chip size="small" label={priority} />;
+  return <DropdownColorChip dropdownName="enquiry_priority" value={priority} />;
 }
 
 /* ================= COMPONENT ================= */
@@ -148,39 +140,137 @@ export default function EnquiryTable({
   isTrash,
   onPageChange,
   onPageSizeChange,
+  onRefresh,
 }: Props) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate();
-  const [deleteUuid, setDeleteUuid] = useState<string | null>(null);
+  const [actionUuid, setActionUuid] = useState<string | null>(null);
   const { showSnackbar } = useSnackbar();
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
 
-  // FUnctions
+  /* ---------- BULK SELECTION ---------- */
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
+  const [bulkLoading, setBulkLoading] = useState(false);
 
-  async function handleDelete() {
-    if (!deleteUuid) return;
+  // Selection is page-scoped — clear it whenever the visible rows change
+  // (page navigation, filters, or switching between list/trash).
+  useEffect(() => {
+    setSelected(new Set());
+  }, [rows, isTrash]);
+
+  function toggleRow(uuid: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(uuid)) next.delete(uuid);
+      else next.add(uuid);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    setSelected((prev) =>
+      prev.size === rows.length ? new Set() : new Set(rows.map((r) => r.uuid)),
+    );
+  }
+
+  async function handleBulkConfirm() {
+    const uuids = Array.from(selected);
+    if (!uuids.length) return;
 
     try {
-      setDeleteLoading(true);
+      setBulkLoading(true);
 
-      await deleteEnquiryByUuid(deleteUuid);
+      const result = isTrash
+        ? await bulkRestoreEnquiries(uuids)
+        : await bulkDeleteEnquiries(uuids);
 
-      showSnackbar({
-        message: "Enquiry deleted successfully",
-        severity: "success",
-      });
-
-      //window.location.reload();
-      onPageChange(page);
+      showSnackbar({ message: result.message, severity: "success" });
+      setSelected(new Set());
+      onRefresh();
     } catch (err: any) {
       showSnackbar({
-        message: err?.response?.data?.detail ?? "Failed to delete enquiry",
+        message:
+          err?.response?.data?.detail ??
+          (isTrash ? "Failed to restore selected enquiries" : "Failed to delete selected enquiries"),
         severity: "error",
       });
     } finally {
-      setDeleteLoading(false);
-      setDeleteUuid(null);
+      setBulkLoading(false);
+      setBulkConfirmOpen(false);
+    }
+  }
+
+  const selectionBar = selected.size > 0 && (
+    <Box
+      display="flex"
+      alignItems="center"
+      justifyContent="space-between"
+      sx={{ p: 1.5, mb: 1, borderRadius: 1, bgcolor: "action.selected" }}
+    >
+      <Typography variant="body2" fontWeight={600}>
+        {selected.size} selected
+      </Typography>
+
+      <Stack direction="row" spacing={1}>
+        <Button size="small" onClick={() => setSelected(new Set())}>
+          Clear
+        </Button>
+
+        <Button
+          size="small"
+          variant="contained"
+          color={isTrash ? "success" : "error"}
+          startIcon={
+            isTrash ? (
+              <RestoreFromTrashIcon fontSize="small" />
+            ) : (
+              <DeleteIcon fontSize="small" />
+            )
+          }
+          onClick={() => setBulkConfirmOpen(true)}
+        >
+          {isTrash ? "Restore Selected" : "Delete Selected"}
+        </Button>
+      </Stack>
+    </Box>
+  );
+
+  // FUnctions
+
+  async function handleConfirmAction() {
+    if (!actionUuid) return;
+
+    try {
+      setActionLoading(true);
+
+      if (isTrash) {
+        await restoreEnquiryByUuid(actionUuid);
+        showSnackbar({
+          message: "Enquiry restored successfully",
+          severity: "success",
+        });
+      } else {
+        await deleteEnquiryByUuid(actionUuid);
+        showSnackbar({
+          message: "Enquiry deleted successfully",
+          severity: "success",
+        });
+      }
+
+      // Refresh the current list/trash view
+      onRefresh();
+    } catch (err: any) {
+      showSnackbar({
+        message:
+          err?.response?.data?.detail ??
+          (isTrash ? "Failed to restore enquiry" : "Failed to delete enquiry"),
+        severity: "error",
+      });
+    } finally {
+      setActionLoading(false);
+      setActionUuid(null);
     }
   }
 
@@ -188,16 +278,25 @@ export default function EnquiryTable({
   if (isMobile) {
     return (
       <Box>
+        {selectionBar}
+
         {loading ? (
           [...Array(3)].map((_, i) => (
             <Skeleton key={i} height={120} sx={{ mb: 2 }} />
           ))
         ) : rows.length ? (
           rows.map((row) => (
-            <Paper key={row.id} sx={{ mb: 1 }}>
+            <Paper key={row.uuid} sx={{ mb: 1 }}>
               <CardContent>
                 <Stack direction="row" justifyContent="space-between">
-                  <Typography fontWeight={600}>{row.customer_name}</Typography>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <Checkbox
+                      size="small"
+                      checked={selected.has(row.uuid)}
+                      onChange={() => toggleRow(row.uuid)}
+                    />
+                    <Typography fontWeight={600}>{row.customer_name}</Typography>
+                  </Stack>
                   {renderStatusChip(row.conversion_status)}
                 </Stack>
 
@@ -234,13 +333,30 @@ export default function EnquiryTable({
           }
         />
         <ConfirmDialog
-          open={Boolean(deleteUuid)}
-          title="Delete Enquiry"
-          message="Are you sure you want to delete this enquiry?"
-          confirmText="Delete"
-          loading={deleteLoading}
-          onClose={() => setDeleteUuid(null)}
-          onConfirm={handleDelete}
+          open={Boolean(actionUuid)}
+          title={isTrash ? "Restore Enquiry" : "Delete Enquiry"}
+          message={
+            isTrash
+              ? "Restore this enquiry?"
+              : "Are you sure you want to delete this enquiry?"
+          }
+          confirmText={isTrash ? "Restore" : "Delete"}
+          loading={actionLoading}
+          onClose={() => setActionUuid(null)}
+          onConfirm={handleConfirmAction}
+        />
+        <ConfirmDialog
+          open={bulkConfirmOpen}
+          title={isTrash ? "Restore Enquiries" : "Delete Enquiries"}
+          message={
+            isTrash
+              ? `Restore ${selected.size} selected enquiries?`
+              : `Delete ${selected.size} selected enquiries?`
+          }
+          confirmText={isTrash ? "Restore" : "Delete"}
+          loading={bulkLoading}
+          onClose={() => setBulkConfirmOpen(false)}
+          onConfirm={handleBulkConfirm}
         />
       </Box>
     );
@@ -249,11 +365,20 @@ export default function EnquiryTable({
   /* ---------- DESKTOP ---------- */
   return (
     <>
+      {selectionBar}
+
       <TableContainer component={Paper}>
         <Table stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell padding="checkbox" />
+              <TableCell padding="checkbox">
+                <Checkbox
+                  indeterminate={selected.size > 0 && selected.size < rows.length}
+                  checked={rows.length > 0 && selected.size === rows.length}
+                  onChange={toggleSelectAll}
+                  disabled={rows.length === 0}
+                />
+              </TableCell>
               {columns.map((col) => (
                 <TableCell key={col.id}>{col.label}</TableCell>
               ))}
@@ -273,9 +398,12 @@ export default function EnquiryTable({
 
             {!loading &&
               rows.map((row) => (
-                <TableRow key={row.id} hover>
+                <TableRow key={row.uuid} hover selected={selected.has(row.uuid)}>
                   <TableCell padding="checkbox">
-                    <Checkbox />
+                    <Checkbox
+                      checked={selected.has(row.uuid)}
+                      onChange={() => toggleRow(row.uuid)}
+                    />
                   </TableCell>
                   <TableCell>{row.enquiry_no}</TableCell>
                   <TableCell>{row.customer_name}</TableCell>
@@ -321,7 +449,7 @@ export default function EnquiryTable({
                         <IconButton
                           size="small"
                           color="error"
-                          onClick={() => setDeleteUuid(row.uuid)}
+                          onClick={() => setActionUuid(row.uuid)}
                         >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
@@ -333,7 +461,7 @@ export default function EnquiryTable({
                       <IconButton
                         size="small"
                         color="success"
-                        onClick={async () => await restoreEnquiryByUuid(row.uuid)}
+                        onClick={() => setActionUuid(row.uuid)}
                       >
                         <RestoreFromTrashIcon fontSize="small" />
                       </IconButton>
@@ -356,13 +484,26 @@ export default function EnquiryTable({
         }
       />
       <ConfirmDialog
-        open={Boolean(deleteUuid)}
+        open={Boolean(actionUuid)}
         title={isTrash ? "Restore Enquiry" : "Delete Enquiry"}
         message={isTrash ? "Restore this enquiry?" : "Delete this enquiry?"}
         confirmText={isTrash ? "Restore" : "Delete"}
-        loading={deleteLoading}
-        onClose={() => setDeleteUuid(null)}
-        onConfirm={handleDelete}
+        loading={actionLoading}
+        onClose={() => setActionUuid(null)}
+        onConfirm={handleConfirmAction}
+      />
+      <ConfirmDialog
+        open={bulkConfirmOpen}
+        title={isTrash ? "Restore Enquiries" : "Delete Enquiries"}
+        message={
+          isTrash
+            ? `Restore ${selected.size} selected enquiries?`
+            : `Delete ${selected.size} selected enquiries?`
+        }
+        confirmText={isTrash ? "Restore" : "Delete"}
+        loading={bulkLoading}
+        onClose={() => setBulkConfirmOpen(false)}
+        onConfirm={handleBulkConfirm}
       />
     </>
   );

@@ -25,11 +25,20 @@ export interface EnquiryFormInput {
 }
 
 /* ==========================================================
+   DETAIL (single enquiry, as returned by GET /enquiries/:uuid)
+========================================================== */
+
+export interface EnquiryDetail extends EnquiryFormInput {
+  uuid: string;
+  enquiry_no: string;
+  version_no: number;
+}
+
+/* ==========================================================
    LIST ITEM
 ========================================================== */
 
 export interface EnquiryListItem {
-  id: number;
   uuid: string;
 
   enquiry_no: string;

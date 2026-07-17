@@ -2,6 +2,7 @@
 import api from "../../services/api";
 
 import type {
+  EnquiryDetail,
   EnquiryFormInput,
   EnquiryListApiResponse,
   GetEnquiriesParams,
@@ -25,10 +26,17 @@ export async function createEnquiry(payload: EnquiryFormInput) {
 
 export async function getEnquiries(
   params: GetEnquiriesParams,
+  signal?: AbortSignal,
 ): Promise<EnquiryListApiResponse> {
+  // Strip empty-string filters (e.g. unset date fields) so they aren't sent
+  // as query params — FastAPI's Optional[date] rejects "" outright.
+  const cleanParams = Object.fromEntries(
+    Object.entries(params).filter(([, v]) => v !== "" && v !== undefined && v !== null),
+  );
+
   const { data } = await api.get<EnquiryListApiResponse>("/api/v1/enquiries", {
-    params,
-    withCredentials: true,
+    params: cleanParams,
+    signal,
   });
 
   return data;
@@ -41,8 +49,8 @@ export async function getEnquiries(
 export async function getEnquiryByUuid(
   uuid: string,
   isDeleted: boolean = false,
-) {
-  const { data } = await api.get(`/api/v1/enquiries/${uuid}`, {
+): Promise<EnquiryDetail> {
+  const { data } = await api.get<EnquiryDetail>(`/api/v1/enquiries/${uuid}`, {
     params: {
       is_deleted: isDeleted,
     },
@@ -58,7 +66,7 @@ export async function getEnquiryByUuid(
 
 export async function updateEnquiryByUuid(
   uuid: string,
-  payload: EnquiryFormInput,
+  payload: EnquiryFormInput & { version_no: number },
 ) {
   const { data } = await api.put(`/api/v1/enquiries/${uuid}`, payload, {
     withCredentials: true,
@@ -91,6 +99,65 @@ export async function restoreEnquiryByUuid(uuid: string) {
     {
       withCredentials: true,
     }
+  );
+
+  return data;
+}
+
+/* ==========================================================
+   BULK DELETE / RESTORE
+========================================================== */
+
+export interface EnquiryBulkActionResult {
+  message: string;
+  count: number;
+}
+
+export async function bulkDeleteEnquiries(
+  uuids: string[],
+): Promise<EnquiryBulkActionResult> {
+  const { data } = await api.post<EnquiryBulkActionResult>(
+    "/api/v1/enquiries/bulk-delete",
+    { enquiry_uuids: uuids },
+    { withCredentials: true },
+  );
+
+  return data;
+}
+
+export async function bulkRestoreEnquiries(
+  uuids: string[],
+): Promise<EnquiryBulkActionResult> {
+  const { data } = await api.post<EnquiryBulkActionResult>(
+    "/api/v1/enquiries/bulk-restore",
+    { enquiry_uuids: uuids },
+    { withCredentials: true },
+  );
+
+  return data;
+}
+
+/* ==========================================================
+   IMPORT
+========================================================== */
+
+export interface EnquiryImportResult {
+  total_rows: number;
+  imported: number;
+  failed: number;
+  errors: { row: number | null; error: string }[];
+}
+
+export async function importEnquiriesFromCsv(
+  file: File,
+): Promise<EnquiryImportResult> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const { data } = await api.post<EnquiryImportResult>(
+    "/api/v1/enquiries/import",
+    formData,
+    { withCredentials: true },
   );
 
   return data;

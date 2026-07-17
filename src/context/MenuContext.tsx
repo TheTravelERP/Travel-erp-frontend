@@ -1,6 +1,7 @@
 // src/context/MenuContext.tsx
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
 import { fetchUserMenu } from '../services/menu.service';
 import type { MenuItem } from '../types/menu.types';
 import { useAuth } from '../hooks/useAuth';
@@ -30,24 +31,30 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
 
   const [menu, setMenu] = useState<MenuItem[]>([]);
 
-  const refresh = async () => {
+  const refresh = async (signal?: AbortSignal) => {
     setLoading(true);
     try {
-      const data = await fetchUserMenu();
+      const data = await fetchUserMenu(signal);
       setMenu(data || []);
+    } catch (err) {
+      if (!axios.isCancel(err)) setMenu([]);
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   };
 
   // 🔥 KEY FIX
   useEffect(() => {
+    const controller = new AbortController();
+
     if (isAuthenticated) {
-      refresh();
+      refresh(controller.signal);
     } else {
       setMenu([]); // clear on logout
       setLoading(false);
     }
+
+    return () => controller.abort();
   }, [isAuthenticated]);
 
   const findMenu = (key: string) => findMenuRecursive(menu, key);

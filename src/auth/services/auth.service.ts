@@ -114,6 +114,20 @@ export async function resetPasswordApi(
   return data;
 }
 
+export async function changePasswordApi(
+  payload: {
+    old_password: string;
+    new_password: string;
+  }
+) {
+  const { data } = await api.post(
+    "/api/v1/auth/change-password",
+    payload
+  );
+
+  return data;
+}
+
 
 
 

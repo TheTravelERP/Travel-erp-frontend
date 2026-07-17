@@ -1,5 +1,6 @@
 // src/components/common/DropdownAutocomplete.tsx
 import React, { useEffect, useState, useRef, useCallback } from "react";
+import axios from "axios";
 import {
   TextField,
   Autocomplete,
@@ -38,7 +39,12 @@ export default function DropdownAutocomplete({
   /* ================= LOAD OPTIONS ================= */
 
   const loadOptions = useCallback(
-    async (currentSearch: string, currentPage: number, isFirstLoad: boolean) => {
+    async (
+      currentSearch: string,
+      currentPage: number,
+      isFirstLoad: boolean,
+      signal?: AbortSignal,
+    ) => {
       const requestId = ++requestRef.current;
       setLoading(true);
 
@@ -53,23 +59,27 @@ export default function DropdownAutocomplete({
           params.page_size = pageSize;
         }
 
-        const data = await getDropdownOptions(params);
+        const data = await getDropdownOptions(params, signal);
 
         if (requestId !== requestRef.current) return;
 
         setOptions((prev) => (isFirstLoad ? data : [...prev, ...data]));
 
         setHasMore(pagination ? data.length === pageSize : false);
+      } catch (err) {
+        if (!axios.isCancel(err)) throw err;
       } finally {
-        setLoading(false);
+        if (!signal?.aborted) setLoading(false);
       }
     },
     [name, pageSize, pagination]
   );
 
   useEffect(() => {
+    const controller = new AbortController();
     setPage(1);
-    loadOptions(search, 1, true);
+    loadOptions(search, 1, true, controller.signal);
+    return () => controller.abort();
   }, [search, loadOptions]);
 
   /* ================= AUTOCOMPLETE UI ================= */

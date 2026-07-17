@@ -31,9 +31,17 @@ import Logo from "../assets/logo.png";
 
 const StyledDrawer = styled(Drawer, {
   shouldForwardProp: (prop) => prop !== "drawerWidth",
-})<{ drawerWidth: number }>(({ theme, drawerWidth }) => ({
-  width: drawerWidth,
+})<{ drawerWidth: number }>(({ theme, drawerWidth, open }) => ({
+  width: open ? drawerWidth : 0,
   flexShrink: 0,
+  whiteSpace: "nowrap",
+  transition: theme.transitions.create("width", {
+    easing: theme.transitions.easing.sharp,
+    duration: open
+      ? theme.transitions.duration.enteringScreen
+      : theme.transitions.duration.leavingScreen,
+  }),
+  overflowX: "hidden",
 
   "& .MuiDrawer-paper": {
     width: drawerWidth,
