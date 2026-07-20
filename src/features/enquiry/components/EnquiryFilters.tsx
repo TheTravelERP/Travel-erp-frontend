@@ -8,6 +8,7 @@ import {
   Typography,
   Stack,
 } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import DropdownAutocomplete from "../../../components/common/DropdownAutocomplete";
 
 /* ================= TYPES ================= */
@@ -36,6 +37,7 @@ export default function EnquiryFilters({
   onApply,
   onReset,
 }: EnquiryFiltersProps) {
+  const { t } = useTranslation();
   return (
     <Box
       sx={{
@@ -50,7 +52,7 @@ export default function EnquiryFilters({
       {/* Header */}
       <Stack spacing={1.5} mb={2}>
         <Typography variant="h6" color="primary">
-          Filters
+          {t("common.filters")}
         </Typography>
       </Stack>
 
@@ -58,7 +60,7 @@ export default function EnquiryFilters({
         {/* Date Range */}
         <Grid size={{ xs: 12, md: 3 }}>
           <TextField
-            label="From Date"
+            label={t("common.fromDate")}
             type="date"
             fullWidth
             value={value.from_date ?? ""}
@@ -69,7 +71,7 @@ export default function EnquiryFilters({
 
         <Grid size={{ xs: 12, md: 3 }}>
           <TextField
-            label="To Date"
+            label={t("common.toDate")}
             type="date"
             fullWidth
             value={value.to_date ?? ""}
@@ -82,7 +84,7 @@ export default function EnquiryFilters({
         <Grid size={{ xs: 12, md: 3 }}>
           <DropdownAutocomplete
             name="conversion_status"
-            label="Conversion Status"
+            label={t("enquiry.conversionStatus")}
             value={value.conversion_status ?? null}
             onChange={(val: string | null) =>
               onChange({ conversion_status: val || undefined })
@@ -96,40 +98,40 @@ export default function EnquiryFilters({
         {/* Lead Source */}
         <Grid size={{ xs: 12, md: 3 }}>
           <DropdownAutocomplete
-            name="lead_source"                
-            label="Lead Source"
+            name="lead_source"
+            label={t("common.source")}
             value={value.lead_source ?? null}
             onChange={(val: string | null) =>
               onChange({ lead_source: val || undefined })
             }
-            useForm={false}                 
-            allowAdd={false}                 
-            pagination={false}              
+            useForm={false}
+            allowAdd={false}
+            pagination={false}
           />
         </Grid>
 
          {/* enquiry_priority */}
         <Grid size={{ xs: 12, md: 3 }}>
           <DropdownAutocomplete
-            name="enquiry_priority"                 
-            label="Enquiry Priority"
+            name="enquiry_priority"
+            label={t("common.priority")}
             value={value.enquiry_priority ?? null}
             onChange={(val: string | null) =>
               onChange({ enquiry_priority: val || undefined })
             }
-            useForm={false}                 
-            allowAdd={false}                 
-            pagination={false}              
+            useForm={false}
+            allowAdd={false}
+            pagination={false}
           />
         </Grid>
 
         {/* Actions */}
         <Grid size={12} display="flex" justifyContent="flex-end" gap={1} mt={1}>
           <Button color="inherit" onClick={onReset}>
-            Reset
+            {t("common.reset")}
           </Button>
           <Button variant="contained" onClick={onApply}>
-            Apply Filters
+            {t("common.applyFilters")}
           </Button>
         </Grid>
       </Grid>

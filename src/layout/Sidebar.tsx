@@ -16,6 +16,7 @@ import {
 
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { alpha } from "@mui/material/styles";
 
 import { useMenu } from "../context/MenuContext";
@@ -80,6 +81,7 @@ export default function Sidebar({ open, drawerWidth = 280 }: any) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const theme = useTheme();
+  const { t } = useTranslation();
 
   const { menu, loading } = useMenu();
 
@@ -122,7 +124,7 @@ export default function Sidebar({ open, drawerWidth = 280 }: any) {
     return (
       <StyledDrawer open={open} variant="persistent" drawerWidth={drawerWidth}>
         <Toolbar />
-        <Typography sx={{ p: 2 }}>Loading menu…</Typography>
+        <Typography sx={{ p: 2 }}>{t("common.loadingMenu")}</Typography>
       </StyledDrawer>
     );
   }
@@ -178,7 +180,7 @@ export default function Sidebar({ open, drawerWidth = 280 }: any) {
             </ListItemIcon>
           )}
 
-          <ListItemText primary={item.title} />
+          <ListItemText primary={t(`menu.${item.id}`, item.title)} />
 
           {hasChildren &&
             (isCurrentOpen ? (

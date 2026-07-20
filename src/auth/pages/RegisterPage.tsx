@@ -1,5 +1,5 @@
 // src/auth/pages/RegisterPage.tsx
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -12,8 +12,9 @@ import {
 } from "@mui/material";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import {
-  registerOrgSchema,
+  getRegisterOrgSchema,
   type RegisterOrgInput,
 } from "../../utils/validator";
 import { requestRegistrationOtp, verifyOtpApi } from "../services/auth.service";
@@ -28,6 +29,8 @@ import PasswordField from "../../components/common/PasswordField";
 export default function RegisterPage() {
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
+  const { t } = useTranslation();
+  const registerOrgSchema = useMemo(() => getRegisterOrgSchema(t), [t]);
 
   const [countries, setCountries] = React.useState<any[]>([]);
   const [countryLoading, setCountryLoading] = React.useState(false);
@@ -85,7 +88,7 @@ export default function RegisterPage() {
       setRegistrationPayload(payload);
       setOtpSent(true);
       setCountdown(60);
-      showSnackbar({ message: "OTP sent successfully", severity: "success" });
+      showSnackbar({ message: t("auth.otpSentSuccess"), severity: "success" });
     } catch (err: any) {
       const detail = err?.response?.data;
       const messageFromApi =
@@ -97,7 +100,7 @@ export default function RegisterPage() {
         showSnackbar({ message: String(messageFromApi), severity: "error" });
         setGlobalError(String(messageFromApi));
       } else {
-        const fallback = err?.message || "Failed to register organization.";
+        const fallback = err?.message || t("auth.registerFailed");
         showSnackbar({ message: fallback, severity: "error" });
         setGlobalError(fallback);
       }
@@ -161,7 +164,7 @@ export default function RegisterPage() {
         replace: true,
       });
     } catch (err: any) {
-      const message = err?.response?.data?.detail || "OTP verification failed";
+      const message = err?.response?.data?.detail || t("auth.otpVerificationFailed");
       if (message === "Invalid OTP" || message === "OTP expired") {
         setOtp("");
 
@@ -187,10 +190,10 @@ export default function RegisterPage() {
       setTimeout(() => {
         otpRef.current?.focus();
       }, 50);
-      showSnackbar({ message: "OTP resent successfully", severity: "success" });
+      showSnackbar({ message: t("auth.otpResentSuccess"), severity: "success" });
     } catch (err: any) {
       showSnackbar({
-        message: err?.response?.data?.detail || "Failed to resend OTP",
+        message: err?.response?.data?.detail || t("auth.otpResendFailed"),
         severity: "error",
       });
     } finally {
@@ -209,7 +212,7 @@ export default function RegisterPage() {
   }, [otpSent]);
 
   return (
-    <AuthCard title="Travel ERP" subtitle="Create your organization">
+    <AuthCard title={t("auth.appTitle")} subtitle={t("auth.registerSubtitle")}>
       {globalError && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {globalError}
@@ -230,7 +233,7 @@ export default function RegisterPage() {
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Organization Name"
+                  label={t("auth.organizationName")}
                   required
                   error={!!errors.organization_name}
                   helperText={errors.organization_name?.message ?? ""}
@@ -244,7 +247,7 @@ export default function RegisterPage() {
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Admin Full Name"
+                  label={t("auth.adminFullName")}
                   required
                   error={!!errors.admin_name}
                   helperText={errors.admin_name?.message ?? ""}
@@ -258,7 +261,7 @@ export default function RegisterPage() {
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Email"
+                  label={t("common.email")}
                   type="email"
                   required
                   error={!!errors.email}
@@ -306,7 +309,7 @@ export default function RegisterPage() {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Select Profile Country"
+                      label={t("auth.selectProfileCountry")}
                       error={!!errors.country_code}
                       helperText={errors.country_code?.message}
                     />
@@ -352,7 +355,7 @@ export default function RegisterPage() {
                     </Box>
                   );
                 }}
-                renderInput={(params) => <TextField {...params} label="Code" />}
+                renderInput={(params) => <TextField {...params} label={t("auth.code")} />}
               />
 
               <Controller
@@ -362,7 +365,7 @@ export default function RegisterPage() {
                   <TextField
                     {...field}
                     fullWidth
-                    label="Mobile Number"
+                    label={t("common.mobileNumber")}
                     error={!!errors.mobile}
                     helperText={errors.mobile?.message}
                     inputProps={{
@@ -384,7 +387,7 @@ export default function RegisterPage() {
                 <PasswordField
                   {...field}
                   fullWidth
-                  label="Password"
+                  label={t("auth.password")}
                   required
                   error={!!errors.password}
                   helperText={errors.password?.message}
@@ -400,7 +403,7 @@ export default function RegisterPage() {
                 <PasswordField
                   {...field}
                   fullWidth
-                  label="Confirm Password"
+                  label={t("profile.confirmPassword")}
                   required
                   error={!!errors.confirm_password}
                   helperText={errors.confirm_password?.message}
@@ -420,17 +423,17 @@ export default function RegisterPage() {
               {isSubmitting ? (
                 <>
                   <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />
-                  Creating...
+                  {t("auth.creating")}
                 </>
               ) : (
-                "Register Organization"
+                t("auth.registerOrganization")
               )}
             </Button>
 
             <Divider />
 
             <Button variant="text" fullWidth onClick={() => navigate("/login")}>
-              Already have an account? Sign In
+              {t("auth.alreadyHaveAccount")}
             </Button>
           </Stack>
         </Box>
@@ -438,9 +441,8 @@ export default function RegisterPage() {
       {otpSent && (
         <Stack spacing={2}>
           <Alert severity="success">
-            We've sent a 6-digit verification code to{" "}
-            <strong>{registrationPayload?.email}</strong>. Please enter it below
-            to complete your registration.
+            {t("auth.otpSentTo")}{" "}
+            <strong>{registrationPayload?.email}</strong>. {t("auth.otpEnterBelow")}
           </Alert>
 
           <OtpInput
@@ -458,10 +460,10 @@ export default function RegisterPage() {
             {otpLoading ? (
               <>
                 <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />
-                Verifying...
+                {t("auth.verifying")}
               </>
             ) : (
-              "Verify OTP"
+              t("auth.verifyOtp")
             )}
           </Button>
 
@@ -473,12 +475,12 @@ export default function RegisterPage() {
             {resendLoading ? (
               <>
                 <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />
-                Sending...
+                {t("auth.sending")}
               </>
             ) : countdown > 0 ? (
-              `Resend OTP (${countdown}s)`
+              t("auth.resendOtpCountdown", { count: countdown })
             ) : (
-              "Resend OTP"
+              t("auth.resendOtp")
             )}
           </Button>
           <Button
@@ -492,7 +494,7 @@ export default function RegisterPage() {
               otpRef.current?.clear();
             }}
           >
-            ← Back to Registration
+            {t("auth.backToRegistration")}
           </Button>
         </Stack>
       )}

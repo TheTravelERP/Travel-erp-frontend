@@ -8,14 +8,13 @@ import {
   TextField,
   ToggleButton,
   ToggleButtonGroup,
-  Autocomplete,
-  InputAdornment,
   useTheme,
   useMediaQuery,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { Controller } from 'react-hook-form';
 import type { Control, UseFormSetValue } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
@@ -34,6 +33,7 @@ export default function CustomerSelector({
 }: CustomerSelectorProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { t } = useTranslation();
 
   const [mode, setMode] = useState<'new' | 'existing'>('new');
 
@@ -63,7 +63,7 @@ export default function CustomerSelector({
         mb={2}
       >
         <Typography variant="h6" color="primary">
-          Customer Information
+          {t('enquiry.customerInformation')}
         </Typography>
 
         <ToggleButtonGroup
@@ -76,12 +76,12 @@ export default function CustomerSelector({
         >
           <ToggleButton value="new">
             <PersonAddIcon fontSize="small" sx={{ mr: 1 }} />
-            New
+            {t('common.new')}
           </ToggleButton>
 
           <ToggleButton value="existing">
             <PersonSearchIcon fontSize="small" sx={{ mr: 1 }} />
-            Existing
+            {t('common.existing')}
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
@@ -98,7 +98,7 @@ export default function CustomerSelector({
                   <TextField
                     {...field}
                     fullWidth
-                    label="Customer Name"
+                    label={t('common.customerName')}
                     required
                     error={!!fieldState.error}
                     helperText={fieldState.error?.message}
@@ -115,15 +115,11 @@ export default function CustomerSelector({
                   <TextField
                     {...field}
                     fullWidth
-                    label="Mobile Number"
+                    label={t('common.mobile')}
                     required
+                    placeholder="+14155550100"
                     error={!!fieldState.error}
                     helperText={fieldState.error?.message}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">+91</InputAdornment>
-                      ),
-                    }}
                   />
                 )}
               />
@@ -136,7 +132,7 @@ export default function CustomerSelector({
                   <TextField
                     {...field}
                     fullWidth
-                    label="Email"
+                    label={t('common.email')}
                     error={!!fieldState.error}
                     helperText={fieldState.error?.message}
                   />
@@ -148,7 +144,7 @@ export default function CustomerSelector({
          <Grid size={{ xs: 12 }}>
           <EntityAutocomplete
             name="cust_id"
-            label="Search Customer"
+            label={t('enquiry.searchCustomer')}
             control={control}
             dropdownName="customers"
             setValue={setValue}

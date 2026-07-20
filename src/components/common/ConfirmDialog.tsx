@@ -8,6 +8,7 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -22,14 +23,19 @@ interface ConfirmDialogProps {
 
 export default function ConfirmDialog({
   open,
-  title = "Confirm",
+  title,
   message,
-  confirmText = "Delete",
-  cancelText = "Cancel",
+  confirmText,
+  cancelText,
   loading = false,
   onClose,
   onConfirm,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t("common.confirm");
+  const resolvedConfirmText = confirmText ?? t("common.delete");
+  const resolvedCancelText = cancelText ?? t("common.cancel");
+
   return (
     <Dialog
       open={open}
@@ -37,7 +43,7 @@ export default function ConfirmDialog({
       maxWidth="xs"
       fullWidth
     >
-      <DialogTitle>{title}</DialogTitle>
+      <DialogTitle>{resolvedTitle}</DialogTitle>
 
       <DialogContent>
         <DialogContentText>
@@ -50,7 +56,7 @@ export default function ConfirmDialog({
           onClick={onClose}
           disabled={loading}
         >
-          {cancelText}
+          {resolvedCancelText}
         </Button>
 
         <Button
@@ -59,7 +65,7 @@ export default function ConfirmDialog({
           onClick={onConfirm}
           disabled={loading}
         >
-          {loading ? "Deleting..." : confirmText}
+          {loading ? t("common.deleting") : resolvedConfirmText}
         </Button>
       </DialogActions>
     </Dialog>

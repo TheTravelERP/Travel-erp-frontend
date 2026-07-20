@@ -7,6 +7,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Navigate, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import EnquiryForm from '../components/EnquiryForm';
 import type { EnquiryFormInput } from "../enquiry.types";
@@ -18,8 +19,9 @@ import { Link as RouterLink } from 'react-router-dom';
 export default function EnquiryCreatePage() {
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
+  const { t } = useTranslation();
 
-  const perms = usePermission('enquiries');
+  const perms = usePermission('crm.enquiries');
 
   // 🚫 Permission Guard
   if (!perms.can_create) {
@@ -29,13 +31,13 @@ export default function EnquiryCreatePage() {
   async function handleCreate(data: EnquiryFormInput) {
     try {
       await createEnquiry(data);
-      showSnackbar({ message: 'Enquiry created successfully', severity: 'success' });
+      showSnackbar({ message: t('common.createdSuccess'), severity: 'success' });
       navigate('/app/enquiries');
     } catch (err: any) {
       const msg =
         err?.response?.data?.message ||
         err?.message ||
-        'Failed to create enquiry';
+        t('common.createFailed');
 
       showSnackbar({ message: msg, severity: 'error' });
     }
@@ -46,17 +48,17 @@ export default function EnquiryCreatePage() {
     <Box sx={{ p: { xs: 1, md: 1 } }}>
       {/* Header */}
       <Typography variant="h6" fontWeight={700}>
-        Create Enquiry
+        {t('common.create')}
       </Typography>
 
       <Breadcrumbs sx={{ mb: 2 }}>
         <Link component={RouterLink} to="/app/dashboard" underline="hover">
-          Dashboard
+          {t('menu.dashboard')}
         </Link>
         <Link component={RouterLink} to="/app/enquiries" underline="hover">
-          Enquiries
+          {t('menu.crm.enquiries')}
         </Link>
-        <Typography color="text.primary">Create</Typography>
+        <Typography color="text.primary">{t('common.create')}</Typography>
       </Breadcrumbs>
 
       {/* Form */}

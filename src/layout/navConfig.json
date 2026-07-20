@@ -1,145 +1,175 @@
 [
-  {
-    "id": "dashboard",
-    "title": "Dashboard",
-    "path": "/app/dashboard",
-    "icon": "Dashboard"
-  },
-
-  {
-    "type": "subheader",
-    "title": "Sales & CRM"
-  },
-  {
-    "id": "crm",
-    "title": "CRM",
-    "icon": "People",
-    "children": [
-      { "id": "enquiries", "title": "Enquiries", "path": "/app/enquiries" },
-      { "id": "crm_quotations", "title": "Quotations", "path": "/app/quotations" },
-      { "id": "crm_customers", "title": "Customers", "path": "/app/customers" }
-    ]
-  },
-
-  {
-    "id": "packages_bookings",
-    "title": "Packages & Bookings",
-    "icon": "ShoppingBag",
-    "children": [
-      { "id": "pkg_types", "title": "Package Types", "path": "/app/packages/types" },
-      { "id": "pkg_details", "title": "Package Details", "path": "/app/packages/details" },
-      { "id": "pkg_list", "title": "Package List", "path": "/app/packages/list" },
-      { "id": "bookings_list", "title": "Bookings List", "path": "/app/bookings/list" }
-    ]
-  },
-
-  {
-    "type": "subheader",
-    "title": "Operations & Logistics"
-  },
-  {
-    "id": "travelers_ops",
-    "title": "Travelers & Visa",
-    "icon": "EmojiPeople",
-    "children": [
-      { "id": "traveler_list", "title": "Travelers / Pilgrims", "path": "/app/ops/travelers" },
-      { "id": "visa_mgmt", "title": "Visa Management", "path": "/app/ops/visa" }
-    ]
-  },
-
-  {
-    "id": "services_ops",
-    "title": "Service & Itinerary",
-    "icon": "Layers",
-    "children": [
-      { "id": "booking_services", "title": "Booking Services", "path": "/app/ops/booking-services" },
-      { "id": "room_allocation", "title": "Room Allocation", "path": "/app/ops/rooming" }
-    ]
-  },
-
-  {
-    "id": "inventory",
-    "title": "Inventory & Procurement",
-    "icon": "Inventory",
-    "children": [
-      { "id": "stock", "title": "Service Stock (Blocks)", "path": "/app/inventory/stock" },
-      { "id": "contracts", "title": "Vendor Contracts", "path": "/app/inventory/contracts" },
-      { "id": "vendors", "title": "Vendor Master", "path": "/app/inventory/vendors" },
-      { "id": "hotels", "title": "Hotel Master", "path": "/app/inventory/hotels", "icon": "Hotel" },
-      { "id": "airlines", "title": "Airline Master", "path": "/app/inventory/airlines", "icon": "Flight" }
-    ]
-  },
-
-  {
-    "type": "subheader",
-    "title": "Finance & Accounting"
-  },
-  {
-    "id": "finance",
-    "title": "Invoicing & Receipts",
-    "icon": "AttachMoney",
-    "children": [
-      { "id": "invoices", "title": "Sales Invoices (AR)", "path": "/app/finance/invoices" },
-      { "id": "receipts", "title": "Receipts & Allocations", "path": "/app/finance/receipts" },
-      { "id": "vendor_bills", "title": "Vendor Bills (AP)", "path": "/app/finance/vendor-bills" }
-    ]
-  },
-
-  {
-    "id": "banking_expenses",
-    "title": "Banking & Expenses",
-    "icon": "AccountBalance",
-    "children": [
-      { "id": "transactions", "title": "Payment Transactions", "path": "/app/banking/transactions" },
-      { "id": "expenses", "title": "Expenses", "path": "/app/banking/expenses" }
-    ]
-  },
-
-  {
-    "id": "accounting",
-    "title": "General Ledger",
-    "icon": "AccountBalance",
-    "children": [
-      { "id": "gl_journal", "title": "Journal Entries", "path": "/app/accounting/journals" },
-      { "id": "coa", "title": "Chart of Accounts", "path": "/app/accounting/coa" }
-    ]
-  },
-
-  {
-    "type": "subheader",
-    "title": "Reporting & Setup"
-  },
-  {
-    "id": "reports",
-    "title": "Analytics & Reports",
-    "icon": "ShowChart",
-    "children": [
-      { "id": "rpt_profit", "title": "Profitability Analysis", "path": "/app/reports/profitability" },
-      { "id": "rpt_ar", "title": "A/R & Balances Due", "path": "/app/reports/ar" },
-      { "id": "rpt_stock_usage", "title": "Inventory Stock Usage", "path": "/app/reports/stock-usage" },
-      { "id": "rpt_traveler_data", "title": "Traveler / Passport Data", "path": "/app/reports/traveler-data" },
-      { "id": "rpt_financials", "title": "Financial Statements", "path": "/app/reports/financials" },
-      { "id": "rpt_audit", "title": "System Audit Log", "path": "/app/reports/audit" }
-    ]
-  },
-
-  {
-    "id": "support",
-    "title": "Support & Ticketing",
-    "icon": "SupportAgent",
-    "path": "/app/support/tickets"
-  },
-
-  {
-    "id": "settings",
-    "title": "System Settings",
-    "icon": "Settings",
-    "children": [
-      { "id": "user_master", "title": "User Management", "path": "/app/settings/users" },
-      { "id": "agent_branding", "title": "Agent Branding", "path": "/app/settings/branding" },
-      { "id": "currency_master", "title": "Currency & Rates", "path": "/app/settings/currencies" },
-      { "id": "doc_seq", "title": "Document Numbering", "path": "/app/settings/doc-seq" },
-      { "id": "menu_perm", "title": "Menu Permissions", "path": "/app/settings/permissions" }
-    ]
-  }
+    {
+        "id": "dashboard",
+        "title": "Dashboard",
+        "path": "/app/dashboard",
+        "icon": "dashboard",
+        "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" }
+    },
+    {
+        "id": "crm",
+        "title": "CRM",
+        "icon": "groups",
+        "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" },
+        "children": [
+            { "id": "crm.enquiries", "title": "Enquiries", "path": "/app/enquiries", "icon": "support_agent", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "crm.customers", "title": "Customers", "path": "/app/crm/customers", "icon": "person", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "crm.quotations", "title": "Quotations", "path": "/app/crm/quotations", "icon": "request_quote", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "crm.followups", "title": "Follow-ups & Reminders", "path": "/app/crm/followups", "icon": "event_repeat", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } }
+        ]
+    },
+    {
+        "id": "packages",
+        "title": "Packages & Bookings",
+        "icon": "flight",
+        "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" },
+        "children": [
+            { "id": "packages.types", "title": "Package Types", "path": "/app/packages/types", "icon": "category", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "packages.list", "title": "Packages", "path": "/app/packages/list", "icon": "luggage", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "packages.departures", "title": "Departures / Batches", "path": "/app/packages/departures", "icon": "event", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "packages.bookings", "title": "Bookings", "path": "/app/bookings/list", "icon": "book_online", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "packages.itinerary", "title": "Booking Itinerary / Services", "path": "/app/bookings/services", "icon": "map", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "packages.room_allocation", "title": "Room Allocation", "path": "/app/bookings/room-allocation", "icon": "meeting_room", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } }
+        ]
+    },
+    {
+        "id": "inventory",
+        "title": "Inventory & Vendors",
+        "icon": "warehouse",
+        "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" },
+        "children": [
+            { "id": "inventory.hotels", "title": "Hotels (Makkah/Madinah)", "path": "/app/inventory/hotels", "icon": "hotel", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "inventory.airlines", "title": "Airlines", "path": "/app/inventory/airlines", "icon": "local_airport", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "inventory.vendors", "title": "Vendors", "path": "/app/inventory/vendors", "icon": "store", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "inventory.contracts", "title": "Vendor Contracts", "path": "/app/inventory/contracts", "icon": "description", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "inventory.stock", "title": "Inventory Stock (Rooms/Seats/Transport)", "path": "/app/inventory/stock", "icon": "inventory_2", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } }
+        ]
+    },
+    {
+        "id": "visa",
+        "title": "Visa & Travelers",
+        "icon": "badge",
+        "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" },
+        "children": [
+            { "id": "visa.travelers", "title": "Travelers / Pilgrims", "path": "/app/ops/travelers", "icon": "groups", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "visa.management", "title": "Visa Management", "path": "/app/ops/visa", "icon": "verified", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "visa.group_processing", "title": "Group Visa Processing (Hajj/Umrah)", "path": "/app/ops/visa-batches", "icon": "how_to_reg", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "visa.insurance_mofa", "title": "Insurance & Mofa Records", "path": "/app/ops/insurance-mofa", "icon": "health_and_safety", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } }
+        ]
+    },
+    {
+        "id": "finance",
+        "title": "Finance",
+        "icon": "payments",
+        "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" },
+        "children": [
+            { "id": "finance.invoices", "title": "Invoices", "path": "/app/finance/invoices", "icon": "receipt_long", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "finance.vouchers", "title": "Service Vouchers (Hotel/Flight)", "path": "/app/finance/vouchers", "icon": "confirmation_number", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "finance.receipts", "title": "Receipts", "path": "/app/finance/receipts", "icon": "receipt", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "finance.receipt_allocation", "title": "Receipt Allocations", "path": "/app/finance/receipt-allocation", "icon": "call_split", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "finance.vendor_bills", "title": "Vendor Bills (AP Invoices)", "path": "/app/finance/vendor-bills", "icon": "request_page", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "finance.expenses", "title": "Expenses", "path": "/app/banking/expenses", "icon": "money_off", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "finance.customer_ledger", "title": "Customer Ledger / Statement", "path": "/app/finance/customer-ledger", "icon": "account_balance_wallet", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "finance.agent_ledger", "title": "Agent Ledger / Statement", "path": "/app/finance/agent-ledger", "icon": "account_balance_wallet", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "finance.coa", "title": "Chart of Accounts", "path": "/app/finance/chart-of-accounts", "icon": "account_tree", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "finance.journal", "title": "Journal Entries (GL)", "path": "/app/finance/journal", "icon": "menu_book", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "finance.tax_summary", "title": "Tax Summary (GST/TCS/TDS)", "path": "/app/finance/tax-summary", "icon": "percent", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } }
+        ]
+    },
+    {
+        "id": "agents",
+        "title": "Agent Management",
+        "icon": "handshake",
+        "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" },
+        "children": [
+            { "id": "agents.list", "title": "Agents", "path": "/app/agents/list", "icon": "badge", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "agents.branding", "title": "Agent Branding (Invoice Header/Footer)", "path": "/app/agents/branding", "icon": "palette", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "agents.bookings", "title": "Agent Bookings", "path": "/app/agents/bookings", "icon": "book_online", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "OWN" } },
+            { "id": "agents.invoices", "title": "Agent-Issued Invoices", "path": "/app/agents/invoices", "icon": "receipt_long", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "OWN" } },
+            { "id": "agents.commission", "title": "Agent Commission / Wallet", "path": "/app/agents/commission", "icon": "account_balance_wallet", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "OWN" } }
+        ]
+    },
+    {
+        "id": "tasks",
+        "title": "Task Management",
+        "icon": "assignment",
+        "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" },
+        "children": [
+            { "id": "tasks.my", "title": "My Tasks", "path": "/app/tasks/my", "icon": "checklist", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": false, "can_print": true, "data_scope": "OWN" } },
+            { "id": "tasks.team", "title": "Team Tasks", "path": "/app/tasks/team", "icon": "groups", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "tasks.calendar", "title": "Task Calendar & Reminders", "path": "/app/tasks/calendar", "icon": "event_note", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } }
+        ]
+    },
+    {
+        "id": "support",
+        "title": "Support",
+        "icon": "support",
+        "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" },
+        "children": [
+            { "id": "support.tickets", "title": "Tickets", "path": "/app/support/tickets", "icon": "confirmation_number", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "support.knowledge_base", "title": "Knowledge Base", "path": "/app/support/kb", "icon": "menu_book", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } }
+        ]
+    },
+    {
+        "id": "ai",
+        "title": "AI Assistant",
+        "icon": "smart_toy",
+        "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" },
+        "children": [
+            { "id": "ai.chatbot", "title": "AI Chat Assistant", "path": "/app/ai/chat", "icon": "chat", "permissions": { "can_view": true, "can_create": true, "can_edit": false, "can_delete": false, "can_export": false, "can_import": false, "can_print": false, "data_scope": "OWN" } },
+            { "id": "ai.insights", "title": "Smart Insights & Predictions", "path": "/app/ai/insights", "icon": "insights", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "ai.document_autofill", "title": "Passport/Visa Auto-Fill (OCR)", "path": "/app/ai/document-scan", "icon": "document_scanner", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": false, "can_export": false, "can_import": true, "can_print": false, "data_scope": "ORG" } }
+        ]
+    },
+    {
+        "id": "reports",
+        "title": "Reports",
+        "icon": "analytics",
+        "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" },
+        "children": [
+            { "id": "reports.sales", "title": "Sales Report", "path": "/app/reports/sales", "icon": "bar_chart", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.bookings", "title": "Booking Report", "path": "/app/reports/bookings", "icon": "book_online", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.package_occupancy", "title": "Package Occupancy Report", "path": "/app/reports/package-occupancy", "icon": "pie_chart", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.enquiry_conversion", "title": "Enquiry Conversion Report", "path": "/app/reports/enquiry-conversion", "icon": "trending_up", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.agent_performance", "title": "Agent Performance Report", "path": "/app/reports/agent-performance", "icon": "leaderboard", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.agent_commission", "title": "Agent Commission Report", "path": "/app/reports/agent-commission", "icon": "payments", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.financial", "title": "Financial Report", "path": "/app/reports/financial", "icon": "account_balance", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.receivables", "title": "Receivables Aging Report", "path": "/app/reports/receivables", "icon": "schedule", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.payables", "title": "Payables Aging Report", "path": "/app/reports/payables", "icon": "schedule", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.pnl", "title": "Profit & Loss Statement", "path": "/app/reports/pnl", "icon": "trending_up", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.balance_sheet", "title": "Balance Sheet", "path": "/app/reports/balance-sheet", "icon": "balance", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.trial_balance", "title": "Trial Balance", "path": "/app/reports/trial-balance", "icon": "balance", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.tax", "title": "Tax / GST Report", "path": "/app/reports/tax", "icon": "percent", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.expenses", "title": "Expense Report", "path": "/app/reports/expenses", "icon": "money_off", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.vendor_purchase", "title": "Vendor Purchase Report", "path": "/app/reports/vendor-purchase", "icon": "shopping_cart", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.hotel_occupancy", "title": "Hotel Occupancy Report", "path": "/app/reports/hotel-occupancy", "icon": "hotel", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.flight_manifest", "title": "Flight Manifest Report", "path": "/app/reports/flight-manifest", "icon": "local_airport", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.room_allocation", "title": "Room Allocation Report", "path": "/app/reports/room-allocation", "icon": "meeting_room", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.visa_status", "title": "Visa Status Report", "path": "/app/reports/visa-status", "icon": "verified", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.passport_expiry", "title": "Passport Expiry Report", "path": "/app/reports/passport-expiry", "icon": "warning", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.travelers", "title": "Pilgrim / Traveler Report", "path": "/app/reports/travelers", "icon": "groups", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.support", "title": "Support Ticket Report", "path": "/app/reports/support", "icon": "support", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.tasks", "title": "Task Report", "path": "/app/reports/tasks", "icon": "assignment", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "reports.custom_builder", "title": "Custom Report Builder", "path": "/app/reports/custom", "icon": "build", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } }
+        ]
+    },
+    {
+        "id": "settings",
+        "title": "Settings",
+        "icon": "settings",
+        "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" },
+        "children": [
+            { "id": "settings.organization", "title": "Organization", "path": "/app/settings/organization", "icon": "domain", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "settings.users", "title": "Users", "path": "/app/settings/users", "icon": "manage_accounts", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "settings.permissions", "title": "Permissions", "path": "/app/settings/permissions", "icon": "lock", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "settings.dropdown", "title": "Dropdown Config", "path": "/app/settings/dropdown", "icon": "arrow_drop_down_circle", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "settings.finance", "title": "Currency & Tax", "path": "/app/settings/finance", "icon": "payments", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "settings.invoice_branding", "title": "Invoice & Branding", "path": "/app/settings/invoice-branding", "icon": "receipt_long", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "settings.doc_numbering", "title": "Document Numbering", "path": "/app/settings/doc-numbering", "icon": "confirmation_number", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "settings.subscription", "title": "Subscription & Billing", "path": "/app/settings/subscription", "icon": "workspace_premium", "permissions": { "can_view": true, "can_create": false, "can_edit": true, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } },
+            { "id": "settings.notifications", "title": "Notification Templates", "path": "/app/settings/notifications", "icon": "notifications", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
+            { "id": "settings.integrations", "title": "Integrations (Payment/WhatsApp/Email)", "path": "/app/settings/integrations", "icon": "integration_instructions", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": false, "can_import": false, "can_print": false, "data_scope": "ORG" } },
+            { "id": "settings.audit_log", "title": "Audit Log", "path": "/app/settings/audit-log", "icon": "history", "permissions": { "can_view": true, "can_create": false, "can_edit": false, "can_delete": false, "can_export": true, "can_import": false, "can_print": true, "data_scope": "ORG" } }
+        ]
+    }
 ]

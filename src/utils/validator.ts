@@ -1,114 +1,119 @@
 // src/utils/validator.ts
 import { z } from "zod";
+import type { TFunction } from "i18next";
 
 /**
  * Reusable base validators and schemas.
- * Export individual field validators too if you want to reuse in other places.
+ * All validation messages are translated — call with the active t()
+ * so error text follows the user's selected language.
  */
 
-// simple reusable pieces
-export const emailValidator = z
-  .string()
-  .trim()
-  .toLowerCase()
-  .min(1, "Email is required")
-  .email("Enter a valid email");
+export const getValidators = (t: TFunction) => ({
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .min(1, t("validation.emailRequired"))
+    .email(t("validation.emailInvalid")),
 
-export const passwordValidator = z
-  .string()
-  .min(6, "Password must be at least 8 characters")
-  .max(36, "Password cannot exceed 36 characters")
-  .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-  .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-  .regex(/[0-9]/, "Password must contain at least one number");
+  password: z
+    .string()
+    .min(6, t("validation.passwordMinLength"))
+    .max(36, t("validation.passwordMaxLength"))
+    .regex(/[A-Z]/, t("validation.passwordUppercase"))
+    .regex(/[a-z]/, t("validation.passwordLowercase"))
+    .regex(/[0-9]/, t("validation.passwordNumber")),
 
+  name: z
+    .string()
+    .trim()
+    .min(3, t("validation.minLength3"))
+    .max(200, t("validation.tooLong")),
 
-export const nameValidator = z
-  .string()
-  .trim()
-  .min(3, "Must be at least 3 characters")
-  .max(200, "Too long");
+  mobile: z
+    .string()
+    .min(7, t("validation.mobileRequired"))
+    .max(15, t("validation.mobileTooLong"))
+    .regex(/^[0-9]+$/, t("validation.digitsOnly")),
 
-export const mobileValidator = z
-  .string()
-  .min(7, "Mobile number is required")
-  .max(15, "Mobile number too long")
-  .regex(/^[0-9]+$/, "Only digits allowed");
+  countryCode: z
+    .string()
+    .length(2, t("validation.countryCodeLength"))
+    .regex(/^[A-Z]{2}$/, t("validation.countryCodeFormat")),
 
-export const countryCodeValidator = z
-  .string()
-  .length(2, "Country code must be exactly 2 characters")
-  .regex(/^[A-Z]{2}$/, "Country code must be 2 uppercase letters");
+  internationalMobile: z
+    .string()
+    .trim()
+    .regex(/^\+[1-9][0-9]{6,14}$/, t("validation.internationalMobile")),
 
-export const internationalMobileValidator = z
-  .string()
-  .trim()
-  .regex(
-    /^\+[1-9][0-9]{6,14}$/,
-    "Enter a valid international mobile number (e.g. +919876543210)"
-  );
+  otp: z
+    .string()
+    .length(6, t("validation.otpLength"))
+    .regex(/^\d{6}$/, t("validation.otpDigitsOnly")),
 
-
-export const otpValidator = z
-  .string()
-  .length(6, "OTP must be exactly 6 digits")
-  .regex(/^\d{6}$/, "OTP must contain only digits");
-
+  confirmPasswordRequired: z.string().min(1, t("validation.confirmPasswordRequired")),
+});
 
 // full form schema (shape the frontend sends)
-export const registerOrgSchema = z
-  .object({
-    organization_name: nameValidator,
-    country_code: countryCodeValidator,
-    admin_name: nameValidator,
-    email: emailValidator,
-    mobile: mobileValidator,
-    password: passwordValidator,
-    confirm_password: z.string().min(1, "Confirm password is required"),
-  })
-  .refine((data) => data.password === data.confirm_password, {
-    message: "Password and confirm password does not match",
-    path: ["confirm_password"],
+export const getRegisterOrgSchema = (t: TFunction) => {
+  const v = getValidators(t);
+  return z
+    .object({
+      organization_name: v.name,
+      country_code: v.countryCode,
+      admin_name: v.name,
+      email: v.email,
+      mobile: v.mobile,
+      password: v.password,
+      confirm_password: v.confirmPasswordRequired,
+    })
+    .refine((data) => data.password === data.confirm_password, {
+      message: t("validation.passwordMismatch"),
+      path: ["confirm_password"],
+    });
+};
+export type RegisterOrgInput = z.infer<ReturnType<typeof getRegisterOrgSchema>>;
+
+export const getLoginSchema = (t: TFunction) => {
+  const v = getValidators(t);
+  return z.object({
+    email: v.email,
+    password: v.password,
   });
-export type RegisterOrgInput = z.infer<typeof registerOrgSchema>;
+};
+export type LoginInput = z.infer<ReturnType<typeof getLoginSchema>>;
 
-export const loginSchema = z.object({
-  email: emailValidator,
-  password: passwordValidator,
-});
-export type LoginInput = z.infer<typeof loginSchema>;
-
-export const forgotPasswordSchema = z.object({
-  email: emailValidator,
-});
-
-export const resetPasswordSchema = z
-  .object({
-    password: passwordValidator,
-    confirm_password: z.string().min(1, "Confirm password is required"),
-  })
-  .refine((data) => data.password === data.confirm_password, {
-    message: "Password and confirm password does not match",
-    path: ["confirm_password"],
+export const getForgotPasswordSchema = (t: TFunction) =>
+  z.object({
+    email: getValidators(t).email,
   });
+export type ForgotPasswordInput = z.infer<ReturnType<typeof getForgotPasswordSchema>>;
 
-export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export const getResetPasswordSchema = (t: TFunction) => {
+  const v = getValidators(t);
+  return z
+    .object({
+      password: v.password,
+      confirm_password: v.confirmPasswordRequired,
+    })
+    .refine((data) => data.password === data.confirm_password, {
+      message: t("validation.passwordMismatch"),
+      path: ["confirm_password"],
+    });
+};
+export type ResetPasswordInput = z.infer<ReturnType<typeof getResetPasswordSchema>>;
 
-export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
-
-export const changePasswordSchema = z
-  .object({
-    old_password: z.string().min(1, "Current password is required"),
-    new_password: passwordValidator,
-    confirm_password: z.string().min(1, "Confirm password is required"),
-  })
-  .refine((data) => data.new_password === data.confirm_password, {
-    message: "Password and confirm password does not match",
-    path: ["confirm_password"],
-  });
-
-export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
-
-
-
-
+export const getChangePasswordSchema = (t: TFunction) => {
+  const v = getValidators(t);
+  return z
+    .object({
+      old_password: z.string().min(1, t("validation.currentPasswordRequired")),
+      new_password: v.password,
+      confirm_password: v.confirmPasswordRequired,
+    })
+    .refine((data) => data.new_password === data.confirm_password, {
+      message: t("validation.passwordMismatch"),
+      path: ["confirm_password"],
+    });
+};
+export type ChangePasswordInput = z.infer<ReturnType<typeof getChangePasswordSchema>>;

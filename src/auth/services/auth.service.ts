@@ -128,6 +128,15 @@ export async function changePasswordApi(
   return data;
 }
 
+export async function updatePreferredLanguageApi(preferredLanguage: string) {
+  const { data } = await api.put(
+    "/api/v1/auth/preferred-language",
+    { preferred_language: preferredLanguage }
+  );
+
+  return data;
+}
+
 
 
 

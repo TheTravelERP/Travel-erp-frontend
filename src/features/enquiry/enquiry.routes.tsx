@@ -14,7 +14,7 @@ export default function EnquiryRoutes() {
       <Route
         index
         element={
-          <PermissionRoute menuId="enquiries" action="can_view">
+          <PermissionRoute menuId="crm.enquiries" action="can_view">
             <EnquiryListPage />
           </PermissionRoute>
         }
@@ -23,7 +23,7 @@ export default function EnquiryRoutes() {
       <Route
         path="create"
         element={
-          <PermissionRoute menuId="enquiries" action="can_create">
+          <PermissionRoute menuId="crm.enquiries" action="can_create">
             <EnquiryCreatePage />
           </PermissionRoute>
         }
@@ -32,7 +32,7 @@ export default function EnquiryRoutes() {
       <Route
         path=":uuid"
         element={
-          <PermissionRoute menuId="enquiries" action="can_view">
+          <PermissionRoute menuId="crm.enquiries" action="can_view">
             <EnquiryViewPage />
           </PermissionRoute>
         }
@@ -41,7 +41,7 @@ export default function EnquiryRoutes() {
       <Route
         path=":uuid/edit"
         element={
-          <PermissionRoute menuId="enquiries" action="can_edit">
+          <PermissionRoute menuId="crm.enquiries" action="can_edit">
             <EnquiryEditPage />
           </PermissionRoute>
         }

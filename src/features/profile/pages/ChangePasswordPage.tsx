@@ -2,8 +2,10 @@
 import { Box, Button, Paper, Stack, Typography } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
-  changePasswordSchema,
+  getChangePasswordSchema,
   type ChangePasswordInput,
 } from '../../../utils/validator';
 import { changePasswordApi } from '../../../auth/services/auth.service';
@@ -12,6 +14,8 @@ import { useSnackbar } from '../../../components/ui/SnackbarProvider';
 
 export default function ChangePasswordPage() {
   const { showSnackbar } = useSnackbar();
+  const { t } = useTranslation();
+  const changePasswordSchema = useMemo(() => getChangePasswordSchema(t), [t]);
 
   const {
     control,
@@ -35,14 +39,14 @@ export default function ChangePasswordPage() {
       });
 
       showSnackbar({
-        message: res.message || 'Password changed successfully.',
+        message: res.message || t('profile.passwordChangedSuccess'),
         severity: 'success',
       });
 
       reset();
     } catch (err: any) {
       showSnackbar({
-        message: err?.response?.data?.detail ?? 'Failed to change password.',
+        message: err?.response?.data?.detail ?? t('profile.passwordChangeFailed'),
         severity: 'error',
       });
     }
@@ -51,10 +55,10 @@ export default function ChangePasswordPage() {
   return (
     <Box>
       <Typography variant="h5" fontWeight={600} gutterBottom>
-        Change Password
+        {t('profile.changePassword')}
       </Typography>
       <Typography variant="body2" color="text.secondary" mb={3}>
-        Dashboard &bull; Profile &bull; Change Password
+        {t('profile.home')} &bull; {t('profile.profile')} &bull; {t('profile.changePassword')}
       </Typography>
 
       <Paper sx={{ p: 3, maxWidth: 480 }}>
@@ -67,7 +71,7 @@ export default function ChangePasswordPage() {
                 <PasswordField
                   {...field}
                   fullWidth
-                  label="Old Password"
+                  label={t('profile.oldPassword')}
                   autoComplete="current-password"
                   error={!!errors.old_password}
                   helperText={errors.old_password?.message}
@@ -82,7 +86,7 @@ export default function ChangePasswordPage() {
                 <PasswordField
                   {...field}
                   fullWidth
-                  label="New Password"
+                  label={t('profile.newPassword')}
                   autoComplete="new-password"
                   error={!!errors.new_password}
                   helperText={errors.new_password?.message}
@@ -97,7 +101,7 @@ export default function ChangePasswordPage() {
                 <PasswordField
                   {...field}
                   fullWidth
-                  label="Confirm Password"
+                  label={t('profile.confirmPassword')}
                   autoComplete="new-password"
                   error={!!errors.confirm_password}
                   helperText={errors.confirm_password?.message}
@@ -112,7 +116,7 @@ export default function ChangePasswordPage() {
               disabled={isSubmitting}
               sx={{ minHeight: 56 }}
             >
-              {isSubmitting ? 'Changing...' : 'Change Password'}
+              {isSubmitting ? t('common.saving') : t('profile.changePassword')}
             </Button>
           </Stack>
         </Box>

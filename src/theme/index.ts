@@ -6,8 +6,12 @@ import components from './components';
 
 export { DEFAULT_PRIMARY_COLOR };
 
-export const createAppTheme = (primaryColor: string = DEFAULT_PRIMARY_COLOR): Theme =>
+export const createAppTheme = (
+  primaryColor: string = DEFAULT_PRIMARY_COLOR,
+  direction: 'ltr' | 'rtl' = 'ltr',
+): Theme =>
   createTheme({
+    direction,
     palette: getPalette(primaryColor),
     typography,
     shape: {

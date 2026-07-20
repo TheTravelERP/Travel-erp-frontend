@@ -8,6 +8,7 @@ import {
   createFilterOptions,
 } from "@mui/material";
 import { Controller } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import {
   getDropdownOptions,
   createDropdownOption,
@@ -28,6 +29,7 @@ export default function DropdownAutocomplete({
   pagination = false,
   pageSize = 20,
 }: any) {
+  const { t } = useTranslation();
   const [options, setOptions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -137,7 +139,11 @@ export default function DropdownAutocomplete({
           }
         }}
 
-        getOptionLabel={(option) => option.label || ""}
+        getOptionLabel={(option) =>
+          option.value === "__add_new__"
+            ? option.label || ""
+            : t(`dropdown.${name}.${option.value}`, { defaultValue: option.label || "" })
+        }
         isOptionEqualToValue={(option, val) =>
           option.value === val.value
         }

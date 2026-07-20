@@ -2,14 +2,16 @@
 
 import { Box, Typography } from "@mui/material";
 import FlightIcon from "@mui/icons-material/Flight";
+import { useTranslation } from "react-i18next";
 
 interface LoaderProps {
   message?: string;
 }
 
-export default function Loader({
-  message = "Loading your journey...",
-}: LoaderProps) {
+export default function Loader({ message }: LoaderProps) {
+  const { t } = useTranslation();
+  const displayMessage = message ?? t("common.loadingDashboard");
+
   return (
     <Box
       sx={{
@@ -97,7 +99,7 @@ export default function Loader({
             fontWeight: 500,
           }}
         >
-          {message}
+          {displayMessage}
         </Typography>
       </Box>
     </Box>

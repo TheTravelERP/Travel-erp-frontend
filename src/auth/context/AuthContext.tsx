@@ -1,12 +1,16 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import api from "../../services/api";
+import i18n from "../../i18n";
 
 export type Session = {
   user_id: number;
   org_id: number;
   org_code: string;
   email: string;
+  name: string | null;
+  picture_url: string | null;
+  preferred_language: string;
 } | null;
 
 type AuthCtx = {
@@ -15,6 +19,7 @@ type AuthCtx = {
   isAuthenticated: boolean;
   login: (s: Session) => void;
   logout: () => Promise<void>;
+  updateSession: (patch: Partial<NonNullable<Session>>) => void;
   loading: boolean;
 };
 
@@ -48,7 +53,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => controller.abort();
   }, []);
 
+  // 2️⃣ Keep the UI language in sync with whichever session is active —
+  // covers both the initial /me load and every subsequent login.
+  useEffect(() => {
+    if (session?.preferred_language) {
+      i18n.changeLanguage(session.preferred_language);
+    }
+  }, [session?.preferred_language]);
+
   const login = (s: Session) => setSession(s);
+
+  const updateSession = (patch: Partial<NonNullable<Session>>) => {
+    setSession((prev) => (prev ? { ...prev, ...patch } : prev));
+  };
 
   const logout = async () => {
     await api.post("/api/v1/auth/logout", {}, { withCredentials: true });
@@ -63,6 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAuthenticated: !!session,
         login,
         logout,
+        updateSession,
         loading,
       }}
     >

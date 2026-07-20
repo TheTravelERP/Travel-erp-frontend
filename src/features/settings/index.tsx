@@ -38,7 +38,7 @@ export default function SettingsPage() {
     try {
       await setThemeColor(color);
       showSnackbar({ message: 'Theme color updated', severity: 'success' });
-    } catch (err) {
+    } catch {
       showSnackbar({ message: 'Failed to update theme color', severity: 'error' });
     } finally {
       setSavingColor(null);
@@ -84,7 +84,7 @@ export default function SettingsPage() {
                     justifyContent: 'center',
                     border: (theme) =>
                       isSelected ? `2px solid ${theme.palette.text.primary}` : '2px solid transparent',
-                    outline: (theme) => (isSelected ? `2px solid ${swatch.value}` : 'none'),
+                    outline: isSelected ? `2px solid ${swatch.value}` : 'none',
                     outlineOffset: '2px',
                     transition: 'transform 0.15s ease',
                     '&:hover': {

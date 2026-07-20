@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { Box, Paper, Collapse } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 import AddIcon from "@mui/icons-material/Add";
 import UploadIcon from "@mui/icons-material/Upload";
@@ -27,7 +28,8 @@ import type { EnquiryListItem } from "../enquiry.types";
 
 export default function EnquiryListPage() {
   const navigate = useNavigate();
-  const perms = usePermission("enquiries");
+  const { t } = useTranslation();
+  const perms = usePermission('crm.enquiries');
   const [searchParams, setSearchParams] = useSearchParams();
 
   /* ---------- UI ---------- */
@@ -39,6 +41,15 @@ export default function EnquiryListPage() {
 
   /* ---------- CURRENT VIEW ---------- */
   const isTrash = searchParams.get("is_deleted") === "true";
+
+  /* ---------- SORTING (URL SOURCE OF TRUTH) ---------- */
+  const sortBy = searchParams.get("sort_by") || undefined;
+  const sortOrder = (searchParams.get("sort_order") as "asc" | "desc") || undefined;
+
+  const handleSortChange = (columnId: string) => {
+    const nextOrder = sortBy === columnId && sortOrder === "asc" ? "desc" : "asc";
+    updateURL({ sort_by: columnId, sort_order: nextOrder, page: 1 });
+  };
 
   /* ---------- APPLIED FILTERS (FROM URL) ---------- */
   const appliedFilters: EnquiryFilterValues = {
@@ -85,6 +96,8 @@ export default function EnquiryListPage() {
           page,
           page_size: pageSize,
           is_deleted: isTrash,
+          sort_by: sortBy,
+          sort_order: sortOrder,
           ...appliedFilters,
         },
         signal,
@@ -138,15 +151,19 @@ export default function EnquiryListPage() {
       showSnackbar({
         message:
           result.failed > 0
-            ? `Imported ${result.imported} of ${result.total_rows} rows (${result.failed} failed)`
-            : `Imported ${result.imported} enquiries successfully`,
+            ? t("common.importedSummary", {
+                imported: result.imported,
+                total: result.total_rows,
+                failed: result.failed,
+              })
+            : t("common.importedSuccess", { count: result.imported }),
         severity: result.failed > 0 ? "warning" : "success",
       });
 
       fetchData();
     } catch (err: any) {
       showSnackbar({
-        message: err?.response?.data?.detail ?? "Import failed",
+        message: err?.response?.data?.detail ?? t("common.importFailed"),
         severity: "error",
       });
     }
@@ -160,23 +177,23 @@ export default function EnquiryListPage() {
     <Box sx={{ p: { xs: 1, md: 1 } }}>
       {/* HEADER */}
       <ListPageToolbar
-        title={isTrash ? "Enquiry Trash" : "Enquiries"}
+        title={isTrash ? t("common.trash") : t('menu.crm.enquiries')}
         breadcrumbs={[
-          { label: "Dashboard", href: "/app/dashboard" },
-          { label: isTrash ? "Enquiry Trash" : "Enquiries" },
+          { label: t("menu.dashboard"), href: "/app/dashboard" },
+          { label: isTrash ? t("common.trash") : t('menu.crm.enquiries') },
         ]}
         primaryAction={
           isTrash
             ? {
                 key: "view",
-                label: "View Enquiries",
+                label: t('menu.crm.enquiries'),
                 icon: <ListAltIcon />,
                 variant: "contained",
                 onClick: () => updateURL({ is_deleted: undefined, page: 1 }),
               }
             : {
                 key: "add",
-                label: "Add Enquiry",
+                label: t("common.add"),
                 icon: <AddIcon />,
                 variant: "contained",
                 show: perms.can_create,
@@ -186,25 +203,25 @@ export default function EnquiryListPage() {
         secondaryActions={[
           {
             key: "filters",
-            label: "Filters",
+            label: t("common.filters"),
             icon: <FilterListIcon />,
             variant: showFilters ? "contained" : "outlined",
             onClick: () => setShowFilters((v) => !v),
           },
           {
             key: "export",
-            label: "Export",
+            label: t("common.export"),
             icon: <DownloadIcon />,
             show: perms.can_export,
             menuItems: [
-              { label: "Export CSV", onClick: () => handleExport("csv") },
-              { label: "Export Excel", onClick: () => handleExport("excel") },
-              { label: "Export PDF", onClick: () => handleExport("pdf") },
+              { label: t("common.exportCsv"), onClick: () => handleExport("csv") },
+              { label: t("common.exportExcel"), onClick: () => handleExport("excel") },
+              { label: t("common.exportPdf"), onClick: () => handleExport("pdf") },
             ],
           },
           {
             key: "import",
-            label: "Import CSV",
+            label: t("common.importCsv"),
             icon: <UploadIcon />,
             show: perms.can_import,
             onClick: () => fileInputRef.current?.click(),
@@ -213,15 +230,15 @@ export default function EnquiryListPage() {
         overflowActions={[
           {
             key: "view-trash",
-            label: "View Trash",
+            label: t("common.viewTrash"),
             show: perms.can_delete && !isTrash,
             onClick: () => updateURL({ is_deleted: true, page: 1 }),
           },
           {
             key: "bulk-assign",
-            label: "Bulk Assign",
+            label: t("common.bulkAssign"),
             disabled: true,
-            disabledReason: "Coming soon",
+            disabledReason: t("common.comingSoon"),
           },
         ]}
       />
@@ -256,7 +273,7 @@ export default function EnquiryListPage() {
 
         {/* WILD SEARCH */}
         <SearchInput
-          placeholder="Search by customer, mobile, package..."
+          placeholder={t("enquiry.searchPlaceholder")}
           value={draftFilters.search || ""}
           onChange={(e) =>
             setDraftFilters({ ...draftFilters, search: e.target.value })
@@ -273,6 +290,9 @@ export default function EnquiryListPage() {
           pageSize={pageSize}
           total={total}
           isTrash={isTrash}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          onSortChange={handleSortChange}
           onPageChange={(p) => updateURL({ page: p })}
           onPageSizeChange={(s) => updateURL({ page_size: s, page: 1 })}
           onRefresh={fetchData}

@@ -14,6 +14,7 @@ import {
 import Grid from '@mui/material/Grid';
 import { Controller } from 'react-hook-form';
 import type { Control, UseFormSetValue } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 
 import InventoryIcon from '@mui/icons-material/Inventory';
 import EditNoteIcon from '@mui/icons-material/EditNote';
@@ -31,6 +32,7 @@ export default function PackageSelector({
 }: PackageSelectorProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { t } = useTranslation();
 
   const [packageMode, setPackageMode] = useState<'custom' | 'existing'>(
     'custom'
@@ -61,7 +63,7 @@ export default function PackageSelector({
         mb={2}
       >
         <Typography variant="h6" color="primary">
-          Package Selection
+          {t('enquiry.packageSelection')}
         </Typography>
 
         <ToggleButtonGroup
@@ -74,12 +76,12 @@ export default function PackageSelector({
         >
           <ToggleButton value="custom">
             <EditNoteIcon fontSize="small" sx={{ mr: 1 }} />
-            Custom
+            {t('common.custom')}
           </ToggleButton>
 
           <ToggleButton value="existing">
             <InventoryIcon fontSize="small" sx={{ mr: 1 }} />
-            Inventory
+            {t('common.inventory')}
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
@@ -95,7 +97,7 @@ export default function PackageSelector({
                 <TextField
                   {...field}
                   fullWidth
-                  label="Package Name"
+                  label={t('enquiry.packageName')}
                   required
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
@@ -118,7 +120,7 @@ export default function PackageSelector({
                     if (v) setValue('package_name', v.name);
                   }}
                   renderInput={(params) => (
-                    <TextField {...params} fullWidth label="Select Package" />
+                    <TextField {...params} fullWidth label={t('enquiry.selectPackage')} />
                   )}
                 />
               )}

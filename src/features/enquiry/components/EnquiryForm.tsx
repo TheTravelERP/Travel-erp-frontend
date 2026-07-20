@@ -11,16 +11,17 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { Controller, useForm } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import GroupIcon from "@mui/icons-material/Group";
-import { enquirySchema } from "../enquiry.schema";
+import { getEnquirySchema } from "../enquiry.schema";
 import type { z } from "zod";
 import CustomerSelector from "../../customer/components/CustomerSelector";
 import PackageSelector from "../../package/components/PackageSelector";
 
-export type EnquiryFormInput = z.infer<typeof enquirySchema>;
+export type EnquiryFormInput = z.infer<ReturnType<typeof getEnquirySchema>>;
 
 import DropdownAutocomplete from "../../../components/common/DropdownAutocomplete";
 import { useNavigate } from "react-router-dom";
@@ -31,11 +32,28 @@ interface EnquiryFormProps {
   loading?: boolean;
 }
 
+const emptyValues = {
+  cust_id: null,
+  customer_name: "",
+  customer_mobile: "",
+  customer_email: "",
+  pkg_id: null,
+  package_name: "",
+  lead_source: "",
+  pax_count: 1,
+  enquiry_priority: "",
+  conversion_status: "Pending",
+  description: "",
+};
+
 export default function EnquiryForm({
   defaultValues,
   onSubmit,
   loading = false,
 }: EnquiryFormProps) {
+  const { t } = useTranslation();
+  const enquirySchema = useMemo(() => getEnquirySchema(t), [t]);
+
   /* ---------------- FORM ---------------- */
   const {
     control,
@@ -46,17 +64,7 @@ export default function EnquiryForm({
   } = useForm<EnquiryFormInput>({
     resolver: zodResolver(enquirySchema),
     defaultValues: {
-      cust_id: null,
-      customer_name: "",
-      customer_mobile: "",
-      customer_email: "",
-      pkg_id: null,
-      package_name: "",
-      lead_source: "",
-      pax_count: 1,
-      enquiry_priority: "",
-      conversion_status: "Pending",
-      description: "",
+      ...emptyValues,
       ...defaultValues,
     },
   });
@@ -66,17 +74,7 @@ export default function EnquiryForm({
   useEffect(() => {
     if (defaultValues) {
       reset({
-        cust_id: null,
-        customer_name: "",
-        customer_mobile: "",
-        customer_email: "",
-        pkg_id: null,
-        package_name: "",
-        lead_source: "",
-        pax_count: 1,
-        enquiry_priority: "",
-        conversion_status: "Pending",
-        description: "",
+        ...emptyValues,
         ...defaultValues,
       });
     }
@@ -103,7 +101,7 @@ export default function EnquiryForm({
         <Grid size={{ xs: 12, md: 12 }}>
           <Paper variant="outlined" sx={{ p: 2 }}>
             <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-              Enquiry Details
+              {t("enquiry.enquiryDetails")}
             </Typography>
 
             <Grid container spacing={2}>
@@ -115,7 +113,7 @@ export default function EnquiryForm({
                     <TextField
                       {...field}
                       type="number"
-                      label="PAX Count"
+                      label={t("enquiry.paxCount")}
                       fullWidth
                       InputProps={{
                         startAdornment: (
@@ -132,7 +130,7 @@ export default function EnquiryForm({
               <Grid size={{ xs: 12, sm: 3 }}>
                 <DropdownAutocomplete
                   name="lead_source"
-                  label="Source"
+                  label={t("common.source")}
                   control={control}
                   useForm={true}
                   allowAdd={true}
@@ -142,10 +140,10 @@ export default function EnquiryForm({
               <Grid size={{ xs: 12, sm: 3 }}>
                 <DropdownAutocomplete
                   name="enquiry_priority"
-                  label="Enquiry Priority"
+                  label={t("common.priority")}
                   control={control}
                   useForm={true}
-                  allowAdd={true}
+                  allowAdd={false}
                   pagination
                 />
               </Grid>
@@ -157,7 +155,7 @@ export default function EnquiryForm({
                   render={({ field }) => (
                     <TextField
                       {...field}
-                      label="Notes"
+                      label={t("common.notes")}
                       multiline
                       rows={2}
                       fullWidth
@@ -175,7 +173,7 @@ export default function EnquiryForm({
 
           <Box display="flex" justifyContent="space-between">
             <Button variant="outlined" onClick={() => navigate("/app/enquiries")}>
-              Back
+              {t("common.back")}
             </Button>
 
             <Box display="flex" gap={2}>
@@ -185,7 +183,7 @@ export default function EnquiryForm({
                 onClick={() => reset()}
                 size="large"
               >
-                Discard
+                {t("common.discard")}
               </Button>
 
               <Button
@@ -194,7 +192,7 @@ export default function EnquiryForm({
                 size="large"
                 disabled={isSubmitting || loading}
               >
-                {isSubmitting || loading ? "Saving..." : "Save Enquiry"}
+                {isSubmitting || loading ? t("common.saving") : t("common.save")}
               </Button>
             </Box>
           </Box>

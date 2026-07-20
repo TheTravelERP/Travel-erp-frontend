@@ -1,7 +1,9 @@
 // src/features/enquiry/components/EnquiryTable.tsx
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import {
   Box,
   Table,
@@ -33,6 +35,7 @@ import type { EnquiryListItem } from "../enquiry.types";
 import { formatDate } from "../../../utils/formatters/date";
 import ConfirmDialog from "../../../components/common/ConfirmDialog";
 import DropdownColorChip from "../../../components/common/DropdownColorChip";
+import SortableTableCell from "../../../components/common/SortableTableCell";
 import {
   bulkDeleteEnquiries,
   bulkRestoreEnquiries,
@@ -50,6 +53,9 @@ interface Props {
   pageSize: number;
   total: number;
   isTrash: boolean;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  onSortChange?: (columnId: string) => void;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
   onRefresh: () => void;
@@ -66,60 +72,62 @@ interface TableColumn {
 
 /* ================= COLUMNS, COLORS ================= */
 
-const columns: TableColumn[] = [
-  {
-    id: "enquiry_no",
-    label: "Enquiry No.",
-    sortable: true,
-    minWidth: 90,
-  },
-  {
-    id: "customer_name",
-    label: "Customer",
-    sortable: true,
-    minWidth: 200,
-  },
-  {
-    id: "customer_mobile",
-    label: "Mobile",
-    sortable: true,
-    minWidth: 200,
-  },
-  {
-    id: "package_name",
-    label: "Package",
-    sortable: true,
-    minWidth: 220,
-  },
-  {
-    id: "pax_count",
-    label: "PAX",
-    sortable: true,
-    align: "center",
-    minWidth: 80,
-  },
-  {
-    id: "enquiry_priority",
-    label: "Priority",
-    sortable: true,
-    format: "chip",
-    minWidth: 110,
-  },
-  {
-    id: "conversion_status",
-    label: "Conversion",
-    sortable: true,
-    format: "chip",
-    minWidth: 120,
-  },
-  {
-    id: "created_at",
-    label: "Created On",
-    sortable: true,
-    format: "date",
-    minWidth: 140,
-  },
-];
+function getColumns(t: TFunction): TableColumn[] {
+  return [
+    {
+      id: "enquiry_no",
+      label: t("enquiry.colEnquiryNo"),
+      sortable: true,
+      minWidth: 90,
+    },
+    {
+      id: "customer_name",
+      label: t("enquiry.colCustomer"),
+      sortable: true,
+      minWidth: 200,
+    },
+    {
+      id: "customer_mobile",
+      label: t("enquiry.colMobile"),
+      sortable: true,
+      minWidth: 200,
+    },
+    {
+      id: "package_name",
+      label: t("enquiry.colPackage"),
+      sortable: true,
+      minWidth: 220,
+    },
+    {
+      id: "pax_count",
+      label: t("enquiry.colPax"),
+      sortable: true,
+      align: "center",
+      minWidth: 80,
+    },
+    {
+      id: "enquiry_priority",
+      label: t("common.priority"),
+      sortable: true,
+      format: "chip",
+      minWidth: 110,
+    },
+    {
+      id: "conversion_status",
+      label: t("common.status"),
+      sortable: true,
+      format: "chip",
+      minWidth: 120,
+    },
+    {
+      id: "created_at",
+      label: t("common.createdOn"),
+      sortable: true,
+      format: "date",
+      minWidth: 140,
+    },
+  ];
+}
 
 function renderStatusChip(status: string) {
   return <DropdownColorChip dropdownName="enquiry_status" value={status} />;
@@ -138,6 +146,9 @@ export default function EnquiryTable({
   pageSize,
   total,
   isTrash,
+  sortBy,
+  sortOrder,
+  onSortChange,
   onPageChange,
   onPageSizeChange,
   onRefresh,
@@ -145,6 +156,8 @@ export default function EnquiryTable({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const columns = useMemo(() => getColumns(t), [t]);
   const [actionUuid, setActionUuid] = useState<string | null>(null);
   const { showSnackbar } = useSnackbar();
   const [actionLoading, setActionLoading] = useState(false);
@@ -193,7 +206,7 @@ export default function EnquiryTable({
       showSnackbar({
         message:
           err?.response?.data?.detail ??
-          (isTrash ? "Failed to restore selected enquiries" : "Failed to delete selected enquiries"),
+          (isTrash ? t("common.restoreSelectedFailed") : t("common.deleteSelectedFailed")),
         severity: "error",
       });
     } finally {
@@ -210,12 +223,12 @@ export default function EnquiryTable({
       sx={{ p: 1.5, mb: 1, borderRadius: 1, bgcolor: "action.selected" }}
     >
       <Typography variant="body2" fontWeight={600}>
-        {selected.size} selected
+        {t("common.selectedCount", { count: selected.size })}
       </Typography>
 
       <Stack direction="row" spacing={1}>
         <Button size="small" onClick={() => setSelected(new Set())}>
-          Clear
+          {t("common.clear")}
         </Button>
 
         <Button
@@ -231,7 +244,7 @@ export default function EnquiryTable({
           }
           onClick={() => setBulkConfirmOpen(true)}
         >
-          {isTrash ? "Restore Selected" : "Delete Selected"}
+          {isTrash ? t("common.restoreSelected") : t("common.deleteSelected")}
         </Button>
       </Stack>
     </Box>
@@ -248,13 +261,13 @@ export default function EnquiryTable({
       if (isTrash) {
         await restoreEnquiryByUuid(actionUuid);
         showSnackbar({
-          message: "Enquiry restored successfully",
+          message: t("common.restoredSuccess"),
           severity: "success",
         });
       } else {
         await deleteEnquiryByUuid(actionUuid);
         showSnackbar({
-          message: "Enquiry deleted successfully",
+          message: t("common.deletedSuccess"),
           severity: "success",
         });
       }
@@ -265,7 +278,7 @@ export default function EnquiryTable({
       showSnackbar({
         message:
           err?.response?.data?.detail ??
-          (isTrash ? "Failed to restore enquiry" : "Failed to delete enquiry"),
+          (isTrash ? t("common.restoreFailed") : t("common.deleteFailed")),
         severity: "error",
       });
     } finally {
@@ -306,7 +319,7 @@ export default function EnquiryTable({
 
                 <Stack direction="row" justifyContent="space-between">
                   <Typography variant="caption">
-                    Pax: {row.pax_count}
+                    {t("common.paxLabel", { count: row.pax_count })}
                   </Typography>
                   <Typography variant="caption">
                     {formatDate(row.created_at)}
@@ -318,7 +331,7 @@ export default function EnquiryTable({
         ) : (
           <Box textAlign="center" py={5}>
             <InboxIcon sx={{ fontSize: 48, opacity: 0.4 }} />
-            <Typography>No Enquiries Found</Typography>
+            <Typography>{t("common.noRecordsFound")}</Typography>
           </Box>
         )}
 
@@ -334,26 +347,26 @@ export default function EnquiryTable({
         />
         <ConfirmDialog
           open={Boolean(actionUuid)}
-          title={isTrash ? "Restore Enquiry" : "Delete Enquiry"}
+          title={isTrash ? t("common.restore") : t("common.delete")}
           message={
             isTrash
-              ? "Restore this enquiry?"
-              : "Are you sure you want to delete this enquiry?"
+              ? t("common.restoreConfirmMessage")
+              : t("common.deleteConfirmMessage")
           }
-          confirmText={isTrash ? "Restore" : "Delete"}
+          confirmText={isTrash ? t("common.restore") : t("common.delete")}
           loading={actionLoading}
           onClose={() => setActionUuid(null)}
           onConfirm={handleConfirmAction}
         />
         <ConfirmDialog
           open={bulkConfirmOpen}
-          title={isTrash ? "Restore Enquiries" : "Delete Enquiries"}
+          title={isTrash ? t("common.restore") : t("common.delete")}
           message={
             isTrash
-              ? `Restore ${selected.size} selected enquiries?`
-              : `Delete ${selected.size} selected enquiries?`
+              ? t("common.restoreBulkConfirmMessage", { count: selected.size })
+              : t("common.deleteBulkConfirmMessage", { count: selected.size })
           }
-          confirmText={isTrash ? "Restore" : "Delete"}
+          confirmText={isTrash ? t("common.restore") : t("common.delete")}
           loading={bulkLoading}
           onClose={() => setBulkConfirmOpen(false)}
           onConfirm={handleBulkConfirm}
@@ -380,9 +393,19 @@ export default function EnquiryTable({
                 />
               </TableCell>
               {columns.map((col) => (
-                <TableCell key={col.id}>{col.label}</TableCell>
+                <SortableTableCell
+                  key={col.id}
+                  id={col.id as string}
+                  label={col.label}
+                  sortable={col.sortable}
+                  align={col.align}
+                  minWidth={col.minWidth}
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                  onSort={onSortChange}
+                />
               ))}
-              <TableCell align="right">Actions</TableCell>
+              <TableCell align="right">{t("common.actions")}</TableCell>
             </TableRow>
           </TableHead>
 
@@ -485,22 +508,26 @@ export default function EnquiryTable({
       />
       <ConfirmDialog
         open={Boolean(actionUuid)}
-        title={isTrash ? "Restore Enquiry" : "Delete Enquiry"}
-        message={isTrash ? "Restore this enquiry?" : "Delete this enquiry?"}
-        confirmText={isTrash ? "Restore" : "Delete"}
+        title={isTrash ? t("common.restore") : t("common.delete")}
+        message={
+          isTrash
+            ? t("common.restoreConfirmMessage")
+            : t("common.deleteConfirmMessageShort")
+        }
+        confirmText={isTrash ? t("common.restore") : t("common.delete")}
         loading={actionLoading}
         onClose={() => setActionUuid(null)}
         onConfirm={handleConfirmAction}
       />
       <ConfirmDialog
         open={bulkConfirmOpen}
-        title={isTrash ? "Restore Enquiries" : "Delete Enquiries"}
+        title={isTrash ? t("common.restore") : t("common.delete")}
         message={
           isTrash
-            ? `Restore ${selected.size} selected enquiries?`
-            : `Delete ${selected.size} selected enquiries?`
+            ? t("common.restoreBulkConfirmMessage", { count: selected.size })
+            : t("common.deleteBulkConfirmMessage", { count: selected.size })
         }
-        confirmText={isTrash ? "Restore" : "Delete"}
+        confirmText={isTrash ? t("common.restore") : t("common.delete")}
         loading={bulkLoading}
         onClose={() => setBulkConfirmOpen(false)}
         onConfirm={handleBulkConfirm}

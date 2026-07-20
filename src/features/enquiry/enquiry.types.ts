@@ -76,6 +76,9 @@ export interface GetEnquiriesParams {
   from_date?: string;
   to_date?: string;
   is_deleted?: boolean;
+
+  sort_by?: string;
+  sort_order?: "asc" | "desc";
 }
 
 /* ==========================================================

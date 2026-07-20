@@ -3,7 +3,6 @@ import {
   AppBar,
   Toolbar,
   IconButton,
-  Avatar,
   Box,
   styled,
 } from '@mui/material';
@@ -13,7 +12,9 @@ import Badge from '@mui/material/Badge';
 import { useState } from 'react';
 
 import ProfilePopover from './ProfilePopover';
+import UserAvatar from '../components/common/UserAvatar';
 import Logo2 from '../assets/Logo2.png';
+import { useAuthContext } from '../auth/context/AuthContext';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -63,6 +64,7 @@ export default function Header({
 }: HeaderProps) {
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
   const notificationCount = 5;
+  const { session } = useAuthContext();
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
@@ -94,7 +96,7 @@ export default function Header({
 
           {/* Profile */}
           <IconButton onClick={handleProfileMenuOpen}>
-            <Avatar />
+            <UserAvatar name={session?.name} email={session?.email} pictureUrl={session?.picture_url} />
           </IconButton>
         </Toolbar>
       </AppBarShift>

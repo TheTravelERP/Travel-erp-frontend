@@ -1,5 +1,6 @@
 // src/components/common/DropdownColorChip.tsx
 import { Chip, type ChipProps } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import { useDropdownOptions } from "../../hooks/useDropdownOptions";
 
 interface DropdownColorChipProps extends Omit<ChipProps, "label" | "color"> {
@@ -36,17 +37,21 @@ export default function DropdownColorChip({
   ...chipProps
 }: DropdownColorChipProps) {
   const { options } = useDropdownOptions(dropdownName);
+  const { t } = useTranslation();
 
   if (!value) return null;
 
   const match = options.find((opt) => opt.value === value);
   const color = match?.color_code || fallbackColor;
+  const label: string = t(`dropdown.${dropdownName}.${value}`, {
+    defaultValue: match?.label ?? value,
+  });
 
   return (
     <Chip
       {...chipProps}
       size={size}
-      label={match?.label ?? value}
+      label={label}
       sx={{
         bgcolor: color,
         color: getContrastText(color),

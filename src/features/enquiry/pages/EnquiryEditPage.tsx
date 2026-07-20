@@ -11,6 +11,7 @@ import {
 
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { Link as RouterLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import EnquiryForm from "../components/EnquiryForm";
 
@@ -30,8 +31,9 @@ export default function EnquiryEditPage() {
   const navigate = useNavigate();
 
   const { showSnackbar } = useSnackbar();
+  const { t } = useTranslation();
 
-  const perms = usePermission("enquiries");
+  const perms = usePermission('crm.enquiries');
 
   const [loading, setLoading] = useState(true);
 
@@ -40,13 +42,13 @@ export default function EnquiryEditPage() {
 
   const [versionNo, setVersionNo] = useState<number>();
 
-  if (!perms.can_edit) {
-    return <Navigate to="/app/unauthorized" replace />;
-  }
-
   useEffect(() => {
     loadEnquiry();
   }, []);
+
+  if (!perms.can_edit) {
+    return <Navigate to="/app/unauthorized" replace />;
+  }
 
   async function loadEnquiry() {
     try {
@@ -54,9 +56,9 @@ export default function EnquiryEditPage() {
 
       setDefaultValues(data);
       setVersionNo(data.version_no);
-    } catch (err: any) {
+    } catch {
       showSnackbar({
-        message: "Failed to load enquiry",
+        message: t("common.loadFailed"),
         severity: "error",
       });
 
@@ -71,7 +73,7 @@ export default function EnquiryEditPage() {
       await updateEnquiryByUuid(uuid!, { ...data, version_no: versionNo! });
 
       showSnackbar({
-        message: "Enquiry updated successfully",
+        message: t("common.updatedSuccess"),
         severity: "success",
       });
 
@@ -81,7 +83,7 @@ export default function EnquiryEditPage() {
         showSnackbar({
           message:
             err?.response?.data?.detail ??
-            "This enquiry was updated by someone else. Please reload and try again.",
+            t("common.updateConflict"),
           severity: "error",
         });
         return;
@@ -90,20 +92,20 @@ export default function EnquiryEditPage() {
       showSnackbar({
         message:
           err?.response?.data?.detail ??
-          "Failed to update enquiry",
+          t("common.updateFailed"),
         severity: "error",
       });
     }
   }
 
   if (loading) {
-    return <Typography>Loading...</Typography>;
+    return <Typography>{t("common.loading")}</Typography>;
   }
 
   return (
     <Box sx={{ p: { xs: 1, md: 1 } }}>
       <Typography variant="h6" fontWeight={700}>
-        Edit Enquiry
+        {t("common.edit")}
       </Typography>
 
       <Breadcrumbs sx={{ mb: 2 }}>
@@ -112,7 +114,7 @@ export default function EnquiryEditPage() {
           to="/app/dashboard"
           underline="hover"
         >
-          Dashboard
+          {t("menu.dashboard")}
         </Link>
 
         <Link
@@ -120,10 +122,10 @@ export default function EnquiryEditPage() {
           to="/app/enquiries"
           underline="hover"
         >
-          Enquiries
+          {t('menu.crm.enquiries')}
         </Link>
 
-        <Typography>Edit</Typography>
+        <Typography>{t("common.edit")}</Typography>
       </Breadcrumbs>
 
       <Paper sx={{ p: 3 }}>

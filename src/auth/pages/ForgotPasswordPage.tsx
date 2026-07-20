@@ -1,6 +1,6 @@
 // src/auth/pages/ForgotPasswordPage.tsx
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -11,9 +11,10 @@ import {
 } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslation } from "react-i18next";
 import {
-  forgotPasswordSchema,
-  resetPasswordSchema,
+  getForgotPasswordSchema,
+  getResetPasswordSchema,
   type ForgotPasswordInput,
   type ResetPasswordInput,
 } from "../../utils/validator";
@@ -33,6 +34,9 @@ import OtpInput, {
 export default function ForgotPasswordPage() {
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
+  const { t } = useTranslation();
+  const forgotPasswordSchema = useMemo(() => getForgotPasswordSchema(t), [t]);
+  const resetPasswordSchema = useMemo(() => getResetPasswordSchema(t), [t]);
 
   const [step, setStep] = useState<"email" | "otp" | "reset">("email");
   const [email, setEmail] = useState("");
@@ -76,7 +80,7 @@ export default function ForgotPasswordPage() {
       setStep("otp");
       setCountdown(60);
       showSnackbar({
-        message: "OTP sent successfully.",
+        message: t("auth.otpSentSuccess"),
         severity: "success",
       });
       /**
@@ -85,7 +89,7 @@ export default function ForgotPasswordPage() {
        */
     } catch (err: any) {
       showSnackbar({
-        message: err?.response?.data?.detail || "Failed to send OTP.",
+        message: err?.response?.data?.detail || t("auth.otpSendFailed"),
         severity: "error",
       });
     } finally {
@@ -108,7 +112,7 @@ export default function ForgotPasswordPage() {
 
       setStep("reset");
     } catch (err: any) {
-      const message = err?.response?.data?.detail || "OTP verification failed";
+      const message = err?.response?.data?.detail || t("auth.otpVerificationFailed");
 
       if (message === "Invalid OTP" || message === "OTP expired") {
         setOtp("");
@@ -143,12 +147,12 @@ export default function ForgotPasswordPage() {
       }, 50);
 
       showSnackbar({
-        message: "OTP resent successfully.",
+        message: t("auth.otpResentSuccess"),
         severity: "success",
       });
     } catch (err: any) {
       showSnackbar({
-        message: err?.response?.data?.detail || "Failed to resend OTP.",
+        message: err?.response?.data?.detail || t("auth.otpResendFailed"),
         severity: "error",
       });
     } finally {
@@ -161,7 +165,7 @@ export default function ForgotPasswordPage() {
   const {
     control: resetControl,
     handleSubmit: handleResetSubmit,
-    formState: { errors: resetErrors, isSubmitting: resetSubmitting },
+    formState: { errors: resetErrors },
   } = useForm<ResetPasswordInput>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
@@ -190,7 +194,7 @@ export default function ForgotPasswordPage() {
       });
     } catch (err: any) {
       showSnackbar({
-        message: err?.response?.data?.detail ?? "Failed to reset password.",
+        message: err?.response?.data?.detail ?? t("auth.resetPasswordFailed"),
         severity: "error",
       });
     } finally {
@@ -200,8 +204,8 @@ export default function ForgotPasswordPage() {
 
   return (
     <AuthCard
-      title="Travel ERP"
-      subtitle="Frogot Password? Enter your email to receive an OTP."
+      title={t("auth.appTitle")}
+      subtitle={t("auth.forgotPasswordSubtitle")}
     >
       {step === "email" && (
         <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -213,7 +217,7 @@ export default function ForgotPasswordPage() {
                 <TextField
                   {...field}
                   fullWidth
-                  label="Email"
+                  label={t("common.email")}
                   autoFocus
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
@@ -230,17 +234,17 @@ export default function ForgotPasswordPage() {
               {requestOtpLoading ? (
                 <>
                   <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />
-                  Sending...
+                  {t("auth.sending")}
                 </>
               ) : (
-                "Send OTP"
+                t("auth.sendOtp")
               )}
             </Button>
 
             <Divider />
 
             <Button variant="text" fullWidth onClick={() => navigate("/login")}>
-              Back to Login
+              {t("auth.backToLogin")}
             </Button>
           </Stack>
         </Box>
@@ -253,7 +257,7 @@ export default function ForgotPasswordPage() {
               textAlign: "center",
             }}
           >
-            We've sent a 6-digit verification code to
+            {t("auth.otpSentTo")}
             <Box
               component="div"
               sx={{
@@ -281,10 +285,10 @@ export default function ForgotPasswordPage() {
             {otpLoading ? (
               <>
                 <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />
-                Verifying...
+                {t("auth.verifying")}
               </>
             ) : (
-              "Verify OTP"
+              t("auth.verifyOtp")
             )}
           </Button>
 
@@ -297,12 +301,12 @@ export default function ForgotPasswordPage() {
             {requestOtpLoading ? (
               <>
                 <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />
-                Sending...
+                {t("auth.sending")}
               </>
             ) : countdown > 0 ? (
-              `Resend OTP (${countdown}s)`
+              t("auth.resendOtpCountdown", { count: countdown })
             ) : (
-              "Resend OTP"
+              t("auth.resendOtp")
             )}
           </Button>
 
@@ -318,7 +322,7 @@ export default function ForgotPasswordPage() {
               otpRef.current?.clear();
             }}
           >
-            ← Back
+            {t("common.back")}
           </Button>
         </Stack>
       )}
@@ -337,7 +341,7 @@ export default function ForgotPasswordPage() {
                 <PasswordField
                   {...field}
                   fullWidth
-                  label="New Password"
+                  label={t("profile.newPassword")}
                   autoComplete="new-password"
                   error={!!resetErrors.password}
                   helperText={resetErrors.password?.message}
@@ -352,7 +356,7 @@ export default function ForgotPasswordPage() {
                 <PasswordField
                   {...field}
                   fullWidth
-                  label="Confirm Password"
+                  label={t("profile.confirmPassword")}
                   autoComplete="new-password"
                   error={!!resetErrors.confirm_password}
                   helperText={resetErrors.confirm_password?.message}
@@ -369,13 +373,13 @@ export default function ForgotPasswordPage() {
                 minHeight: 56,
               }}
             >
-              {resetLoading ? "Resetting..." : "Reset Password"}
+              {resetLoading ? t("auth.resetting") : t("auth.resetPassword")}
             </Button>
 
             <Divider />
 
             <Button variant="text" fullWidth onClick={() => navigate("/login")}>
-              Back to Login
+              {t("auth.backToLogin")}
             </Button>
           </Stack>
         </Box>

@@ -12,6 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
+import { useTranslation } from "react-i18next";
 
 import {
   Link as RouterLink,
@@ -35,21 +36,22 @@ export default function EnquiryViewPage() {
   const navigate = useNavigate();
 
   const { showSnackbar } = useSnackbar();
+  const { t } = useTranslation();
 
-  const perms = usePermission("enquiries");
+  const perms = usePermission('crm.enquiries');
 
   const [loading, setLoading] = useState(true);
   const [enquiry, setEnquiry] = useState<EnquiryFormInput | null>(null);
-
-  if (!perms.can_view) {
-    return <Navigate to="/app/unauthorized" replace />;
-  }
 
   useEffect(() => {
     if (uuid) {
       loadEnquiry();
     }
   }, [uuid]);
+
+  if (!perms.can_view) {
+    return <Navigate to="/app/unauthorized" replace />;
+  }
 
   async function loadEnquiry() {
     try {
@@ -58,7 +60,7 @@ export default function EnquiryViewPage() {
       setEnquiry(data);
     } catch (err: any) {
       showSnackbar({
-        message: err?.response?.data?.detail || "Unable to load enquiry",
+        message: err?.response?.data?.detail || t("common.loadUnable"),
         severity: "error",
       });
 
@@ -69,7 +71,7 @@ export default function EnquiryViewPage() {
   }
 
   if (loading) {
-    return <Typography>Loading...</Typography>;
+    return <Typography>{t("common.loading")}</Typography>;
   }
 
   if (!enquiry) {
@@ -81,19 +83,19 @@ export default function EnquiryViewPage() {
       {/* Header */}
 
       <Typography variant="h6" fontWeight={700}>
-        View Enquiry
+        {t("common.view")}
       </Typography>
 
       <Breadcrumbs sx={{ mb: 2 }}>
         <Link component={RouterLink} underline="hover" to="/app/dashboard">
-          Dashboard
+          {t("menu.dashboard")}
         </Link>
 
         <Link component={RouterLink} underline="hover" to="/app/enquiries">
-          Enquiries
+          {t('menu.crm.enquiries')}
         </Link>
 
-        <Typography>View</Typography>
+        <Typography>{t("common.view")}</Typography>
       </Breadcrumbs>
 
       <Paper sx={{ p: 3 }}>
@@ -101,24 +103,24 @@ export default function EnquiryViewPage() {
 
         <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
           <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-            Customer Information
+            {t("enquiry.customerInformation")}
           </Typography>
 
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="caption">Customer Name</Typography>
+              <Typography variant="caption">{t("common.customerName")}</Typography>
 
               <Typography mt={0.5}>{enquiry.customer_name || "-"}</Typography>
             </Grid>
 
             <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="caption">Mobile Number</Typography>
+              <Typography variant="caption">{t("common.mobile")}</Typography>
 
               <Typography mt={0.5}>{enquiry.customer_mobile || "-"}</Typography>
             </Grid>
 
             <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="caption">Email</Typography>
+              <Typography variant="caption">{t("common.email")}</Typography>
 
               <Typography mt={0.5}>{enquiry.customer_email || "-"}</Typography>
             </Grid>
@@ -129,12 +131,12 @@ export default function EnquiryViewPage() {
 
         <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
           <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-            Package Selection
+            {t("enquiry.packageSelection")}
           </Typography>
 
           <Grid container spacing={3}>
             <Grid size={{ xs: 12 }}>
-              <Typography variant="caption">Package Name</Typography>
+              <Typography variant="caption">{t("enquiry.packageName")}</Typography>
 
               <Typography mt={0.5}>{enquiry.package_name || "-"}</Typography>
             </Grid>
@@ -145,24 +147,24 @@ export default function EnquiryViewPage() {
 
         <Paper variant="outlined" sx={{ p: 2 }}>
           <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-            Enquiry Details
+            {t("enquiry.enquiryDetails")}
           </Typography>
 
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, md: 3 }}>
-              <Typography variant="caption">PAX Count</Typography>
+              <Typography variant="caption">{t("enquiry.paxCount")}</Typography>
 
               <Typography mt={0.5}>{enquiry.pax_count}</Typography>
             </Grid>
 
             <Grid size={{ xs: 12, md: 3 }}>
-              <Typography variant="caption">Source</Typography>
+              <Typography variant="caption">{t("common.source")}</Typography>
 
               <Typography mt={0.5}>{enquiry.lead_source}</Typography>
             </Grid>
 
             <Grid size={{ xs: 12, md: 3 }}>
-              <Typography variant="caption">Priority</Typography>
+              <Typography variant="caption">{t("common.priority")}</Typography>
 
               <Box mt={0.5}>
                 <DropdownColorChip
@@ -173,7 +175,7 @@ export default function EnquiryViewPage() {
             </Grid>
 
             <Grid size={{ xs: 12, md: 3 }}>
-              <Typography variant="caption">Status</Typography>
+              <Typography variant="caption">{t("common.status")}</Typography>
 
               <Box mt={0.5}>
                 <DropdownColorChip
@@ -184,7 +186,7 @@ export default function EnquiryViewPage() {
             </Grid>
 
             <Grid size={{ xs: 12 }}>
-              <Typography variant="caption">Notes</Typography>
+              <Typography variant="caption">{t("common.notes")}</Typography>
 
               <Typography mt={0.5} whiteSpace="pre-wrap">
                 {enquiry.description || "-"}
@@ -205,7 +207,7 @@ export default function EnquiryViewPage() {
             onClick={() => navigate("/app/enquiries")}
             size="large"
           >
-            Back
+            {t("common.back")}
           </Button>
 
           {/* Right */}
@@ -217,7 +219,7 @@ export default function EnquiryViewPage() {
                 size="large"
                 onClick={() => navigate(`/app/enquiries/${uuid}/edit`)}
               >
-                Edit
+                {t("common.edit")}
               </Button>
             )}
           </Box>

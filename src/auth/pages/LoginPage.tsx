@@ -1,17 +1,16 @@
-import React from "react";
+import { useMemo } from "react";
 import {
   Box,
   Button,
   TextField,
   Stack,
   Divider,
-  InputAdornment,
-  IconButton,
   CircularProgress,
 } from "@mui/material";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
-import { loginSchema, type LoginInput } from "../../utils/validator";
+import { useTranslation } from "react-i18next";
+import { getLoginSchema, type LoginInput } from "../../utils/validator";
 import { loginApi } from "../services/auth.service";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -24,6 +23,8 @@ export default function LoginPage() {
   const location = useLocation() as any;
   const { login } = useAuth();
   const { showSnackbar } = useSnackbar();
+  const { t } = useTranslation();
+  const loginSchema = useMemo(() => getLoginSchema(t), [t]);
 
   const {
     control,
@@ -42,9 +43,12 @@ export default function LoginPage() {
         user_id: res.user_id,
         org_id: res.org_id,
         email: res.email,
-        org_code: "",
+        org_code: res.org_code,
+        name: res.name,
+        picture_url: res.picture_url,
+        preferred_language: res.preferred_language,
       });
-      showSnackbar({ message: "Login successful", severity: "success" });
+      showSnackbar({ message: t("auth.loginSuccess"), severity: "success" });
 
       const redirectTo = location?.state?.from || "/dashboard";
       navigate(redirectTo, { replace: true });
@@ -53,14 +57,14 @@ export default function LoginPage() {
         err?.response?.data?.detail ||
         err?.response?.data?.message ||
         err?.message ||
-        "Invalid email or password";
+        t("auth.invalidCredentials");
 
       showSnackbar({ message: msg, severity: "error" });
     }
   }
 
   return (
-    <AuthCard title="Travel ERP" subtitle="Sign in to continue">
+    <AuthCard title={t("auth.appTitle")} subtitle={t("auth.signInSubtitle")}>
       {/* Form */}
       <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
         <Stack spacing={2}>
@@ -71,7 +75,7 @@ export default function LoginPage() {
             render={({ field }) => (
               <TextField
                 {...field}
-                label="Email"
+                label={t("common.email")}
                 type="email"
                 error={!!errors.email}
                 helperText={errors.email?.message}
@@ -87,9 +91,9 @@ export default function LoginPage() {
               <PasswordField
                 {...field}
                 fullWidth
-                label="Password"
+                label={t("auth.password")}
                 error={!!errors.password}
-                helperText={errors.password?.message ?? "Min 8 characters"}
+                helperText={errors.password?.message ?? t("auth.minCharactersHint", { count: 8 })}
                 autoComplete="current-password"
               />
             )}
@@ -105,10 +109,10 @@ export default function LoginPage() {
             {isSubmitting ? (
               <>
                 <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />
-                Sign In...
+                {t("auth.signingIn")}
               </>
             ) : (
-              "Sign In"
+              t("auth.signIn")
             )}
           </Button>
 
@@ -124,7 +128,7 @@ export default function LoginPage() {
               size="small"
               onClick={() => navigate("/forgot-password")}
             >
-              Forgot your password?
+              {t("auth.forgotPassword")}
             </Button>
 
             <Button
@@ -132,7 +136,7 @@ export default function LoginPage() {
               size="small"
               onClick={() => navigate("/register")}
             >
-              Create account
+              {t("auth.createAccount")}
             </Button>
           </Box>
         </Stack>

@@ -1,4 +1,5 @@
 // layout/ProfilePopover.tsx
+import { useState } from 'react';
 import {
   Menu,
   MenuItem,
@@ -9,6 +10,8 @@ import {
   IconButton,
   Button,
   ListItemIcon,
+  Select,
+  CircularProgress,
   styled,
 } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
@@ -19,8 +22,12 @@ import SecurityIcon from '@mui/icons-material/Security';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuthContext } from '../auth/context/AuthContext';
 import { useSnackbar } from '../components/ui/SnackbarProvider';
+import UserAvatar from '../components/common/UserAvatar';
+import { updatePreferredLanguageApi } from '../auth/services/auth.service';
+import { SUPPORTED_LANGUAGES, type LanguageCode } from '../i18n';
 
 /* ---------------- styled components ---------------- */
 
@@ -65,25 +72,28 @@ const AddTeamButton = styled(IconButton)(({ theme }) => ({
   },
 }));
 
+const LanguageSection = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(2),
+  paddingTop: theme.spacing(1),
+  paddingBottom: theme.spacing(1),
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+}));
+
 const LogoutContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),
 }));
 
 /* ---------------- data ---------------- */
 
-const USER_DATA = {
-  name: 'Jaydon Frankie',
-  email: 'demo@minimals.cc',
-  avatarUrl: '',
-};
-
 const MENU_OPTIONS = [
-  { label: 'Home', icon: HomeIcon, path: '/dashboard' },
-  { label: 'Profile', icon: PersonIcon, path: '/profile' },
-  { label: 'Projects', icon: FolderSharedIcon, path: '/projects', badge: 3 },
-  { label: 'Subscription', icon: AttachMoneyIcon, path: '/subscription' },
-  { label: 'Change Password', icon: SecurityIcon, path: '/app/profile/change-password' },
-  { label: 'Theme Color', icon: SettingsIcon, path: '/app/settings/theme-color' },
+  { labelKey: 'profile.home', icon: HomeIcon, path: '/dashboard' },
+  { labelKey: 'profile.profile', icon: PersonIcon, path: '/profile' },
+  { labelKey: 'profile.projects', icon: FolderSharedIcon, path: '/projects', badge: 3 },
+  { labelKey: 'profile.subscription', icon: AttachMoneyIcon, path: '/subscription' },
+  { labelKey: 'profile.changePassword', icon: SecurityIcon, path: '/app/profile/change-password' },
+  { labelKey: 'profile.themeColor', icon: SettingsIcon, path: '/app/settings/theme-color' },
 ];
 
 interface ProfilePopoverProps {
@@ -98,12 +108,32 @@ export default function ProfilePopover({
   onClose,
 }: ProfilePopoverProps) {
   const navigate = useNavigate();
-  const { logout } = useAuthContext();
+  const { t, i18n } = useTranslation();
+  const { session, logout, updateSession } = useAuthContext();
   const { showSnackbar } = useSnackbar();
+  const [changingLanguage, setChangingLanguage] = useState(false);
 
   const handleNavigation = (path: string) => {
     onClose();
     navigate(path);
+  };
+
+  const handleLanguageChange = async (next: LanguageCode) => {
+    if (!next || next === session?.preferred_language) return;
+
+    setChangingLanguage(true);
+    try {
+      await updatePreferredLanguageApi(next);
+      updateSession({ preferred_language: next });
+      i18n.changeLanguage(next);
+    } catch (err: any) {
+      showSnackbar({
+        message: err?.response?.data?.detail ?? 'Failed to update language',
+        severity: 'error',
+      });
+    } finally {
+      setChangingLanguage(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -111,7 +141,7 @@ export default function ProfilePopover({
     await logout();
 
     showSnackbar({
-      message: 'Logged out successfully',
+      message: t('profile.loggedOutSuccess'),
       severity: 'success',
     });
 
@@ -129,13 +159,13 @@ export default function ProfilePopover({
       {/* USER INFO */}
       <UserSection>
         <UserRow>
-          <Avatar src={USER_DATA.avatarUrl} />
+          <UserAvatar name={session?.name} email={session?.email} pictureUrl={session?.picture_url} />
           <Box ml={2}>
             <Typography variant="subtitle2" noWrap>
-              {USER_DATA.name}
+              {session?.name || session?.email}
             </Typography>
             <Typography variant="body2" color="text.secondary" noWrap>
-              {USER_DATA.email}
+              {session?.email}
             </Typography>
           </Box>
         </UserRow>
@@ -156,18 +186,41 @@ export default function ProfilePopover({
 
       <Divider />
 
+      {/* LANGUAGE */}
+      <LanguageSection>
+        <Typography variant="body2" color="text.secondary">
+          {t('profile.language')}
+        </Typography>
+        <Select
+          size="small"
+          value={session?.preferred_language ?? 'en'}
+          disabled={changingLanguage}
+          onChange={(e) => handleLanguageChange(e.target.value as LanguageCode)}
+          endAdornment={changingLanguage ? <CircularProgress size={14} sx={{ mr: 2 }} /> : undefined}
+          sx={{ minWidth: 130 }}
+        >
+          {SUPPORTED_LANGUAGES.map((lang) => (
+            <MenuItem key={lang.code} value={lang.code}>
+              {lang.label}
+            </MenuItem>
+          ))}
+        </Select>
+      </LanguageSection>
+
+      <Divider />
+
       {/* MENU OPTIONS */}
       {MENU_OPTIONS.map((option) => {
         const IconComponent = option.icon;
 
         return (
-          <MenuItem key={option.label} onClick={() => handleNavigation(option.path)}>
+          <MenuItem key={option.labelKey} onClick={() => handleNavigation(option.path)}>
             <ListItemIcon>
               <IconComponent fontSize="small" />
             </ListItemIcon>
 
             <Typography variant="body2" flexGrow={1}>
-              {option.label}
+              {t(option.labelKey)}
             </Typography>
 
             {option.badge && (
@@ -189,7 +242,7 @@ export default function ProfilePopover({
           color="error"
           onClick={handleLogout}
         >
-          Logout
+          {t('profile.logout')}
         </Button>
       </LogoutContainer>
     </PopoverMenu>
