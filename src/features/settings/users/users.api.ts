@@ -39,8 +39,8 @@ export async function getUsersLookup(signal?: AbortSignal): Promise<UserListItem
    DETAIL
 ========================================================== */
 
-export async function getUserById(userId: number, isDeleted = false): Promise<UserDetail> {
-  const { data } = await api.get<UserDetail>(`/api/v1/settings/users/${userId}`, {
+export async function getUserById(userUuid: string, isDeleted = false): Promise<UserDetail> {
+  const { data } = await api.get<UserDetail>(`/api/v1/settings/users/${userUuid}`, {
     params: { is_deleted: isDeleted },
   });
   return data;
@@ -56,10 +56,10 @@ export async function createUser(payload: UserCreateInput): Promise<UserDetail> 
 }
 
 export async function updateUser(
-  userId: number,
+  userUuid: string,
   payload: UserUpdateInput & { version_no: number },
 ): Promise<UserDetail> {
-  const { data } = await api.put<UserDetail>(`/api/v1/settings/users/${userId}`, payload);
+  const { data } = await api.put<UserDetail>(`/api/v1/settings/users/${userUuid}`, payload);
   return data;
 }
 
@@ -67,13 +67,13 @@ export async function updateUser(
    DELETE / RESTORE
 ========================================================== */
 
-export async function deleteUser(userId: number) {
-  const { data } = await api.delete(`/api/v1/settings/users/${userId}`);
+export async function deleteUser(userUuid: string) {
+  const { data } = await api.delete(`/api/v1/settings/users/${userUuid}`);
   return data;
 }
 
-export async function restoreUser(userId: number) {
-  const { data } = await api.put(`/api/v1/settings/users/${userId}/restore`, {});
+export async function restoreUser(userUuid: string) {
+  const { data } = await api.put(`/api/v1/settings/users/${userUuid}/restore`, {});
   return data;
 }
 
@@ -81,43 +81,17 @@ export async function restoreUser(userId: number) {
    BULK
 ========================================================== */
 
-export async function bulkDeleteUsers(userIds: number[]): Promise<UserBulkActionResult> {
+export async function bulkDeleteUsers(userUuids: string[]): Promise<UserBulkActionResult> {
   const { data } = await api.post<UserBulkActionResult>('/api/v1/settings/users/bulk-delete', {
-    user_ids: userIds,
+    user_uuids: userUuids,
   });
   return data;
 }
 
-export async function bulkRestoreUsers(userIds: number[]): Promise<UserBulkActionResult> {
+export async function bulkRestoreUsers(userUuids: string[]): Promise<UserBulkActionResult> {
   const { data } = await api.post<UserBulkActionResult>('/api/v1/settings/users/bulk-restore', {
-    user_ids: userIds,
+    user_uuids: userUuids,
   });
   return data;
 }
 
-/* ==========================================================
-   FILE UPLOAD
-========================================================== */
-
-export async function uploadUserFile(
-  file: File,
-  category: 'picture' | 'identification',
-): Promise<{ url: string }> {
-  const formData = new FormData();
-  formData.append('file', file);
-
-  const { data } = await api.post<{ url: string }>(
-    `/api/v1/settings/users/upload?category=${category}`,
-    formData,
-  );
-
-  return data;
-}
-
-/** Uploaded file URLs are backend-relative paths (e.g. "/uploads/1/picture/x.jpg") — resolve against the API origin, not the frontend's. */
-export function resolveUploadUrl(path?: string | null): string | undefined {
-  if (!path) return undefined;
-  if (/^https?:\/\//i.test(path)) return path;
-  const base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-  return `${base}${path}`;
-}

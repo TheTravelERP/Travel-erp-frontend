@@ -1,5 +1,5 @@
 // src/features/package/components/PackageSelector.tsx
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Paper,
@@ -7,17 +7,17 @@ import {
   TextField,
   ToggleButton,
   ToggleButtonGroup,
-  Autocomplete,
   useTheme,
   useMediaQuery,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import { Controller } from 'react-hook-form';
+import { Controller, useWatch } from 'react-hook-form';
 import type { Control, UseFormSetValue } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import InventoryIcon from '@mui/icons-material/Inventory';
 import EditNoteIcon from '@mui/icons-material/EditNote';
+import EntityAutocomplete from '../../../components/common/EntityAutocomplete';
 
 
 /* ---------------- TYPES ---------------- */
@@ -34,9 +34,18 @@ export default function PackageSelector({
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { t } = useTranslation();
 
-  const [packageMode, setPackageMode] = useState<'custom' | 'existing'>(
-    'custom'
+  // Editing an enquiry already linked to a package should open on "Inventory", not default to "Custom".
+  const initialPkgUuid = useWatch({ control, name: 'pkg_uuid' });
+  const [packageMode, setPackageMode] = useState<'custom' | 'existing'>(() =>
+    initialPkgUuid ? 'existing' : 'custom'
   );
+
+  // The active mode itself is part of the submitted form data (see enquiry.schema.ts) —
+  // push the derived initial value in once so validation reflects it from the start.
+  useEffect(() => {
+    setValue('package_mode', packageMode);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /* ---------------- HANDLERS ---------------- */
   const handlePackageModeChange = (
@@ -46,8 +55,13 @@ export default function PackageSelector({
     if (!value) return;
 
     setPackageMode(value);
-    setValue('pkg_id', null);
-    setValue('package_name', '');
+    setValue('package_mode', value);
+
+    // Only the currently active side is what gets submitted (see EnquiryForm's submit
+    // handler) — toggling itself must never erase what's already typed/selected.
+    if (value === 'custom') {
+      setValue('pkg_uuid', null);
+    }
   };
 
   /* ---------------- RENDER ---------------- */
@@ -107,23 +121,15 @@ export default function PackageSelector({
           </Grid>
         ) : (
           <Grid size={{ xs: 12 }}>
-            <Controller
-              name="pkg_id"
+            <EntityAutocomplete
+              name="pkg_uuid"
+              label={t('enquiry.selectPackage')}
               control={control}
-              render={({ field }) => (
-                <Autocomplete
-                  fullWidth
-                  options={MOCK_PACKAGES}
-                  getOptionLabel={(o) => o.name}
-                  onChange={(_, v) => {
-                    field.onChange(v?.id ?? null);
-                    if (v) setValue('package_name', v.name);
-                  }}
-                  renderInput={(params) => (
-                    <TextField {...params} fullWidth label={t('enquiry.selectPackage')} />
-                  )}
-                />
-              )}
+              dropdownName="packages"
+              setValue={setValue}
+              autoFillMap={{
+                package_name: 'label',
+              }}
             />
           </Grid>
         )}

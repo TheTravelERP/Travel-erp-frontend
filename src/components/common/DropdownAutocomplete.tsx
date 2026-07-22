@@ -28,7 +28,13 @@ export default function DropdownAutocomplete({
 
   pagination = false,
   pageSize = 20,
+
+  // Defaults to `name` — only pass this when the form field name and the
+  // dropdown_option lookup key genuinely differ (e.g. field "status" backed
+  // by dropdown_option rows stored under "package_status").
+  dropdownName,
 }: any) {
+  const lookupName = dropdownName ?? name;
   const { t } = useTranslation();
   const [options, setOptions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -52,7 +58,7 @@ export default function DropdownAutocomplete({
 
       try {
         const params: any = {
-          dropdown_name: name,
+          dropdown_name: lookupName,
           search: currentSearch,
         };
 
@@ -74,7 +80,7 @@ export default function DropdownAutocomplete({
         if (!signal?.aborted) setLoading(false);
       }
     },
-    [name, pageSize, pagination]
+    [lookupName, pageSize, pagination]
   );
 
   useEffect(() => {
@@ -86,7 +92,12 @@ export default function DropdownAutocomplete({
 
   /* ================= AUTOCOMPLETE UI ================= */
 
-  const renderAutocomplete = (currentValue: any, handleChange: any) => {
+  const renderAutocomplete = (
+    currentValue: any,
+    handleChange: any,
+    error?: boolean,
+    helperText?: string,
+  ) => {
     const selectedValue =
       options.find((opt) => opt.value === currentValue) || null;
 
@@ -128,14 +139,14 @@ export default function DropdownAutocomplete({
         onChange={async (_, newValue: any) => {
           if (allowAdd && newValue?.value === "__add_new__") {
             const created = await createDropdownOption(
-              name,
+              lookupName,
               newValue.inputValue,
               newValue.inputValue
             );
             setOptions((prev) => [created, ...prev]);
             handleChange(created.value);
           } else {
-            handleChange(newValue ? newValue.value : null);
+            handleChange(newValue ? newValue.value : "");
           }
         }}
 
@@ -172,6 +183,8 @@ export default function DropdownAutocomplete({
           <TextField
             {...params}
             label={label}
+            error={error}
+            helperText={helperText}
             InputProps={{
               ...params.InputProps,
               endAdornment: (
@@ -196,8 +209,8 @@ export default function DropdownAutocomplete({
         name={name}
         control={control}
         defaultValue={null}
-        render={({ field }) =>
-          renderAutocomplete(field.value, field.onChange)
+        render={({ field, fieldState }) =>
+          renderAutocomplete(field.value, field.onChange, !!fieldState.error, fieldState.error?.message)
         }
       />
     );

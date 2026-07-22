@@ -25,6 +25,8 @@ export type EnquiryFormInput = z.infer<ReturnType<typeof getEnquirySchema>>;
 
 import DropdownAutocomplete from "../../../components/common/DropdownAutocomplete";
 import { useNavigate } from "react-router-dom";
+import { useSnackbar } from "../../../components/ui/SnackbarProvider";
+import { mergeFormDefaults } from "../../../utils/mergeFormDefaults";
 
 interface EnquiryFormProps {
   defaultValues?: Partial<EnquiryFormInput>;
@@ -33,11 +35,13 @@ interface EnquiryFormProps {
 }
 
 const emptyValues = {
-  cust_id: null,
+  cust_uuid: null,
+  customer_mode: "new" as const,
   customer_name: "",
   customer_mobile: "",
   customer_email: "",
-  pkg_id: null,
+  pkg_uuid: null,
+  package_mode: "custom" as const,
   package_name: "",
   lead_source: "",
   pax_count: 1,
@@ -52,6 +56,7 @@ export default function EnquiryForm({
   loading = false,
 }: EnquiryFormProps) {
   const { t } = useTranslation();
+  const { showSnackbar } = useSnackbar();
   const enquirySchema = useMemo(() => getEnquirySchema(t), [t]);
 
   /* ---------------- FORM ---------------- */
@@ -63,28 +68,42 @@ export default function EnquiryForm({
     formState: { isSubmitting },
   } = useForm<EnquiryFormInput>({
     resolver: zodResolver(enquirySchema),
-    defaultValues: {
-      ...emptyValues,
-      ...defaultValues,
-    },
+    defaultValues: mergeFormDefaults(emptyValues, defaultValues),
   });
 
   const navigate = useNavigate();
 
   useEffect(() => {
     if (defaultValues) {
-      reset({
-        ...emptyValues,
-        ...defaultValues,
-      });
+      reset(mergeFormDefaults(emptyValues, defaultValues));
     }
   }, [defaultValues, reset]);
+
+  // Only the currently active side of each New/Existing-style toggle is ever submitted —
+  // if "New"/"Custom" is active, a stale linked uuid left over from earlier toggling must
+  // not be sent, even though the field itself is never cleared just from toggling.
+  const submitActiveModes = ({
+    customer_mode,
+    package_mode,
+    ...data
+  }: EnquiryFormInput) => {
+    const payload = { ...data };
+    if (customer_mode === "new") {
+      payload.cust_uuid = null;
+    }
+    if (package_mode === "custom") {
+      payload.pkg_uuid = null;
+    }
+    return onSubmit(payload as EnquiryFormInput);
+  };
 
   /* ---------------- RENDER ---------------- */
   return (
     <Box
       component="form"
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(submitActiveModes, () =>
+        showSnackbar({ message: t("validation.fixHighlightedFields"), severity: "error" }),
+      )}
       noValidate
       sx={{ flexGrow: 1 }}
     >
@@ -109,12 +128,23 @@ export default function EnquiryForm({
                 <Controller
                   name="pax_count"
                   control={control}
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <TextField
                       {...field}
                       type="number"
                       label={t("enquiry.paxCount")}
                       fullWidth
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        if (raw === "") {
+                          field.onChange(raw);
+                          return;
+                        }
+                        const num = Number(raw);
+                        field.onChange(Number.isFinite(num) ? Math.min(num, 9999) : raw);
+                      }}
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">

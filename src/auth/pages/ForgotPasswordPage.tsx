@@ -208,7 +208,13 @@ export default function ForgotPasswordPage() {
       subtitle={t("auth.forgotPasswordSubtitle")}
     >
       {step === "email" && (
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <Box
+          component="form"
+          onSubmit={handleSubmit(onSubmit, () =>
+            showSnackbar({ message: t("validation.fixHighlightedFields"), severity: "error" }),
+          )}
+          noValidate
+        >
           <Stack spacing={2}>
             <Controller
               name="email"

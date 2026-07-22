@@ -11,6 +11,7 @@ import {
   Button,
   CircularProgress,
   Divider,
+  Stack,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import {
@@ -19,6 +20,8 @@ import {
   type OrganizationProfile,
   type OrganizationProfileUpdate,
 } from '../../../services/organization.service';
+import { uploadFile } from '../../../services/upload.service';
+import FileUploadField from '../../../components/common/FileUploadField';
 import { useSnackbar } from '../../../components/ui/SnackbarProvider';
 
 const DATE_FORMATS = ['YYYY-MM-DD', 'DD/MM/YYYY', 'MM/DD/YYYY'];
@@ -28,8 +31,13 @@ const MONTH_KEYS = [
   'july', 'august', 'september', 'october', 'november', 'december',
 ];
 
+const DOC_SLOTS = ['doc1', 'doc2', 'doc3', 'doc4'] as const;
+
 const EDITABLE_FIELDS = [
-  'name', 'legal_name', 'logo_url', 'website', 'email', 'mobile',
+  'name', 'legal_name', 'logo_url', 'header_image_url', 'footer_image_url',
+  'doc1_label', 'doc1_url', 'doc2_label', 'doc2_url',
+  'doc3_label', 'doc3_url', 'doc4_label', 'doc4_url',
+  'website', 'email', 'mobile',
   'address', 'city', 'state', 'tax_registration_label', 'tax_registration_number',
   'timezone', 'date_format', 'time_format', 'financial_year_start_month',
 ] as const;
@@ -114,9 +122,6 @@ export default function OrganizationSettingsPage() {
             <TextField fullWidth label={t('settings.website')} value={form.website ?? ''} onChange={(e) => setField('website', e.target.value)} />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField fullWidth label={t('settings.logoUrl')} value={form.logo_url ?? ''} onChange={(e) => setField('logo_url', e.target.value)} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
             <TextField fullWidth label={t('common.email')} value={form.email ?? ''} onChange={(e) => setField('email', e.target.value)} />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
@@ -137,6 +142,70 @@ export default function OrganizationSettingsPage() {
           <Grid size={{ xs: 12, sm: 6 }}>
             <TextField fullWidth label={t('settings.baseCurrency')} value={form.base_currency} disabled helperText={t('settings.editUnderCurrencyTax')} />
           </Grid>
+        </Grid>
+
+        <Divider sx={{ mb: 3 }} />
+
+        <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+          {t('settings.branding')}
+        </Typography>
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <FileUploadField
+              label={t('settings.logoUrl')}
+              variant="avatar"
+              value={form.logo_url}
+              onUpload={async (file) => (await uploadFile(file, 'organization', 'logo')).url}
+              onChange={(url) => setField('logo_url', url ?? '')}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <FileUploadField
+              label={t('settings.headerImage')}
+              variant="document"
+              value={form.header_image_url}
+              onUpload={async (file) => (await uploadFile(file, 'organization', 'header_image')).url}
+              onChange={(url) => setField('header_image_url', url ?? '')}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <FileUploadField
+              label={t('settings.footerImage')}
+              variant="document"
+              value={form.footer_image_url}
+              onUpload={async (file) => (await uploadFile(file, 'organization', 'footer_image')).url}
+              onChange={(url) => setField('footer_image_url', url ?? '')}
+            />
+          </Grid>
+        </Grid>
+
+        <Divider sx={{ mb: 3 }} />
+
+        <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+          {t('settings.documents')}
+        </Typography>
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+          {DOC_SLOTS.map((slot) => (
+            <Grid key={slot} size={{ xs: 12, sm: 6 }}>
+              <Stack spacing={1}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label={t('settings.documentLabel')}
+                  value={form[`${slot}_label`] ?? ''}
+                  onChange={(e) => setField(`${slot}_label`, e.target.value)}
+                />
+                <FileUploadField
+                  label={t('settings.documentFile')}
+                  variant="document"
+                  value={form[`${slot}_url`]}
+                  onUpload={async (file) => (await uploadFile(file, 'organization', slot)).url}
+                  onChange={(url) => setField(`${slot}_url`, url ?? '')}
+                  accept="image/jpeg,image/png,image/webp,application/pdf"
+                />
+              </Stack>
+            </Grid>
+          ))}
         </Grid>
 
         <Divider sx={{ mb: 3 }} />

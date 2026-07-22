@@ -1,6 +1,6 @@
 // src/features/customer/components/CustomerSelector.tsx
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Paper,
@@ -12,7 +12,7 @@ import {
   useMediaQuery,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import { Controller } from 'react-hook-form';
+import { Controller, useWatch } from 'react-hook-form';
 import type { Control, UseFormSetValue } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -35,7 +35,18 @@ export default function CustomerSelector({
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { t } = useTranslation();
 
-  const [mode, setMode] = useState<'new' | 'existing'>('new');
+  // Editing an enquiry already linked to a customer should open on "Existing", not default to "New".
+  const initialCustUuid = useWatch({ control, name: 'cust_uuid' });
+  const [mode, setMode] = useState<'new' | 'existing'>(() =>
+    initialCustUuid ? 'existing' : 'new'
+  );
+
+  // The active mode itself is part of the submitted form data (see enquiry.schema.ts) —
+  // push the derived initial value in once so validation reflects it from the start.
+  useEffect(() => {
+    setValue('customer_mode', mode);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /* ---------------- HANDLERS ---------------- */
   const handleModeChange = (
@@ -45,9 +56,13 @@ export default function CustomerSelector({
     if (!value) return;
 
     setMode(value);
-    setValue('cust_id', null);
-    setValue('customer_name', '');
-    setValue('customer_mobile', '');
+    setValue('customer_mode', value);
+
+    // Only the currently active side is what gets submitted (see EnquiryForm's submit
+    // handler) — toggling itself must never erase what's already typed/selected.
+    if (value === 'new') {
+      setValue('cust_uuid', null);
+    }
   };
 
   /* ---------------- RENDER ---------------- */
@@ -143,7 +158,7 @@ export default function CustomerSelector({
         ) : (
          <Grid size={{ xs: 12 }}>
           <EntityAutocomplete
-            name="cust_id"
+            name="cust_uuid"
             label={t('enquiry.searchCustomer')}
             control={control}
             dropdownName="customers"

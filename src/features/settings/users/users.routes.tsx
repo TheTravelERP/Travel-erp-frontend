@@ -28,7 +28,7 @@ export default function UsersRoutes() {
       />
 
       <Route
-        path=":id/edit"
+        path=":uuid/edit"
         element={
           <PermissionRoute menuId="settings.users" action="can_edit">
             <UserEditPage />

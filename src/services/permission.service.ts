@@ -24,7 +24,7 @@ export interface MenuPermissionNode {
 }
 
 export interface UserPermissionsResponse {
-  user_id: number;
+  user_uuid: string;
   permissions: MenuPermissionNode[];
 }
 
@@ -45,17 +45,17 @@ export type PermissionUpdateItem = Pick<
 >;
 
 export const fetchUserPermissions = async (
-  userId: number,
+  userUuid: string,
   signal?: AbortSignal
 ): Promise<UserPermissionsResponse> => {
-  const res = await api.get(`/api/v1/settings/permissions/${userId}`, { signal });
+  const res = await api.get(`/api/v1/settings/permissions/${userUuid}`, { signal });
   return res.data;
 };
 
 export const updateUserPermissions = async (
-  userId: number,
+  userUuid: string,
   permissions: PermissionUpdateItem[]
 ): Promise<UserPermissionsResponse> => {
-  const res = await api.put(`/api/v1/settings/permissions/${userId}`, { permissions });
+  const res = await api.put(`/api/v1/settings/permissions/${userUuid}`, { permissions });
   return res.data;
 };

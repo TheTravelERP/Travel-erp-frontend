@@ -22,6 +22,16 @@ export interface OrganizationProfile {
   name: string;
   legal_name: string | null;
   logo_url: string | null;
+  header_image_url: string | null;
+  footer_image_url: string | null;
+  doc1_label: string | null;
+  doc1_url: string | null;
+  doc2_label: string | null;
+  doc2_url: string | null;
+  doc3_label: string | null;
+  doc3_url: string | null;
+  doc4_label: string | null;
+  doc4_url: string | null;
   website: string | null;
   email: string | null;
   mobile: string | null;

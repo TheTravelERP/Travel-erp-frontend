@@ -3,15 +3,19 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
+  Avatar,
   Box,
   Breadcrumbs,
   Button,
+  Chip,
   Divider,
   Link,
   Paper,
   Typography,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -24,8 +28,51 @@ import {
 import { getCustomerByUuid } from "../customer.api";
 import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 import { usePermission } from "../../../hooks/usePermission";
+import FilePreviewDialog from "../../../components/common/FilePreviewDialog";
+import { getFileKind, resolveUploadUrl } from "../../../services/upload.service";
 
 import type { CustomerDetail } from "../customer.types";
+
+function DocumentThumb({ label, url }: { label: string; url?: string | null }) {
+  const [open, setOpen] = useState(false);
+  const resolvedUrl = resolveUploadUrl(url);
+  const kind = resolvedUrl ? getFileKind(resolvedUrl) : null;
+
+  return (
+    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+      <Typography variant="caption" display="block" mb={0.5}>
+        {label}
+      </Typography>
+      {resolvedUrl ? (
+        <>
+          {kind === "image" ? (
+            <Avatar
+              src={resolvedUrl}
+              variant="rounded"
+              onClick={() => setOpen(true)}
+              sx={{ width: 72, height: 72, cursor: "pointer" }}
+            />
+          ) : (
+            <Chip
+              icon={kind === "pdf" ? <PictureAsPdfIcon /> : <InsertDriveFileIcon />}
+              label={kind === "pdf" ? "PDF" : "File"}
+              clickable
+              onClick={() => setOpen(true)}
+            />
+          )}
+          <FilePreviewDialog
+            open={open}
+            url={resolvedUrl}
+            label={label}
+            onClose={() => setOpen(false)}
+          />
+        </>
+      ) : (
+        <Typography mt={0.5}>-</Typography>
+      )}
+    </Grid>
+  );
+}
 
 export default function CustomerViewPage() {
   const { uuid } = useParams();
@@ -162,6 +209,31 @@ export default function CustomerViewPage() {
               <Typography variant="caption">{t("customer.passportIssueCountry")}</Typography>
               <Typography mt={0.5}>{customer.passport_issue_country || "-"}</Typography>
             </Grid>
+          </Grid>
+        </Paper>
+
+        {/* ================= DOCUMENTS ================= */}
+
+        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+          <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
+            {t("customer.documents")}
+          </Typography>
+
+          <Grid container spacing={3}>
+            <DocumentThumb label={t("customer.picture")} url={customer.picture_url} />
+            <DocumentThumb label={t("customer.passportFront")} url={customer.passport_front_url} />
+            <DocumentThumb label={t("customer.passportBack")} url={customer.passport_back_url} />
+            {(["doc1", "doc2", "doc3", "doc4"] as const).map((slot) => {
+              const url = customer[`${slot}_url`];
+              if (!url) return null;
+              return (
+                <DocumentThumb
+                  key={slot}
+                  label={customer[`${slot}_label`] || t("settings.documentFile")}
+                  url={url}
+                />
+              );
+            })}
           </Grid>
         </Paper>
 

@@ -62,7 +62,13 @@ export default function ChangePasswordPage() {
       </Typography>
 
       <Paper sx={{ p: 3, maxWidth: 480 }}>
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <Box
+          component="form"
+          onSubmit={handleSubmit(onSubmit, () =>
+            showSnackbar({ message: t('validation.fixHighlightedFields'), severity: 'error' }),
+          )}
+          noValidate
+        >
           <Stack spacing={2}>
             <Controller
               name="old_password"

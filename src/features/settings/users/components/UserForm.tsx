@@ -10,7 +10,9 @@ import { getUserCreateSchema, getUserUpdateSchema, type UserCreateFormInput, typ
 import DropdownAutocomplete from '../../../../components/common/DropdownAutocomplete';
 import PasswordField from '../../../../components/common/PasswordField';
 import FileUploadField from '../../../../components/common/FileUploadField';
-import { uploadUserFile, resolveUploadUrl } from '../users.api';
+import { uploadFile } from '../../../../services/upload.service';
+import { useSnackbar } from '../../../../components/ui/SnackbarProvider';
+import { mergeFormDefaults } from '../../../../utils/mergeFormDefaults';
 
 const USER_TYPES = ['Admin', 'Employee', 'Agent'];
 const STATUSES = ['Active', 'Inactive', 'Suspended'];
@@ -49,6 +51,7 @@ const emptyValues: UserFormInput = {
 export default function UserForm({ mode, defaultValues, onSubmit, loading = false }: UserFormProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { showSnackbar } = useSnackbar();
   const userCreateSchema = useMemo(() => getUserCreateSchema(t), [t]);
   const userUpdateSchema = useMemo(() => getUserUpdateSchema(t), [t]);
   const schema = mode === 'create' ? userCreateSchema : userUpdateSchema;
@@ -62,12 +65,12 @@ export default function UserForm({ mode, defaultValues, onSubmit, loading = fals
     formState: { errors, isSubmitting },
   } = useForm<UserFormInput>({
     resolver: zodResolver(schema as any),
-    defaultValues: { ...emptyValues, ...defaultValues },
+    defaultValues: mergeFormDefaults(emptyValues, defaultValues),
   });
 
   useEffect(() => {
     if (defaultValues) {
-      reset({ ...emptyValues, ...defaultValues });
+      reset(mergeFormDefaults(emptyValues, defaultValues));
     }
   }, [defaultValues, reset]);
 
@@ -75,7 +78,14 @@ export default function UserForm({ mode, defaultValues, onSubmit, loading = fals
   const identificationFileUrl = watch('identification_file_url');
 
   return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ flexGrow: 1 }}>
+    <Box
+      component="form"
+      onSubmit={handleSubmit(onSubmit, () =>
+        showSnackbar({ message: t('validation.fixHighlightedFields'), severity: 'error' }),
+      )}
+      noValidate
+      sx={{ flexGrow: 1 }}
+    >
       <Grid container spacing={2}>
         {/* ACCOUNT */}
         <Grid size={{ xs: 12 }}>
@@ -187,9 +197,9 @@ export default function UserForm({ mode, defaultValues, onSubmit, loading = fals
                 <FileUploadField
                   label={t('settings.profilePicture')}
                   variant="avatar"
-                  value={pictureUrl ? resolveUploadUrl(pictureUrl) : null}
+                  value={pictureUrl || null}
                   onUpload={async (file) => {
-                    const { url } = await uploadUserFile(file, 'picture');
+                    const { url } = await uploadFile(file, 'user', 'picture');
                     return url;
                   }}
                   onChange={(url) => setValue('picture_url', url ?? '')}
@@ -362,7 +372,7 @@ export default function UserForm({ mode, defaultValues, onSubmit, loading = fals
                   variant="document"
                   value={identificationFileUrl || null}
                   onUpload={async (file) => {
-                    const { url } = await uploadUserFile(file, 'identification');
+                    const { url } = await uploadFile(file, 'user', 'identification');
                     return url;
                   }}
                   onChange={(url) => setValue('identification_file_url', url ?? '')}

@@ -10,7 +10,7 @@ import type { UserDetail } from '../users.types';
 import { useSnackbar } from '../../../../components/ui/SnackbarProvider';
 
 export default function UserEditPage() {
-  const { id } = useParams();
+  const { uuid } = useParams();
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
   const { t } = useTranslation();
@@ -19,8 +19,8 @@ export default function UserEditPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id) return;
-    getUserById(Number(id))
+    if (!uuid) return;
+    getUserById(uuid)
       .then(setUser)
       .catch(() => {
         showSnackbar({ message: t('common.loadFailed'), severity: 'error' });
@@ -28,7 +28,7 @@ export default function UserEditPage() {
       })
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [uuid]);
 
   async function handleUpdate(data: any) {
     if (!user) return;
@@ -36,7 +36,7 @@ export default function UserEditPage() {
       const cleaned = Object.fromEntries(
         Object.entries(data).map(([k, v]) => [k, v === '' ? undefined : v]),
       );
-      await updateUser(user.id, { ...cleaned, version_no: user.version_no } as any);
+      await updateUser(user.uuid, { ...cleaned, version_no: user.version_no } as any);
       showSnackbar({ message: t('common.updatedSuccess'), severity: 'success' });
       navigate('/app/settings/users');
     } catch (err: any) {

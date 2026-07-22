@@ -53,7 +53,7 @@ export default function RegisterPage() {
     setError,
     setValue,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isSubmitted },
   } = useForm<RegisterOrgInput>({
     resolver: zodResolver(registerOrgSchema),
     defaultValues: {
@@ -70,6 +70,11 @@ export default function RegisterPage() {
   const [globalError, setGlobalError] = React.useState<string | null>(null);
 
   async function onSubmit(data: RegisterOrgInput) {
+    if (!selectedPhoneCountry) {
+      showSnackbar({ message: t("validation.fixHighlightedFields"), severity: "error" });
+      return;
+    }
+
     setGlobalError(null);
     try {
       // Create a shallow copy of the form data
@@ -222,7 +227,9 @@ export default function RegisterPage() {
       {!otpSent && (
         <Box
           component="form"
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(onSubmit, () =>
+            showSnackbar({ message: t("validation.fixHighlightedFields"), severity: "error" }),
+          )}
           mt={1}
           noValidate
         >
@@ -310,6 +317,7 @@ export default function RegisterPage() {
                     <TextField
                       {...params}
                       label={t("auth.selectProfileCountry")}
+                      required
                       error={!!errors.country_code}
                       helperText={errors.country_code?.message}
                     />
@@ -355,7 +363,19 @@ export default function RegisterPage() {
                     </Box>
                   );
                 }}
-                renderInput={(params) => <TextField {...params} label={t("auth.code")} />}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label={t("auth.code")}
+                    required
+                    error={!selectedPhoneCountry && isSubmitted}
+                    helperText={
+                      !selectedPhoneCountry && isSubmitted
+                        ? t("validation.phoneCountryCodeRequired")
+                        : ""
+                    }
+                  />
+                )}
               />
 
               <Controller

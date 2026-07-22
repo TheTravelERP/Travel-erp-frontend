@@ -22,6 +22,18 @@ export interface CustomerFormInput {
 
   gstin?: string;
   billing_address?: string;
+
+  picture_url?: string;
+  passport_front_url?: string;
+  passport_back_url?: string;
+  doc1_label?: string;
+  doc1_url?: string;
+  doc2_label?: string;
+  doc2_url?: string;
+  doc3_label?: string;
+  doc3_url?: string;
+  doc4_label?: string;
+  doc4_url?: string;
 }
 
 /* ==========================================================

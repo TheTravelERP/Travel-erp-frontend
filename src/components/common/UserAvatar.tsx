@@ -1,6 +1,6 @@
 // src/components/common/UserAvatar.tsx
 import { Avatar, type AvatarProps } from '@mui/material';
-import { resolveUploadUrl } from '../../features/settings/users/users.api';
+import { resolveUploadUrl } from '../../services/upload.service';
 
 interface UserAvatarProps extends Omit<AvatarProps, 'src' | 'children'> {
   name?: string | null;

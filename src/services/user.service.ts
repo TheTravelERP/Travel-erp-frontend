@@ -11,6 +11,7 @@ export type UserStatus = 'Active' | 'Inactive' | 'Suspended';
 
 export interface UserListItem {
   id: number;
+  uuid: string;
   name: string | null;
   email: string;
   mobile: string;

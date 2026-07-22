@@ -50,7 +50,7 @@ export default function EntityAutocomplete({
       name={name}
       control={control}
       defaultValue={null}
-      render={({ field }) => {
+      render={({ field, fieldState }) => {
         /* ---------------- HANDLE SELECTED ---------------- */
 
         const selected =
@@ -143,6 +143,8 @@ export default function EntityAutocomplete({
                 {...params}
                 label={label}
                 fullWidth
+                error={!!fieldState.error}
+                helperText={fieldState.error?.message}
                 InputProps={{
                   ...params.InputProps,
                   endAdornment: (

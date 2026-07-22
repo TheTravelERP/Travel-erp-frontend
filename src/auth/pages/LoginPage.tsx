@@ -66,7 +66,13 @@ export default function LoginPage() {
   return (
     <AuthCard title={t("auth.appTitle")} subtitle={t("auth.signInSubtitle")}>
       {/* Form */}
-      <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+      <Box
+        component="form"
+        onSubmit={handleSubmit(onSubmit, () =>
+          showSnackbar({ message: t("validation.fixHighlightedFields"), severity: "error" }),
+        )}
+        noValidate
+      >
         <Stack spacing={2}>
           {/* Email */}
           <Controller

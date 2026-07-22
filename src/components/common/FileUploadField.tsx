@@ -1,12 +1,16 @@
 // src/components/common/FileUploadField.tsx
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Avatar, Box, Button, Chip, CircularProgress, Stack, Typography } from '@mui/material';
 import UploadIcon from '@mui/icons-material/Upload';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import CloseIcon from '@mui/icons-material/Close';
+import FilePreviewDialog from './FilePreviewDialog';
+import { getFileKind, resolveUploadUrl } from '../../services/upload.service';
 
 interface FileUploadFieldProps {
   label: string;
+  /** Raw value as stored (backend-relative path or absolute URL) — resolved internally for display. */
   value?: string | null;
   onChange: (url: string | null) => void;
   onUpload: (file: File) => Promise<string>;
@@ -24,9 +28,12 @@ export default function FileUploadField({
   variant = 'document',
   helperText,
 }: FileUploadFieldProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  const resolvedUrl = resolveUploadUrl(value);
+  const kind = resolvedUrl ? getFileKind(resolvedUrl) : null;
 
   const handleFileSelect = async (file: File) => {
     setError(null);
@@ -49,11 +56,24 @@ export default function FileUploadField({
 
       <Stack direction="row" alignItems="center" spacing={1.5}>
         {variant === 'avatar' ? (
-          <Avatar src={value ?? undefined} sx={{ width: 56, height: 56 }} />
-        ) : value ? (
+          <Avatar
+            src={kind === 'image' ? resolvedUrl : undefined}
+            onClick={() => resolvedUrl && setPreviewOpen(true)}
+            sx={{ width: 56, height: 56, cursor: resolvedUrl ? 'pointer' : 'default' }}
+          />
+        ) : resolvedUrl && kind === 'image' ? (
+          <Avatar
+            src={resolvedUrl}
+            variant="rounded"
+            onClick={() => setPreviewOpen(true)}
+            sx={{ width: 56, height: 56, cursor: 'pointer' }}
+          />
+        ) : resolvedUrl ? (
           <Chip
-            icon={<InsertDriveFileIcon />}
-            label="File uploaded"
+            icon={kind === 'pdf' ? <PictureAsPdfIcon /> : <InsertDriveFileIcon />}
+            label={kind === 'pdf' ? 'PDF' : 'File'}
+            clickable
+            onClick={() => setPreviewOpen(true)}
             onDelete={() => onChange(null)}
             deleteIcon={<CloseIcon />}
           />
@@ -66,9 +86,8 @@ export default function FileUploadField({
           startIcon={uploading ? <CircularProgress size={16} /> : <UploadIcon />}
           disabled={uploading}
         >
-          {uploading ? 'Uploading...' : value ? 'Replace' : 'Upload'}
+          {uploading ? 'Uploading...' : resolvedUrl ? 'Replace' : 'Upload'}
           <input
-            ref={inputRef}
             type="file"
             accept={accept}
             hidden
@@ -80,7 +99,7 @@ export default function FileUploadField({
           />
         </Button>
 
-        {variant === 'avatar' && value && (
+        {variant === 'avatar' && resolvedUrl && (
           <Button size="small" color="error" onClick={() => onChange(null)}>
             Remove
           </Button>
@@ -97,6 +116,13 @@ export default function FileUploadField({
           {error}
         </Typography>
       )}
+
+      <FilePreviewDialog
+        open={previewOpen}
+        url={resolvedUrl ?? null}
+        label={label}
+        onClose={() => setPreviewOpen(false)}
+      />
     </Box>
   );
 }

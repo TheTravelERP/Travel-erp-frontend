@@ -11,6 +11,17 @@ import UnauthorizedPage from '../../pages/errors/UnauthorizedPage';
 import ForgotPasswordPage from '../../auth/pages/ForgotPasswordPage';
 import EnquiryRoutes from '../../features/enquiry/enquiry.routes';
 import CustomerRoutes from '../../features/customer/customer.routes';
+import PackageTypeRoutes from '../../features/package/packageType/packageType.routes';
+import PackageDetailRoutes from '../../features/package/packageDetail/packageDetail.routes';
+import PackageRoutes from '../../features/package/package.routes';
+import PackagePricingRoutes from '../../features/package/packagePricing/packagePricing.routes';
+import PackageServiceRoutes from '../../features/package/packageService/packageService.routes';
+import HotelRoutes from '../../features/inventory/hotel/hotel.routes';
+import AirlineRoutes from '../../features/inventory/airline/airline.routes';
+import TransportCompanyRoutes from '../../features/inventory/transportCompany/transportCompany.routes';
+import ZiyaratRoutes from '../../features/inventory/ziyarat/ziyarat.routes';
+import InsuranceProviderRoutes from '../../features/inventory/insuranceProvider/insuranceProvider.routes';
+import GuideRoutes from '../../features/inventory/guide/guide.routes';
 import SettingsPage from '../../features/settings';
 import ChangePasswordPage from '../../features/profile/pages/ChangePasswordPage';
 import OrganizationSettingsPage from '../../features/settings/pages/OrganizationSettingsPage';
@@ -26,15 +37,10 @@ import ComingSoonPage from '../../components/common/ComingSoonPage';
 const COMING_SOON_ROUTES: { menuId: string; path: string }[] = [
   { menuId: 'crm.quotations', path: '/app/crm/quotations' },
   { menuId: 'crm.followups', path: '/app/crm/followups' },
-  { menuId: 'packages.types', path: '/app/packages/types' },
-  { menuId: 'packages.list', path: '/app/packages/list' },
   { menuId: 'packages.departures', path: '/app/packages/departures' },
   { menuId: 'packages.bookings', path: '/app/bookings/list' },
   { menuId: 'packages.itinerary', path: '/app/bookings/services' },
   { menuId: 'packages.room_allocation', path: '/app/bookings/room-allocation' },
-  { menuId: 'inventory.hotels', path: '/app/inventory/hotels' },
-  { menuId: 'inventory.airlines', path: '/app/inventory/airlines' },
-  { menuId: 'inventory.vendors', path: '/app/inventory/vendors' },
   { menuId: 'inventory.contracts', path: '/app/inventory/contracts' },
   { menuId: 'inventory.stock', path: '/app/inventory/stock' },
   { menuId: 'visa.travelers', path: '/app/ops/travelers' },
@@ -125,6 +131,17 @@ export default function AppRouter() {
 
         <Route path="/app/enquiries/*" element={<EnquiryRoutes />} />
         <Route path="/app/crm/customers/*" element={<CustomerRoutes />} />
+        <Route path="/app/packages/types/*" element={<PackageTypeRoutes />} />
+        <Route path="/app/packages/details/*" element={<PackageDetailRoutes />} />
+        <Route path="/app/packages/list/*" element={<PackageRoutes />} />
+        <Route path="/app/packages/pricing/*" element={<PackagePricingRoutes />} />
+        <Route path="/app/packages/services/*" element={<PackageServiceRoutes />} />
+        <Route path="/app/inventory/hotels/*" element={<HotelRoutes />} />
+        <Route path="/app/inventory/airlines/*" element={<AirlineRoutes />} />
+        <Route path="/app/inventory/vendors/*" element={<TransportCompanyRoutes />} />
+        <Route path="/app/inventory/ziyarat/*" element={<ZiyaratRoutes />} />
+        <Route path="/app/inventory/insurance/*" element={<InsuranceProviderRoutes />} />
+        <Route path="/app/inventory/guides/*" element={<GuideRoutes />} />
         <Route path="/app/settings/theme-color" element={<SettingsPage />} />
         <Route path="/app/profile/change-password" element={<ChangePasswordPage />} />
 

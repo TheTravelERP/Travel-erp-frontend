@@ -33,6 +33,18 @@ export const getCustomerSchema = (t: TFunction) =>
 
     gstin: z.string().trim().optional(),
     billing_address: z.string().trim().optional(),
+
+    picture_url: z.string().trim().optional(),
+    passport_front_url: z.string().trim().optional(),
+    passport_back_url: z.string().trim().optional(),
+    doc1_label: z.string().trim().optional(),
+    doc1_url: z.string().trim().optional(),
+    doc2_label: z.string().trim().optional(),
+    doc2_url: z.string().trim().optional(),
+    doc3_label: z.string().trim().optional(),
+    doc3_url: z.string().trim().optional(),
+    doc4_label: z.string().trim().optional(),
+    doc4_url: z.string().trim().optional(),
   });
 
 export type CustomerSchema = ReturnType<typeof getCustomerSchema>;

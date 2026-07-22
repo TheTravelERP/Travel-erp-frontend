@@ -34,7 +34,7 @@ import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash';
 import type { UserListItem, UserStatus } from '../users.types';
 import ConfirmDialog from '../../../../components/common/ConfirmDialog';
 import SortableTableCell from '../../../../components/common/SortableTableCell';
-import { resolveUploadUrl } from '../users.api';
+import { resolveUploadUrl } from '../../../../services/upload.service';
 import {
   bulkDeleteUsers,
   bulkRestoreUsers,
@@ -92,11 +92,11 @@ export default function UsersTable({
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
   const { session } = useAuthContext();
-  const [actionId, setActionId] = useState<number | null>(null);
+  const [actionId, setActionId] = useState<string | null>(null);
   const { showSnackbar } = useSnackbar();
   const [actionLoading, setActionLoading] = useState(false);
 
-  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
   const [bulkLoading, setBulkLoading] = useState(false);
 
@@ -104,29 +104,29 @@ export default function UsersTable({
     setSelected(new Set());
   }, [rows, isTrash]);
 
-  function toggleRow(id: number) {
+  function toggleRow(uuid: string) {
     setSelected((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(uuid)) next.delete(uuid);
+      else next.add(uuid);
       return next;
     });
   }
 
   function toggleSelectAll() {
     setSelected((prev) => {
-      const selectable = rows.filter((r) => r.id !== session?.user_id).map((r) => r.id);
+      const selectable = rows.filter((r) => r.id !== session?.user_id).map((r) => r.uuid);
       return prev.size === selectable.length ? new Set() : new Set(selectable);
     });
   }
 
   async function handleBulkConfirm() {
-    const ids = Array.from(selected);
-    if (!ids.length) return;
+    const uuids = Array.from(selected);
+    if (!uuids.length) return;
 
     try {
       setBulkLoading(true);
-      const result = isTrash ? await bulkRestoreUsers(ids) : await bulkDeleteUsers(ids);
+      const result = isTrash ? await bulkRestoreUsers(uuids) : await bulkDeleteUsers(uuids);
       showSnackbar({ message: result.message, severity: 'success' });
       setSelected(new Set());
       onRefresh();
@@ -203,15 +203,15 @@ export default function UsersTable({
   const rowActions = (row: UserListItem) => {
     const isSelf = row.id === session?.user_id;
     return (
-      <>
+      <Stack direction="row" spacing={0.5} justifyContent="flex-end">
         {!isTrash && (
           <>
-            <IconButton size="small" onClick={() => navigate(`/app/settings/users/${row.id}/edit`)}>
+            <IconButton size="small" onClick={() => navigate(`/app/settings/users/${row.uuid}/edit`)}>
               <EditIcon fontSize="small" />
             </IconButton>
             <IconButton
               size="small"
-              onClick={() => navigate(`/app/settings/permissions?userId=${row.id}`)}
+              onClick={() => navigate(`/app/settings/permissions?userUuid=${row.uuid}`)}
               title="Manage permissions"
             >
               <LockPersonIcon fontSize="small" />
@@ -221,7 +221,7 @@ export default function UsersTable({
               color="error"
               disabled={isSelf}
               title={isSelf ? "You can't delete your own account" : undefined}
-              onClick={() => setActionId(row.id)}
+              onClick={() => setActionId(row.uuid)}
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
@@ -229,11 +229,11 @@ export default function UsersTable({
         )}
 
         {isTrash && (
-          <IconButton size="small" color="success" onClick={() => setActionId(row.id)}>
+          <IconButton size="small" color="success" onClick={() => setActionId(row.uuid)}>
             <RestoreFromTrashIcon fontSize="small" />
           </IconButton>
         )}
-      </>
+      </Stack>
     );
   };
 
@@ -252,7 +252,7 @@ export default function UsersTable({
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
                   <Stack direction="row" alignItems="center" spacing={1}>
                     {!isTrash && row.id !== session?.user_id && (
-                      <Checkbox size="small" checked={selected.has(row.id)} onChange={() => toggleRow(row.id)} />
+                      <Checkbox size="small" checked={selected.has(row.uuid)} onChange={() => toggleRow(row.uuid)} />
                     )}
                     <Avatar src={resolveUploadUrl(row.picture_url)} sx={{ width: 32, height: 32 }} />
                     <Typography fontWeight={600}>{row.name || row.email}</Typography>
@@ -342,7 +342,9 @@ export default function UsersTable({
                 />
               ))}
               <TableCell align="center">Age</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+                Actions
+              </TableCell>
             </TableRow>
           </TableHead>
 
@@ -374,9 +376,9 @@ export default function UsersTable({
                   <TableRow key={row.id} hover selected={selected.has(row.id)}>
                     <TableCell padding="checkbox">
                       <Checkbox
-                        checked={selected.has(row.id)}
+                        checked={selected.has(row.uuid)}
                         disabled={!isTrash && isSelf}
-                        onChange={() => toggleRow(row.id)}
+                        onChange={() => toggleRow(row.uuid)}
                       />
                     </TableCell>
                     <TableCell>
@@ -393,7 +395,9 @@ export default function UsersTable({
                       <Chip size="small" label={row.status} color={STATUS_COLOR[row.status]} />
                     </TableCell>
                     <TableCell align="center">{row.age ?? '—'}</TableCell>
-                    <TableCell align="right">{rowActions(row)}</TableCell>
+                    <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+                      {rowActions(row)}
+                    </TableCell>
                   </TableRow>
                 );
               })}

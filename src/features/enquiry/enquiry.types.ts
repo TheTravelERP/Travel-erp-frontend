@@ -6,13 +6,17 @@
 ========================================================== */
 
 export interface EnquiryFormInput {
-  cust_id?: number | null;
+  cust_uuid?: string | null;
+  /** Which side of the New/Existing toggle is active — decides what actually gets submitted. */
+  customer_mode?: 'new' | 'existing';
 
   customer_name?: string;
   customer_mobile?: string;
   customer_email?: string;
 
-  pkg_id?: number |null;
+  pkg_uuid?: string | null;
+  /** Which side of the Custom/Inventory toggle is active — decides what actually gets submitted. */
+  package_mode?: 'custom' | 'existing';
   package_name?: string;
 
   pax_count: number;

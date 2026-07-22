@@ -405,7 +405,9 @@ export default function EnquiryTable({
                   onSort={onSortChange}
                 />
               ))}
-              <TableCell align="right">{t("common.actions")}</TableCell>
+              <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
+                {t("common.actions")}
+              </TableCell>
             </TableRow>
           </TableHead>
 
@@ -442,53 +444,59 @@ export default function EnquiryTable({
                   <TableCell>
                     {new Date(row.created_at).toLocaleDateString()}
                   </TableCell>
-                  <TableCell align="right">
-                    {/* View - always visible */}
-                    <IconButton
-                      size="small"
-                      onClick={() =>
-                        navigate(
-                          isTrash
-                            ? `/app/enquiries/${row.uuid}?is_deleted=true`
-                            : `/app/enquiries/${row.uuid}`,
-                        )
-                      }
+                  <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
+                    <Stack
+                      direction="row"
+                      spacing={0.5}
+                      justifyContent="flex-end"
                     >
-                      <VisibilityIcon fontSize="small" />
-                    </IconButton>
-
-                    {/* Active Enquiries */}
-                    {!isTrash && (
-                      <>
-                        <IconButton
-                          size="small"
-                          onClick={() =>
-                            navigate(`/app/enquiries/${row.uuid}/edit`)
-                          }
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => setActionUuid(row.uuid)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </>
-                    )}
-
-                    {/* Trash */}
-                    {isTrash && (
+                      {/* View - always visible */}
                       <IconButton
                         size="small"
-                        color="success"
-                        onClick={() => setActionUuid(row.uuid)}
+                        onClick={() =>
+                          navigate(
+                            isTrash
+                              ? `/app/enquiries/${row.uuid}?is_deleted=true`
+                              : `/app/enquiries/${row.uuid}`,
+                          )
+                        }
                       >
-                        <RestoreFromTrashIcon fontSize="small" />
+                        <VisibilityIcon fontSize="small" />
                       </IconButton>
-                    )}
+
+                      {/* Active Enquiries */}
+                      {!isTrash && (
+                        <>
+                          <IconButton
+                            size="small"
+                            onClick={() =>
+                              navigate(`/app/enquiries/${row.uuid}/edit`)
+                            }
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => setActionUuid(row.uuid)}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </>
+                      )}
+
+                      {/* Trash */}
+                      {isTrash && (
+                        <IconButton
+                          size="small"
+                          color="success"
+                          onClick={() => setActionUuid(row.uuid)}
+                        >
+                          <RestoreFromTrashIcon fontSize="small" />
+                        </IconButton>
+                      )}
+                    </Stack>
                   </TableCell>
                 </TableRow>
               ))}

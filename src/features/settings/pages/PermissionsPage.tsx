@@ -77,7 +77,7 @@ export default function PermissionsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [users, setUsers] = useState<UserListItem[]>([]);
-  const [selectedUserId, setSelectedUserId] = useState<number | ''>('');
+  const [selectedUserUuid, setSelectedUserUuid] = useState<string>('');
   const [rows, setRows] = useState<MenuPermissionNode[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadingPerms, setLoadingPerms] = useState(false);
@@ -87,9 +87,9 @@ export default function PermissionsPage() {
     fetchUsersLookup()
       .then((list) => {
         setUsers(list);
-        const fromQuery = Number(searchParams.get('userId'));
-        if (fromQuery && list.some((u) => u.id === fromQuery)) {
-          setSelectedUserId(fromQuery);
+        const fromQuery = searchParams.get('userUuid');
+        if (fromQuery && list.some((u) => u.uuid === fromQuery)) {
+          setSelectedUserUuid(fromQuery);
         }
       })
       .catch(() => showSnackbar({ message: 'Failed to load users', severity: 'error' }))
@@ -98,13 +98,13 @@ export default function PermissionsPage() {
   }, []);
 
   useEffect(() => {
-    if (!selectedUserId) {
+    if (!selectedUserUuid) {
       setRows([]);
       return;
     }
     const controller = new AbortController();
     setLoadingPerms(true);
-    fetchUserPermissions(selectedUserId, controller.signal)
+    fetchUserPermissions(selectedUserUuid, controller.signal)
       .then((res) => setRows(res.permissions))
       .catch((err) => {
         if (!axios.isCancel(err)) {
@@ -116,10 +116,11 @@ export default function PermissionsPage() {
       });
     return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedUserId]);
+  }, [selectedUserUuid]);
 
   const orderedRows = useMemo(() => sortDepthFirst(rows), [rows]);
-  const isSelf = session?.user_id === selectedUserId;
+  const selectedUser = users.find((u) => u.uuid === selectedUserUuid);
+  const isSelf = !!selectedUser && selectedUser.id === session?.user_id;
 
   const toggle = (menuId: number, action: keyof MenuPermissionNode) => {
     setRows((prev) =>
@@ -165,17 +166,17 @@ export default function PermissionsPage() {
     );
   };
 
-  const handleUserChange = (value: number) => {
-    setSelectedUserId(value);
-    setSearchParams(value ? { userId: String(value) } : {});
+  const handleUserChange = (value: string) => {
+    setSelectedUserUuid(value);
+    setSearchParams(value ? { userUuid: value } : {});
   };
 
   const handleSave = async () => {
-    if (!selectedUserId) return;
+    if (!selectedUserUuid) return;
     setSaving(true);
     try {
       const res = await updateUserPermissions(
-        selectedUserId,
+        selectedUserUuid,
         rows.map((r) => ({
           menu_id: r.menu_id,
           can_view: r.can_view,
@@ -217,12 +218,12 @@ export default function PermissionsPage() {
           select
           fullWidth
           label="User"
-          value={selectedUserId}
+          value={selectedUserUuid}
           disabled={loadingUsers}
-          onChange={(e) => handleUserChange(Number(e.target.value))}
+          onChange={(e) => handleUserChange(e.target.value)}
         >
           {users.map((u) => (
-            <MenuItem key={u.id} value={u.id}>
+            <MenuItem key={u.uuid} value={u.uuid}>
               {u.name || u.email} ({u.user_type})
             </MenuItem>
           ))}
@@ -235,7 +236,7 @@ export default function PermissionsPage() {
         </Alert>
       )}
 
-      {selectedUserId && (
+      {selectedUserUuid && (
         <Paper sx={{ overflow: 'auto', width: '100%' }}>
           {loadingPerms ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
@@ -325,7 +326,7 @@ export default function PermissionsPage() {
         </Paper>
       )}
 
-      {selectedUserId && !loadingPerms && (
+      {selectedUserUuid && !loadingPerms && (
         <Box sx={{ mt: 3 }}>
           <Button variant="contained" disabled={saving || isSelf} onClick={handleSave}>
             {saving ? 'Saving...' : 'Save Permissions'}
