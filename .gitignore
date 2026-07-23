@@ -18,6 +18,14 @@ dist-ssr
 .env.*
 !.env.example
 
+# Personal/confidential working files — never commit these.
+# Covers a folder named important/confidential, or any file named
+# important.* / confidential.* (any extension).
+important/
+important.*
+confidential/
+confidential.*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
