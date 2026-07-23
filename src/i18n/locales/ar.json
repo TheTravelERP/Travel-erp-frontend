@@ -33,6 +33,7 @@
     "status": "الحالة",
     "active": "نشط",
     "inactive": "غير نشط",
+    "all": "الكل",
     "priority": "الأولوية",
     "notes": "ملاحظات",
     "email": "البريد الإلكتروني",
@@ -126,7 +127,6 @@
     "inventory": "المخزون والموردون",
     "inventory.hotels": "الفنادق (مكة/المدينة)",
     "inventory.airlines": "شركات الطيران",
-    "inventory.vendors": "الموردون",
     "inventory.contracts": "عقود الموردين",
     "inventory.stock": "مخزون (الغرف/المقاعد/النقل)",
     "visa": "التأشيرات والمسافرون",
@@ -203,8 +203,7 @@
     "packages.pricing": "أسعار الباقات",
     "packages.services": "خدمات الباقة",
     "inventory.ziyarat": "الزيارة",
-    "inventory.insurance": "مزودو التأمين",
-    "inventory.guides": "المرشدون"
+    "inventory.vendor_master": "الموردون"
   },
   "enquiry": {
     "conversionStatus": "حالة التحويل",
@@ -392,7 +391,9 @@
     "confirmPasswordRequired": "تأكيد كلمة المرور مطلوب",
     "passwordMismatch": "كلمة المرور وتأكيدها غير متطابقين",
     "currentPasswordRequired": "كلمة المرور الحالية مطلوبة",
-    "nameRequired": "الاسم مطلوب"
+    "nameRequired": "الاسم مطلوب",
+    "codeRequired": "الرمز مطلوب",
+    "endDateBeforeStartDate": "لا يمكن أن يكون تاريخ الانتهاء أقدم من تاريخ البدء"
   },
   "auth": {
     "appTitle": "Travel ERP",
@@ -560,11 +561,8 @@
     "pricingSection": "التسعير",
     "costPrice": "سعر التكلفة",
     "sellingPrice": "سعر البيع",
-    "vendorSection": "مراجع المورد",
-    "hotelId": "معرف الفندق",
-    "airlineId": "معرف شركة الطيران",
-    "vendorId": "معرف المورد",
-    "inventoryId": "معرف المخزون",
+    "inventorySection": "مرجع المخزون",
+    "inventory": "المخزون",
     "remarks": "ملاحظات",
     "colPackage": "الباقة",
     "colDay": "اليوم",
@@ -633,22 +631,86 @@
       "nameRequired": "اسم شركة الطيران مطلوب"
     }
   },
-  "transportCompany": {
-    "name": "اسم الشركة",
+  "vendor": {
+    "code": "رمز المورد",
+    "name": "اسم المورد",
+    "type": "نوع المورد",
     "contactPerson": "الشخص المسؤول",
     "mobile": "الجوال",
     "email": "البريد الإلكتروني",
+    "website": "الموقع الإلكتروني",
+    "gstin": "GSTIN",
+    "pan": "PAN",
     "address": "العنوان",
     "city": "المدينة",
+    "state": "المنطقة",
     "country": "الدولة",
-    "gstin": "GSTIN",
+    "pincode": "الرمز البريدي",
+    "paymentTerms": "شروط الدفع",
     "remarks": "ملاحظات",
-    "colName": "اسم الشركة",
+    "status": "الحالة",
+    "colCode": "رمز المورد",
+    "colName": "اسم المورد",
+    "colType": "النوع",
     "colContactPerson": "الشخص المسؤول",
     "colMobile": "الجوال",
     "colCity": "المدينة",
+    "colStatus": "الحالة"
+  },
+  "vendorContract": {
+    "title": "تفاصيل العقد",
+    "vendor": "المورد",
+    "code": "رمز العقد",
+    "name": "اسم العقد",
+    "type": "نوع العقد",
+    "referenceNo": "الرقم المرجعي",
+    "validFrom": "ساري من",
+    "validTo": "ساري حتى",
+    "currency": "العملة",
+    "paymentTerms": "شروط الدفع",
+    "remarks": "ملاحظات",
+    "status": "الحالة",
+    "colCode": "رمز العقد",
+    "colName": "اسم العقد",
+    "colVendor": "المورد",
+    "colType": "النوع",
+    "colValidFrom": "ساري من",
+    "colValidTo": "ساري حتى",
+    "colStatus": "الحالة",
     "validation": {
-      "nameRequired": "اسم الشركة مطلوب"
+      "vendorRequired": "المورد مطلوب",
+      "validToBeforeValidFrom": "لا يمكن أن يكون تاريخ الانتهاء أقدم من تاريخ البدء"
+    }
+  },
+  "inventoryStock": {
+    "title": "تفاصيل المخزون",
+    "contract": "عقد المورد",
+    "code": "رمز المخزون",
+    "name": "اسم المخزون",
+    "serviceType": "نوع الخدمة",
+    "serviceReference": "الخدمة المرتبطة",
+    "startDate": "تاريخ البدء",
+    "endDate": "تاريخ الانتهاء",
+    "totalQty": "الكمية الإجمالية",
+    "bookedQty": "الكمية المحجوزة",
+    "blockedQty": "الكمية المعلقة",
+    "costPrice": "سعر التكلفة",
+    "sellingPrice": "سعر البيع",
+    "quantitiesAndPricing": "الكميات والتسعير",
+    "colCode": "رمز المخزون",
+    "colName": "اسم المخزون",
+    "colServiceType": "نوع الخدمة",
+    "colContract": "العقد",
+    "colTotalQty": "الإجمالي",
+    "colBookedQty": "محجوز",
+    "colAvailableQty": "متاح",
+    "colStatus": "الحالة",
+    "validation": {
+      "contractRequired": "عقد المورد مطلوب",
+      "qtyWholeNumber": "يجب أن تكون الكمية رقمًا صحيحًا",
+      "totalQtyPositive": "يجب أن تكون الكمية الإجمالية أكبر من صفر",
+      "bookedExceedsTotal": "لا يمكن أن تتجاوز الكمية المحجوزة الكمية الإجمالية",
+      "blockedExceedsAvailable": "لا يمكن أن تتجاوز الكمية المعلقة الكمية المتاحة"
     }
   },
   "ziyarat": {
@@ -668,38 +730,6 @@
     "colDefaultCost": "التكلفة الافتراضية",
     "validation": {
       "nameRequired": "اسم الزيارة مطلوب"
-    }
-  },
-  "insuranceProvider": {
-    "name": "اسم المزود",
-    "contactPerson": "الشخص المسؤول",
-    "phone": "الهاتف",
-    "email": "البريد الإلكتروني",
-    "website": "الموقع الإلكتروني",
-    "remarks": "ملاحظات",
-    "colName": "اسم المزود",
-    "colContactPerson": "الشخص المسؤول",
-    "colPhone": "الهاتف",
-    "colEmail": "البريد الإلكتروني",
-    "validation": {
-      "nameRequired": "اسم المزود مطلوب"
-    }
-  },
-  "guide": {
-    "name": "اسم المرشد",
-    "mobile": "الجوال",
-    "email": "البريد الإلكتروني",
-    "languages": "اللغات",
-    "languagesHint": "مثال: الإنجليزية، العربية، الأردية",
-    "licenseNo": "رقم الرخصة",
-    "experienceYears": "الخبرة (سنوات)",
-    "remarks": "ملاحظات",
-    "colName": "الاسم",
-    "colMobile": "الجوال",
-    "colLanguages": "اللغات",
-    "colExperience": "الخبرة",
-    "validation": {
-      "nameRequired": "اسم المرشد مطلوب"
     }
   }
 }

@@ -35,10 +35,7 @@ const emptyValues = {
   day_no: 1,
   service_order: 0,
   service_type: "",
-  inventory_id: undefined,
-  hotel_id: undefined,
-  airline_id: undefined,
-  vendor_id: undefined,
+  inventory_uuid: "",
   description: "",
   start_datetime: "",
   end_datetime: "",
@@ -236,50 +233,20 @@ export default function PackageServiceForm({
         </Grid>
       </Paper>
 
-      {/* VENDOR REFERENCES */}
+      {/* INVENTORY REFERENCE */}
       <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
         <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
-          {t("packageService.vendorSection")}
+          {t("packageService.inventorySection")}
         </Typography>
 
         <Grid container spacing={2}>
-          <Grid size={{ xs: 6, sm: 3 }}>
-            <Controller
-              name="hotel_id"
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <EntityAutocomplete
+              name="inventory_uuid"
+              label={t("packageService.inventory")}
               control={control}
-              render={({ field }) => (
-                <TextField {...field} type="number" label={t("packageService.hotelId")} fullWidth />
-              )}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 6, sm: 3 }}>
-            <Controller
-              name="airline_id"
-              control={control}
-              render={({ field }) => (
-                <TextField {...field} type="number" label={t("packageService.airlineId")} fullWidth />
-              )}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 6, sm: 3 }}>
-            <Controller
-              name="vendor_id"
-              control={control}
-              render={({ field }) => (
-                <TextField {...field} type="number" label={t("packageService.vendorId")} fullWidth />
-              )}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 6, sm: 3 }}>
-            <Controller
-              name="inventory_id"
-              control={control}
-              render={({ field }) => (
-                <TextField {...field} type="number" label={t("packageService.inventoryId")} fullWidth />
-              )}
+              dropdownName="inventory_items"
+              setValue={setValue}
             />
           </Grid>
 

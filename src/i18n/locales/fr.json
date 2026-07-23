@@ -33,6 +33,7 @@
     "status": "Statut",
     "active": "Actif",
     "inactive": "Inactif",
+    "all": "Tous",
     "priority": "Priorité",
     "notes": "Notes",
     "email": "E-mail",
@@ -126,7 +127,6 @@
     "inventory": "Inventaire et fournisseurs",
     "inventory.hotels": "Hôtels (La Mecque/Médine)",
     "inventory.airlines": "Compagnies aériennes",
-    "inventory.vendors": "Fournisseurs",
     "inventory.contracts": "Contrats fournisseurs",
     "inventory.stock": "Stock d'inventaire (chambres/sièges/transport)",
     "visa": "Visa et voyageurs",
@@ -203,8 +203,7 @@
     "packages.pricing": "Tarification des forfaits",
     "packages.services": "Services du forfait",
     "inventory.ziyarat": "Ziyarat",
-    "inventory.insurance": "Assureurs",
-    "inventory.guides": "Guides"
+    "inventory.vendor_master": "Fournisseurs"
   },
   "enquiry": {
     "conversionStatus": "Statut de conversion",
@@ -392,7 +391,9 @@
     "confirmPasswordRequired": "La confirmation du mot de passe est requise",
     "passwordMismatch": "Le mot de passe et sa confirmation ne correspondent pas",
     "currentPasswordRequired": "Le mot de passe actuel est requis",
-    "nameRequired": "Le nom est requis"
+    "nameRequired": "Le nom est requis",
+    "codeRequired": "Le code est requis",
+    "endDateBeforeStartDate": "La date de fin ne peut pas être antérieure à la date de début"
   },
   "auth": {
     "appTitle": "Travel ERP",
@@ -560,11 +561,8 @@
     "pricingSection": "Tarification",
     "costPrice": "Prix de revient",
     "sellingPrice": "Prix de vente",
-    "vendorSection": "Références fournisseur",
-    "hotelId": "ID Hôtel",
-    "airlineId": "ID Compagnie aérienne",
-    "vendorId": "ID Fournisseur",
-    "inventoryId": "ID Inventaire",
+    "inventorySection": "Référence d'inventaire",
+    "inventory": "Inventaire",
     "remarks": "Remarques",
     "colPackage": "Forfait",
     "colDay": "Jour",
@@ -633,22 +631,86 @@
       "nameRequired": "Le nom de la compagnie est requis"
     }
   },
-  "transportCompany": {
-    "name": "Nom de l'entreprise",
+  "vendor": {
+    "code": "Code fournisseur",
+    "name": "Nom du fournisseur",
+    "type": "Type de fournisseur",
     "contactPerson": "Personne à contacter",
     "mobile": "Mobile",
     "email": "E-mail",
+    "website": "Site web",
+    "gstin": "GSTIN",
+    "pan": "PAN",
     "address": "Adresse",
     "city": "Ville",
+    "state": "État / Région",
     "country": "Pays",
-    "gstin": "GSTIN",
+    "pincode": "Code postal",
+    "paymentTerms": "Conditions de paiement",
     "remarks": "Remarques",
-    "colName": "Nom de l'entreprise",
+    "status": "Statut",
+    "colCode": "Code fournisseur",
+    "colName": "Nom du fournisseur",
+    "colType": "Type",
     "colContactPerson": "Personne à contacter",
     "colMobile": "Mobile",
     "colCity": "Ville",
+    "colStatus": "Statut"
+  },
+  "vendorContract": {
+    "title": "Détails du contrat",
+    "vendor": "Fournisseur",
+    "code": "Code du contrat",
+    "name": "Nom du contrat",
+    "type": "Type de contrat",
+    "referenceNo": "N° de référence",
+    "validFrom": "Valide à partir de",
+    "validTo": "Valide jusqu'à",
+    "currency": "Devise",
+    "paymentTerms": "Conditions de paiement",
+    "remarks": "Remarques",
+    "status": "Statut",
+    "colCode": "Code du contrat",
+    "colName": "Nom du contrat",
+    "colVendor": "Fournisseur",
+    "colType": "Type",
+    "colValidFrom": "Valide à partir de",
+    "colValidTo": "Valide jusqu'à",
+    "colStatus": "Statut",
     "validation": {
-      "nameRequired": "Le nom de l'entreprise est requis"
+      "vendorRequired": "Le fournisseur est requis",
+      "validToBeforeValidFrom": "La date de fin ne peut pas être antérieure à la date de début"
+    }
+  },
+  "inventoryStock": {
+    "title": "Détails de l'inventaire",
+    "contract": "Contrat fournisseur",
+    "code": "Code d'inventaire",
+    "name": "Nom de l'inventaire",
+    "serviceType": "Type de service",
+    "serviceReference": "Service lié",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "totalQty": "Quantité totale",
+    "bookedQty": "Quantité réservée",
+    "blockedQty": "Quantité bloquée",
+    "costPrice": "Prix de revient",
+    "sellingPrice": "Prix de vente",
+    "quantitiesAndPricing": "Quantités et tarification",
+    "colCode": "Code d'inventaire",
+    "colName": "Nom de l'inventaire",
+    "colServiceType": "Type de service",
+    "colContract": "Contrat",
+    "colTotalQty": "Total",
+    "colBookedQty": "Réservé",
+    "colAvailableQty": "Disponible",
+    "colStatus": "Statut",
+    "validation": {
+      "contractRequired": "Le contrat fournisseur est requis",
+      "qtyWholeNumber": "La quantité doit être un nombre entier",
+      "totalQtyPositive": "La quantité totale doit être supérieure à zéro",
+      "bookedExceedsTotal": "La quantité réservée ne peut pas dépasser la quantité totale",
+      "blockedExceedsAvailable": "La quantité bloquée ne peut pas dépasser la quantité disponible"
     }
   },
   "ziyarat": {
@@ -668,38 +730,6 @@
     "colDefaultCost": "Coût par défaut",
     "validation": {
       "nameRequired": "Le nom de la Ziyarat est requis"
-    }
-  },
-  "insuranceProvider": {
-    "name": "Nom de l'assureur",
-    "contactPerson": "Personne à contacter",
-    "phone": "Téléphone",
-    "email": "E-mail",
-    "website": "Site web",
-    "remarks": "Remarques",
-    "colName": "Nom de l'assureur",
-    "colContactPerson": "Personne à contacter",
-    "colPhone": "Téléphone",
-    "colEmail": "E-mail",
-    "validation": {
-      "nameRequired": "Le nom de l'assureur est requis"
-    }
-  },
-  "guide": {
-    "name": "Nom du guide",
-    "mobile": "Mobile",
-    "email": "E-mail",
-    "languages": "Langues",
-    "languagesHint": "ex. Anglais, Arabe, Ourdou",
-    "licenseNo": "N° de licence",
-    "experienceYears": "Expérience (années)",
-    "remarks": "Remarques",
-    "colName": "Nom",
-    "colMobile": "Mobile",
-    "colLanguages": "Langues",
-    "colExperience": "Expérience",
-    "validation": {
-      "nameRequired": "Le nom du guide est requis"
     }
   }
 }

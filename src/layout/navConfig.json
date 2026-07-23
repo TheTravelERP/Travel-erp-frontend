@@ -40,7 +40,6 @@
         "children": [
             { "id": "inventory.hotels", "title": "Hotels (Makkah/Madinah)", "path": "/app/inventory/hotels", "icon": "hotel", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
             { "id": "inventory.airlines", "title": "Airlines", "path": "/app/inventory/airlines", "icon": "local_airport", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
-            { "id": "inventory.vendors", "title": "Vendors", "path": "/app/inventory/vendors", "icon": "store", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
             { "id": "inventory.contracts", "title": "Vendor Contracts", "path": "/app/inventory/contracts", "icon": "description", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } },
             { "id": "inventory.stock", "title": "Inventory Stock (Rooms/Seats/Transport)", "path": "/app/inventory/stock", "icon": "inventory_2", "permissions": { "can_view": true, "can_create": true, "can_edit": true, "can_delete": true, "can_export": true, "can_import": true, "can_print": true, "data_scope": "ORG" } }
         ]

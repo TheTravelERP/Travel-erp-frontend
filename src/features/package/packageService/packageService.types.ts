@@ -10,10 +10,7 @@ export interface PackageServiceFormInput {
   service_order?: number;
   service_type: string;
 
-  inventory_id?: number;
-  hotel_id?: number;
-  airline_id?: number;
-  vendor_id?: number;
+  inventory_uuid?: string;
 
   description?: string;
 
@@ -45,6 +42,9 @@ export interface PackageServiceListItem {
   package_uuid: string;
   package_code?: string;
   package_name?: string;
+  inventory_uuid?: string;
+  inventory_code?: string;
+  inventory_name?: string;
   day_no: number;
   service_order: number;
   service_type: string;

@@ -33,6 +33,7 @@
     "status": "Status",
     "active": "Active",
     "inactive": "Inactive",
+    "all": "All",
     "priority": "Priority",
     "notes": "Notes",
     "email": "Email",
@@ -126,7 +127,6 @@
     "inventory": "Inventory & Vendors",
     "inventory.hotels": "Hotels (Makkah/Madinah)",
     "inventory.airlines": "Airlines",
-    "inventory.vendors": "Vendors",
     "inventory.contracts": "Vendor Contracts",
     "inventory.stock": "Inventory Stock (Rooms/Seats/Transport)",
     "visa": "Visa & Travelers",
@@ -203,8 +203,7 @@
     "packages.pricing": "Package Pricing",
     "packages.services": "Package Services",
     "inventory.ziyarat": "Ziyarat",
-    "inventory.insurance": "Insurance Providers",
-    "inventory.guides": "Guides"
+    "inventory.vendor_master": "Vendor Master"
   },
   "enquiry": {
     "conversionStatus": "Conversion Status",
@@ -392,7 +391,9 @@
     "confirmPasswordRequired": "Confirm password is required",
     "passwordMismatch": "Password and confirm password does not match",
     "currentPasswordRequired": "Current password is required",
-    "nameRequired": "Name is required"
+    "nameRequired": "Name is required",
+    "codeRequired": "Code is required",
+    "endDateBeforeStartDate": "End date cannot be earlier than start date"
   },
   "auth": {
     "appTitle": "Travel ERP",
@@ -560,11 +561,8 @@
     "pricingSection": "Pricing",
     "costPrice": "Cost Price",
     "sellingPrice": "Selling Price",
-    "vendorSection": "Vendor References",
-    "hotelId": "Hotel ID",
-    "airlineId": "Airline ID",
-    "vendorId": "Vendor ID",
-    "inventoryId": "Inventory ID",
+    "inventorySection": "Inventory Reference",
+    "inventory": "Inventory",
     "remarks": "Remarks",
     "colPackage": "Package",
     "colDay": "Day",
@@ -633,22 +631,86 @@
       "nameRequired": "Airline name is required"
     }
   },
-  "transportCompany": {
-    "name": "Company Name",
+  "vendor": {
+    "code": "Vendor Code",
+    "name": "Vendor Name",
+    "type": "Vendor Type",
     "contactPerson": "Contact Person",
     "mobile": "Mobile",
     "email": "Email",
+    "website": "Website",
+    "gstin": "GSTIN",
+    "pan": "PAN",
     "address": "Address",
     "city": "City",
+    "state": "State",
     "country": "Country",
-    "gstin": "GSTIN",
+    "pincode": "Pincode",
+    "paymentTerms": "Payment Terms",
     "remarks": "Remarks",
-    "colName": "Company Name",
+    "status": "Status",
+    "colCode": "Vendor Code",
+    "colName": "Vendor Name",
+    "colType": "Type",
     "colContactPerson": "Contact Person",
     "colMobile": "Mobile",
     "colCity": "City",
+    "colStatus": "Status"
+  },
+  "vendorContract": {
+    "title": "Contract Details",
+    "vendor": "Vendor",
+    "code": "Contract Code",
+    "name": "Contract Name",
+    "type": "Contract Type",
+    "referenceNo": "Reference No.",
+    "validFrom": "Valid From",
+    "validTo": "Valid To",
+    "currency": "Currency",
+    "paymentTerms": "Payment Terms",
+    "remarks": "Remarks",
+    "status": "Status",
+    "colCode": "Contract Code",
+    "colName": "Contract Name",
+    "colVendor": "Vendor",
+    "colType": "Type",
+    "colValidFrom": "Valid From",
+    "colValidTo": "Valid To",
+    "colStatus": "Status",
     "validation": {
-      "nameRequired": "Company name is required"
+      "vendorRequired": "Vendor is required",
+      "validToBeforeValidFrom": "Valid To cannot be earlier than Valid From"
+    }
+  },
+  "inventoryStock": {
+    "title": "Inventory Details",
+    "contract": "Vendor Contract",
+    "code": "Inventory Code",
+    "name": "Inventory Name",
+    "serviceType": "Service Type",
+    "serviceReference": "Linked Service",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "totalQty": "Total Quantity",
+    "bookedQty": "Booked Quantity",
+    "blockedQty": "Blocked Quantity",
+    "costPrice": "Cost Price",
+    "sellingPrice": "Selling Price",
+    "quantitiesAndPricing": "Quantities & Pricing",
+    "colCode": "Inventory Code",
+    "colName": "Inventory Name",
+    "colServiceType": "Service Type",
+    "colContract": "Contract",
+    "colTotalQty": "Total",
+    "colBookedQty": "Booked",
+    "colAvailableQty": "Available",
+    "colStatus": "Status",
+    "validation": {
+      "contractRequired": "Vendor contract is required",
+      "qtyWholeNumber": "Quantity must be a whole number",
+      "totalQtyPositive": "Total quantity must be greater than zero",
+      "bookedExceedsTotal": "Booked quantity cannot exceed total quantity",
+      "blockedExceedsAvailable": "Blocked quantity cannot exceed available quantity"
     }
   },
   "ziyarat": {
@@ -668,38 +730,6 @@
     "colDefaultCost": "Default Cost",
     "validation": {
       "nameRequired": "Ziyarat name is required"
-    }
-  },
-  "insuranceProvider": {
-    "name": "Provider Name",
-    "contactPerson": "Contact Person",
-    "phone": "Phone",
-    "email": "Email",
-    "website": "Website",
-    "remarks": "Remarks",
-    "colName": "Provider Name",
-    "colContactPerson": "Contact Person",
-    "colPhone": "Phone",
-    "colEmail": "Email",
-    "validation": {
-      "nameRequired": "Provider name is required"
-    }
-  },
-  "guide": {
-    "name": "Guide Name",
-    "mobile": "Mobile",
-    "email": "Email",
-    "languages": "Languages",
-    "languagesHint": "e.g. English, Arabic, Urdu",
-    "licenseNo": "License No.",
-    "experienceYears": "Experience (Years)",
-    "remarks": "Remarks",
-    "colName": "Name",
-    "colMobile": "Mobile",
-    "colLanguages": "Languages",
-    "colExperience": "Experience",
-    "validation": {
-      "nameRequired": "Guide name is required"
     }
   }
 }

@@ -18,10 +18,10 @@ import PackagePricingRoutes from '../../features/package/packagePricing/packageP
 import PackageServiceRoutes from '../../features/package/packageService/packageService.routes';
 import HotelRoutes from '../../features/inventory/hotel/hotel.routes';
 import AirlineRoutes from '../../features/inventory/airline/airline.routes';
-import TransportCompanyRoutes from '../../features/inventory/transportCompany/transportCompany.routes';
+import VendorRoutes from '../../features/inventory/vendor/vendor.routes';
+import VendorContractRoutes from '../../features/inventory/vendorContract/vendorContract.routes';
+import InventoryStockRoutes from '../../features/inventory/inventoryStock/inventoryStock.routes';
 import ZiyaratRoutes from '../../features/inventory/ziyarat/ziyarat.routes';
-import InsuranceProviderRoutes from '../../features/inventory/insuranceProvider/insuranceProvider.routes';
-import GuideRoutes from '../../features/inventory/guide/guide.routes';
 import SettingsPage from '../../features/settings';
 import ChangePasswordPage from '../../features/profile/pages/ChangePasswordPage';
 import OrganizationSettingsPage from '../../features/settings/pages/OrganizationSettingsPage';
@@ -41,8 +41,6 @@ const COMING_SOON_ROUTES: { menuId: string; path: string }[] = [
   { menuId: 'packages.bookings', path: '/app/bookings/list' },
   { menuId: 'packages.itinerary', path: '/app/bookings/services' },
   { menuId: 'packages.room_allocation', path: '/app/bookings/room-allocation' },
-  { menuId: 'inventory.contracts', path: '/app/inventory/contracts' },
-  { menuId: 'inventory.stock', path: '/app/inventory/stock' },
   { menuId: 'visa.travelers', path: '/app/ops/travelers' },
   { menuId: 'visa.management', path: '/app/ops/visa' },
   { menuId: 'visa.group_processing', path: '/app/ops/visa-batches' },
@@ -138,10 +136,10 @@ export default function AppRouter() {
         <Route path="/app/packages/services/*" element={<PackageServiceRoutes />} />
         <Route path="/app/inventory/hotels/*" element={<HotelRoutes />} />
         <Route path="/app/inventory/airlines/*" element={<AirlineRoutes />} />
-        <Route path="/app/inventory/vendors/*" element={<TransportCompanyRoutes />} />
+        <Route path="/app/inventory/vendor-master/*" element={<VendorRoutes />} />
+        <Route path="/app/inventory/contracts/*" element={<VendorContractRoutes />} />
+        <Route path="/app/inventory/stock/*" element={<InventoryStockRoutes />} />
         <Route path="/app/inventory/ziyarat/*" element={<ZiyaratRoutes />} />
-        <Route path="/app/inventory/insurance/*" element={<InsuranceProviderRoutes />} />
-        <Route path="/app/inventory/guides/*" element={<GuideRoutes />} />
         <Route path="/app/settings/theme-color" element={<SettingsPage />} />
         <Route path="/app/profile/change-password" element={<ChangePasswordPage />} />
 

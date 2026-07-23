@@ -33,6 +33,7 @@
     "status": "Estado",
     "active": "Activo",
     "inactive": "Inactivo",
+    "all": "Todos",
     "priority": "Prioridad",
     "notes": "Notas",
     "email": "Correo electrónico",
@@ -126,7 +127,6 @@
     "inventory": "Inventario y proveedores",
     "inventory.hotels": "Hoteles (La Meca/Medina)",
     "inventory.airlines": "Aerolíneas",
-    "inventory.vendors": "Proveedores",
     "inventory.contracts": "Contratos de proveedores",
     "inventory.stock": "Stock de inventario (habitaciones/asientos/transporte)",
     "visa": "Visado y viajeros",
@@ -203,8 +203,7 @@
     "packages.pricing": "Precios de paquetes",
     "packages.services": "Servicios del paquete",
     "inventory.ziyarat": "Ziyarat",
-    "inventory.insurance": "Proveedores de Seguro",
-    "inventory.guides": "Guías"
+    "inventory.vendor_master": "Proveedores"
   },
   "enquiry": {
     "conversionStatus": "Estado de conversión",
@@ -392,7 +391,9 @@
     "confirmPasswordRequired": "La confirmación de la contraseña es obligatoria",
     "passwordMismatch": "La contraseña y su confirmación no coinciden",
     "currentPasswordRequired": "La contraseña actual es obligatoria",
-    "nameRequired": "El nombre es obligatorio"
+    "nameRequired": "El nombre es obligatorio",
+    "codeRequired": "El código es obligatorio",
+    "endDateBeforeStartDate": "La fecha de fin no puede ser anterior a la fecha de inicio"
   },
   "auth": {
     "appTitle": "Travel ERP",
@@ -560,11 +561,8 @@
     "pricingSection": "Precios",
     "costPrice": "Precio de costo",
     "sellingPrice": "Precio de venta",
-    "vendorSection": "Referencias de proveedor",
-    "hotelId": "ID de Hotel",
-    "airlineId": "ID de Aerolínea",
-    "vendorId": "ID de Proveedor",
-    "inventoryId": "ID de Inventario",
+    "inventorySection": "Referencia de inventario",
+    "inventory": "Inventario",
     "remarks": "Observaciones",
     "colPackage": "Paquete",
     "colDay": "Día",
@@ -633,22 +631,86 @@
       "nameRequired": "El nombre de la aerolínea es obligatorio"
     }
   },
-  "transportCompany": {
-    "name": "Nombre de la empresa",
+  "vendor": {
+    "code": "Código de proveedor",
+    "name": "Nombre del proveedor",
+    "type": "Tipo de proveedor",
     "contactPerson": "Persona de contacto",
     "mobile": "Móvil",
     "email": "Correo electrónico",
+    "website": "Sitio web",
+    "gstin": "GSTIN",
+    "pan": "PAN",
     "address": "Dirección",
     "city": "Ciudad",
+    "state": "Estado / Región",
     "country": "País",
-    "gstin": "GSTIN",
+    "pincode": "Código postal",
+    "paymentTerms": "Condiciones de pago",
     "remarks": "Observaciones",
-    "colName": "Nombre de la empresa",
+    "status": "Estado",
+    "colCode": "Código de proveedor",
+    "colName": "Nombre del proveedor",
+    "colType": "Tipo",
     "colContactPerson": "Persona de contacto",
     "colMobile": "Móvil",
     "colCity": "Ciudad",
+    "colStatus": "Estado"
+  },
+  "vendorContract": {
+    "title": "Detalles del contrato",
+    "vendor": "Proveedor",
+    "code": "Código de contrato",
+    "name": "Nombre del contrato",
+    "type": "Tipo de contrato",
+    "referenceNo": "N.º de referencia",
+    "validFrom": "Válido desde",
+    "validTo": "Válido hasta",
+    "currency": "Moneda",
+    "paymentTerms": "Condiciones de pago",
+    "remarks": "Observaciones",
+    "status": "Estado",
+    "colCode": "Código de contrato",
+    "colName": "Nombre del contrato",
+    "colVendor": "Proveedor",
+    "colType": "Tipo",
+    "colValidFrom": "Válido desde",
+    "colValidTo": "Válido hasta",
+    "colStatus": "Estado",
     "validation": {
-      "nameRequired": "El nombre de la empresa es obligatorio"
+      "vendorRequired": "El proveedor es obligatorio",
+      "validToBeforeValidFrom": "La fecha de fin no puede ser anterior a la fecha de inicio"
+    }
+  },
+  "inventoryStock": {
+    "title": "Detalles del inventario",
+    "contract": "Contrato de proveedor",
+    "code": "Código de inventario",
+    "name": "Nombre del inventario",
+    "serviceType": "Tipo de servicio",
+    "serviceReference": "Servicio vinculado",
+    "startDate": "Fecha de inicio",
+    "endDate": "Fecha de fin",
+    "totalQty": "Cantidad total",
+    "bookedQty": "Cantidad reservada",
+    "blockedQty": "Cantidad bloqueada",
+    "costPrice": "Precio de costo",
+    "sellingPrice": "Precio de venta",
+    "quantitiesAndPricing": "Cantidades y precios",
+    "colCode": "Código de inventario",
+    "colName": "Nombre del inventario",
+    "colServiceType": "Tipo de servicio",
+    "colContract": "Contrato",
+    "colTotalQty": "Total",
+    "colBookedQty": "Reservado",
+    "colAvailableQty": "Disponible",
+    "colStatus": "Estado",
+    "validation": {
+      "contractRequired": "El contrato de proveedor es obligatorio",
+      "qtyWholeNumber": "La cantidad debe ser un número entero",
+      "totalQtyPositive": "La cantidad total debe ser mayor que cero",
+      "bookedExceedsTotal": "La cantidad reservada no puede superar la cantidad total",
+      "blockedExceedsAvailable": "La cantidad bloqueada no puede superar la cantidad disponible"
     }
   },
   "ziyarat": {
@@ -668,38 +730,6 @@
     "colDefaultCost": "Costo predeterminado",
     "validation": {
       "nameRequired": "El nombre de la Ziyarat es obligatorio"
-    }
-  },
-  "insuranceProvider": {
-    "name": "Nombre del proveedor",
-    "contactPerson": "Persona de contacto",
-    "phone": "Teléfono",
-    "email": "Correo electrónico",
-    "website": "Sitio web",
-    "remarks": "Observaciones",
-    "colName": "Nombre del proveedor",
-    "colContactPerson": "Persona de contacto",
-    "colPhone": "Teléfono",
-    "colEmail": "Correo electrónico",
-    "validation": {
-      "nameRequired": "El nombre del proveedor es obligatorio"
-    }
-  },
-  "guide": {
-    "name": "Nombre del guía",
-    "mobile": "Móvil",
-    "email": "Correo electrónico",
-    "languages": "Idiomas",
-    "languagesHint": "p. ej. Inglés, Árabe, Urdu",
-    "licenseNo": "N.º de licencia",
-    "experienceYears": "Experiencia (años)",
-    "remarks": "Observaciones",
-    "colName": "Nombre",
-    "colMobile": "Móvil",
-    "colLanguages": "Idiomas",
-    "colExperience": "Experiencia",
-    "validation": {
-      "nameRequired": "El nombre del guía es obligatorio"
     }
   }
 }

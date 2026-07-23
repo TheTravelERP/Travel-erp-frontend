@@ -9,10 +9,7 @@ export const getPackageServiceSchema = (t: TFunction) =>
     service_order: z.coerce.number().int().min(0).optional(),
     service_type: z.string().trim().min(1, t('packageService.validation.serviceTypeRequired')),
 
-    inventory_id: z.coerce.number().int().optional(),
-    hotel_id: z.coerce.number().int().optional(),
-    airline_id: z.coerce.number().int().optional(),
-    vendor_id: z.coerce.number().int().optional(),
+    inventory_uuid: z.string().trim().optional(),
 
     description: z.string().trim().max(255).optional(),
 

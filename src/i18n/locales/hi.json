@@ -33,6 +33,7 @@
     "status": "स्थिति",
     "active": "सक्रिय",
     "inactive": "निष्क्रिय",
+    "all": "सभी",
     "priority": "प्राथमिकता",
     "notes": "नोट्स",
     "email": "ईमेल",
@@ -126,7 +127,6 @@
     "inventory": "इन्वेंटरी और विक्रेता",
     "inventory.hotels": "होटल (मक्का/मदीना)",
     "inventory.airlines": "एयरलाइंस",
-    "inventory.vendors": "विक्रेता",
     "inventory.contracts": "विक्रेता अनुबंध",
     "inventory.stock": "इन्वेंटरी स्टॉक (कमरे/सीटें/परिवहन)",
     "visa": "वीज़ा और यात्री",
@@ -203,8 +203,7 @@
     "packages.pricing": "पैकेज मूल्य निर्धारण",
     "packages.services": "पैकेज सेवाएं",
     "inventory.ziyarat": "ज़ियारत",
-    "inventory.insurance": "बीमा प्रदाता",
-    "inventory.guides": "गाइड"
+    "inventory.vendor_master": "विक्रेता"
   },
   "enquiry": {
     "conversionStatus": "रूपांतरण स्थिति",
@@ -392,7 +391,9 @@
     "confirmPasswordRequired": "पासवर्ड की पुष्टि आवश्यक है",
     "passwordMismatch": "पासवर्ड और पुष्टि पासवर्ड मेल नहीं खाते",
     "currentPasswordRequired": "वर्तमान पासवर्ड आवश्यक है",
-    "nameRequired": "नाम आवश्यक है"
+    "nameRequired": "नाम आवश्यक है",
+    "codeRequired": "कोड आवश्यक है",
+    "endDateBeforeStartDate": "समाप्ति तिथि प्रारंभ तिथि से पहले नहीं हो सकती"
   },
   "auth": {
     "appTitle": "Travel ERP",
@@ -560,11 +561,8 @@
     "pricingSection": "मूल्य निर्धारण",
     "costPrice": "लागत मूल्य",
     "sellingPrice": "विक्रय मूल्य",
-    "vendorSection": "विक्रेता संदर्भ",
-    "hotelId": "होटल आईडी",
-    "airlineId": "एयरलाइन आईडी",
-    "vendorId": "विक्रेता आईडी",
-    "inventoryId": "इन्वेंटरी आईडी",
+    "inventorySection": "इन्वेंटरी संदर्भ",
+    "inventory": "इन्वेंटरी",
     "remarks": "टिप्पणियाँ",
     "colPackage": "पैकेज",
     "colDay": "दिन",
@@ -633,22 +631,86 @@
       "nameRequired": "एयरलाइन नाम आवश्यक है"
     }
   },
-  "transportCompany": {
-    "name": "कंपनी का नाम",
+  "vendor": {
+    "code": "वेंडर कोड",
+    "name": "वेंडर नाम",
+    "type": "वेंडर प्रकार",
     "contactPerson": "संपर्क व्यक्ति",
     "mobile": "मोबाइल",
     "email": "ईमेल",
+    "website": "वेबसाइट",
+    "gstin": "जीएसटीआईएन",
+    "pan": "पैन",
     "address": "पता",
     "city": "शहर",
+    "state": "राज्य",
     "country": "देश",
-    "gstin": "जीएसटीआईएन",
+    "pincode": "पिनकोड",
+    "paymentTerms": "भुगतान शर्तें",
     "remarks": "टिप्पणियाँ",
-    "colName": "कंपनी का नाम",
+    "status": "स्थिति",
+    "colCode": "वेंडर कोड",
+    "colName": "वेंडर नाम",
+    "colType": "प्रकार",
     "colContactPerson": "संपर्क व्यक्ति",
     "colMobile": "मोबाइल",
     "colCity": "शहर",
+    "colStatus": "स्थिति"
+  },
+  "vendorContract": {
+    "title": "अनुबंध विवरण",
+    "vendor": "वेंडर",
+    "code": "अनुबंध कोड",
+    "name": "अनुबंध नाम",
+    "type": "अनुबंध प्रकार",
+    "referenceNo": "संदर्भ संख्या",
+    "validFrom": "इससे मान्य",
+    "validTo": "इस तक मान्य",
+    "currency": "मुद्रा",
+    "paymentTerms": "भुगतान शर्तें",
+    "remarks": "टिप्पणियाँ",
+    "status": "स्थिति",
+    "colCode": "अनुबंध कोड",
+    "colName": "अनुबंध नाम",
+    "colVendor": "वेंडर",
+    "colType": "प्रकार",
+    "colValidFrom": "इससे मान्य",
+    "colValidTo": "इस तक मान्य",
+    "colStatus": "स्थिति",
     "validation": {
-      "nameRequired": "कंपनी का नाम आवश्यक है"
+      "vendorRequired": "वेंडर आवश्यक है",
+      "validToBeforeValidFrom": "\"इस तक मान्य\" तारीख \"इससे मान्य\" तारीख से पहले नहीं हो सकती"
+    }
+  },
+  "inventoryStock": {
+    "title": "इन्वेंटरी विवरण",
+    "contract": "वेंडर अनुबंध",
+    "code": "इन्वेंटरी कोड",
+    "name": "इन्वेंटरी नाम",
+    "serviceType": "सेवा प्रकार",
+    "serviceReference": "जुड़ी हुई सेवा",
+    "startDate": "प्रारंभ तिथि",
+    "endDate": "समाप्ति तिथि",
+    "totalQty": "कुल मात्रा",
+    "bookedQty": "बुक की गई मात्रा",
+    "blockedQty": "रोकी गई मात्रा",
+    "costPrice": "लागत मूल्य",
+    "sellingPrice": "विक्रय मूल्य",
+    "quantitiesAndPricing": "मात्रा और मूल्य निर्धारण",
+    "colCode": "इन्वेंटरी कोड",
+    "colName": "इन्वेंटरी नाम",
+    "colServiceType": "सेवा प्रकार",
+    "colContract": "अनुबंध",
+    "colTotalQty": "कुल",
+    "colBookedQty": "बुक की गई",
+    "colAvailableQty": "उपलब्ध",
+    "colStatus": "स्थिति",
+    "validation": {
+      "contractRequired": "वेंडर अनुबंध आवश्यक है",
+      "qtyWholeNumber": "मात्रा एक पूर्ण संख्या होनी चाहिए",
+      "totalQtyPositive": "कुल मात्रा शून्य से अधिक होनी चाहिए",
+      "bookedExceedsTotal": "बुक की गई मात्रा कुल मात्रा से अधिक नहीं हो सकती",
+      "blockedExceedsAvailable": "रोकी गई मात्रा उपलब्ध मात्रा से अधिक नहीं हो सकती"
     }
   },
   "ziyarat": {
@@ -668,38 +730,6 @@
     "colDefaultCost": "डिफ़ॉल्ट लागत",
     "validation": {
       "nameRequired": "ज़ियारत नाम आवश्यक है"
-    }
-  },
-  "insuranceProvider": {
-    "name": "प्रदाता नाम",
-    "contactPerson": "संपर्क व्यक्ति",
-    "phone": "फोन",
-    "email": "ईमेल",
-    "website": "वेबसाइट",
-    "remarks": "टिप्पणियाँ",
-    "colName": "प्रदाता नाम",
-    "colContactPerson": "संपर्क व्यक्ति",
-    "colPhone": "फोन",
-    "colEmail": "ईमेल",
-    "validation": {
-      "nameRequired": "प्रदाता नाम आवश्यक है"
-    }
-  },
-  "guide": {
-    "name": "गाइड नाम",
-    "mobile": "मोबाइल",
-    "email": "ईमेल",
-    "languages": "भाषाएँ",
-    "languagesHint": "जैसे अंग्रेज़ी, अरबी, उर्दू",
-    "licenseNo": "लाइसेंस नंबर",
-    "experienceYears": "अनुभव (वर्ष)",
-    "remarks": "टिप्पणियाँ",
-    "colName": "नाम",
-    "colMobile": "मोबाइल",
-    "colLanguages": "भाषाएँ",
-    "colExperience": "अनुभव",
-    "validation": {
-      "nameRequired": "गाइड नाम आवश्यक है"
     }
   }
 }
