@@ -2,6 +2,7 @@
 import { Box, TextField, Button, Grid, Typography, Stack, MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import DropdownAutocomplete from '../../../../components/common/DropdownAutocomplete';
+import QuickDateRangeFilter from '../../../../components/common/QuickDateRangeFilter';
 
 export interface UsersFilterValues {
   search?: string;
@@ -9,6 +10,8 @@ export interface UsersFilterValues {
   status?: string;
   designation?: string;
   gender?: string;
+  from_date?: string;
+  to_date?: string;
 }
 
 interface UsersFiltersProps {
@@ -41,6 +44,12 @@ export default function UsersFilters({ value, onChange, onApply, onReset }: User
       </Stack>
 
       <Grid container spacing={2}>
+        <QuickDateRangeFilter
+          fromDate={value.from_date}
+          toDate={value.to_date}
+          onChange={onChange}
+        />
+
         <Grid size={{ xs: 12, md: 3 }}>
           <TextField
             select

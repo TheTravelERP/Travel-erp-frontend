@@ -1,6 +1,5 @@
 // src/features/customer/components/CustomerForm.tsx
 import {
-  Autocomplete,
   Box,
   Button,
   TextField,
@@ -11,28 +10,23 @@ import {
   Stack,
 } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { getCustomerSchema } from "../customer.schema";
 import type { z } from "zod";
+import CountryAutocomplete from "../../../components/common/CountryAutocomplete";
 import DropdownAutocomplete from "../../../components/common/DropdownAutocomplete";
+import EntityAutocomplete from "../../../components/common/EntityAutocomplete";
 import FileUploadField from "../../../components/common/FileUploadField";
+import MobileNumberField from "../../../components/common/MobileNumberField";
 import { useNavigate } from "react-router-dom";
-import { getCountries } from "../../../services/public.service";
 import { uploadFile } from "../../../services/upload.service";
 import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../utils/mergeFormDefaults";
 
 const DOC_SLOTS = ["doc1", "doc2", "doc3", "doc4"] as const;
-
-interface Country {
-  iso_code: string;
-  label: string;
-  phone_code: string;
-  flag_url: string;
-}
 
 export type CustomerFormValues = z.infer<ReturnType<typeof getCustomerSchema>>;
 
@@ -49,12 +43,15 @@ const emptyValues: CustomerFormValues = {
   gender: "",
   dob: "",
   nationality: "",
+  country: "",
+  agent_uuid: "",
   passport_no: "",
   passport_issue_date: "",
   passport_expiry_date: "",
   passport_issue_country: "",
   email: "",
   mobile: "",
+  alternate_mobile: "",
   gstin: "",
   billing_address: "",
   picture_url: "",
@@ -99,21 +96,6 @@ export default function CustomerForm({
     }
   }, [defaultValues, reset]);
 
-  const [countries, setCountries] = useState<Country[]>([]);
-  const [countryLoading, setCountryLoading] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        setCountryLoading(true);
-        const res = await getCountries();
-        setCountries(res.items || []);
-      } finally {
-        setCountryLoading(false);
-      }
-    })();
-  }, []);
-
   return (
     <Box
       component="form"
@@ -150,20 +132,14 @@ export default function CustomerForm({
               </Grid>
 
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Controller
-                  name="mobile"
+                <MobileNumberField name="mobile" control={control} label={t("common.mobile")} required />
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <MobileNumberField
+                  name="alternate_mobile"
                   control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label={t("common.mobile")}
-                      fullWidth
-                      required
-                      placeholder="+14155550100"
-                      error={!!errors.mobile}
-                      helperText={errors.mobile?.message}
-                    />
-                  )}
+                  label={t("customer.alternateMobile")}
                 />
               </Grid>
 
@@ -210,36 +186,30 @@ export default function CustomerForm({
               </Grid>
 
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Controller
+                <CountryAutocomplete
+                  name="country"
+                  control={control}
+                  field="label"
+                  label={t("customer.country")}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <CountryAutocomplete
                   name="nationality"
                   control={control}
-                  render={({ field }) => (
-                    <Autocomplete
-                      options={countries}
-                      loading={countryLoading}
-                      value={countries.find((c) => c.label === field.value) || null}
-                      isOptionEqualToValue={(option, value) => option.label === value?.label}
-                      getOptionLabel={(option) => option?.label || ""}
-                      onChange={(_, value) => field.onChange(value?.label || "")}
-                      renderOption={(props, option) => {
-                        const { key, ...optionProps } = props;
-                        return (
-                          <Box
-                            key={key}
-                            component="li"
-                            {...optionProps}
-                            sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                          >
-                            <img src={option.flag_url} width={20} alt="" />
-                            {option.label}
-                          </Box>
-                        );
-                      }}
-                      renderInput={(params) => (
-                        <TextField {...params} label={t("customer.nationality")} fullWidth />
-                      )}
-                    />
-                  )}
+                  field="nationality"
+                  label={t("customer.nationality")}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <EntityAutocomplete
+                  name="agent_uuid"
+                  label={t("customer.agent")}
+                  control={control}
+                  dropdownName="users"
+                  allowAdd={false}
                 />
               </Grid>
             </Grid>
@@ -297,40 +267,11 @@ export default function CustomerForm({
               </Grid>
 
               <Grid size={{ xs: 12, sm: 3 }}>
-                <Controller
+                <CountryAutocomplete
                   name="passport_issue_country"
                   control={control}
-                  render={({ field }) => (
-                    <Autocomplete
-                      options={countries}
-                      loading={countryLoading}
-                      value={countries.find((c) => c.label === field.value) || null}
-                      isOptionEqualToValue={(option, value) => option.label === value?.label}
-                      getOptionLabel={(option) => option?.label || ""}
-                      onChange={(_, value) => field.onChange(value?.label || "")}
-                      renderOption={(props, option) => {
-                        const { key, ...optionProps } = props;
-                        return (
-                          <Box
-                            key={key}
-                            component="li"
-                            {...optionProps}
-                            sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                          >
-                            <img src={option.flag_url} width={20} alt="" />
-                            {option.label}
-                          </Box>
-                        );
-                      }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          label={t("customer.passportIssueCountry")}
-                          fullWidth
-                        />
-                      )}
-                    />
-                  )}
+                  field="label"
+                  label={t("customer.passportIssueCountry")}
                 />
               </Grid>
             </Grid>

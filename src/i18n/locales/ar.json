@@ -7,12 +7,15 @@
     "edit": "تعديل",
     "delete": "حذف",
     "view": "عرض",
+    "clone": "استنساخ",
     "save": "حفظ",
     "discard": "تجاهل",
     "back": "رجوع",
     "reset": "إعادة تعيين",
     "clear": "مسح",
     "close": "إغلاق",
+    "row": "الصف",
+    "error": "خطأ",
     "cancel": "إلغاء",
     "restore": "استعادة",
     "search": "بحث",
@@ -41,6 +44,13 @@
     "customerName": "اسم العميل",
     "fromDate": "من تاريخ",
     "toDate": "إلى تاريخ",
+    "dateRange": "النطاق الزمني",
+    "today": "اليوم",
+    "thisWeek": "هذا الأسبوع",
+    "thisMonth": "هذا الشهر",
+    "thisYear": "هذا العام",
+    "thisFinancialYear": "السنة المالية الحالية",
+    "dateRangeInvalid": "يجب أن يكون \"من تاريخ\" قبل \"إلى تاريخ\" أو مساويًا له",
     "actions": "الإجراءات",
     "createdOn": "تاريخ الإنشاء",
     "new": "جديد",
@@ -91,7 +101,11 @@
       "november": "نوفمبر",
       "december": "ديسمبر"
     },
-    "searchByCodeName": "البحث بالرمز والاسم..."
+    "searchByCodeName": "البحث بالرمز والاسم...",
+    "yes": "نعم",
+    "no": "لا",
+    "address": "العنوان",
+    "description": "الوصف"
   },
   "profile": {
     "home": "الرئيسية",
@@ -191,7 +205,7 @@
     "settings": "الإعدادات",
     "settings.organization": "المؤسسة",
     "settings.users": "المستخدمون",
-    "settings.permissions": "الصلاحيات",
+    "settings.permissions": "سجل الأدوار",
     "settings.dropdown": "إعدادات القوائم المنسدلة",
     "settings.finance": "العملة والضريبة",
     "settings.invoice_branding": "الفواتير والعلامة التجارية",
@@ -203,9 +217,12 @@
     "packages.pricing": "أسعار الباقات",
     "packages.services": "خدمات الباقة",
     "inventory.ziyarat": "الزيارة",
-    "inventory.vendor_master": "الموردون"
+    "inventory.vendor_master": "الموردون",
+    "settings.branch_master": "سجل الفروع",
+    "settings.document_type_master": "سجل أنواع المستندات"
   },
   "enquiry": {
+    "alternateMobile": "رقم الجوال البديل",
     "conversionStatus": "حالة التحويل",
     "leadSource": "مصدر العميل المحتمل",
     "searchPlaceholder": "ابحث بالعميل أو الجوال أو الباقة...",
@@ -237,7 +254,10 @@
   },
   "customer": {
     "searchPlaceholder": "ابحث بالاسم أو الجوال أو البريد الإلكتروني أو جواز السفر...",
+    "alternateMobile": "رقم الجوال البديل",
     "nationality": "الجنسية",
+    "country": "الدولة",
+    "agent": "الوكيل",
     "passportDetails": "بيانات جواز السفر",
     "passportNumber": "رقم جواز السفر",
     "passportIssueDate": "تاريخ إصدار جواز السفر",
@@ -310,6 +330,7 @@
     "name": "الاسم",
     "shortName": "الاسم المختصر",
     "status": "الحالة",
+    "packageStatus": "حالة الباقة",
     "featured": "مميز",
     "active": "نشط",
     "routeSection": "المسار والتواريخ",
@@ -393,7 +414,9 @@
     "currentPasswordRequired": "كلمة المرور الحالية مطلوبة",
     "nameRequired": "الاسم مطلوب",
     "codeRequired": "الرمز مطلوب",
-    "endDateBeforeStartDate": "لا يمكن أن يكون تاريخ الانتهاء أقدم من تاريخ البدء"
+    "endDateBeforeStartDate": "لا يمكن أن يكون تاريخ الانتهاء أقدم من تاريخ البدء",
+    "roleRequired": "يرجى اختيار دور",
+    "branchRequired": "يرجى اختيار فرع"
   },
   "auth": {
     "appTitle": "Travel ERP",
@@ -490,7 +513,7 @@
     "pdfFooterText": "نص تذييل PDF",
     "account": "الحساب",
     "fullName": "الاسم الكامل",
-    "role": "الدور",
+    "role": "نوع المستخدم",
     "userType": {
       "Admin": "مسؤول",
       "Employee": "موظف",
@@ -520,8 +543,7 @@
       "Inactive": "غير نشط",
       "Suspended": "موقوف"
     },
-    "any": "أي",
-    "userCreatedAssignPermissions": "تم إنشاء المستخدم. قم بتعيين الصلاحيات له ضمن الصلاحيات."
+    "any": "أي"
   },
   "packagePricing": {
     "package": "الباقة",
@@ -731,5 +753,98 @@
     "validation": {
       "nameRequired": "اسم الزيارة مطلوب"
     }
+  },
+  "branch": {
+    "title": "الفرع",
+    "code": "رمز الفرع",
+    "name": "اسم الفرع",
+    "legalName": "الاسم القانوني",
+    "currency": "العملة",
+    "phone": "الهاتف",
+    "email": "البريد الإلكتروني",
+    "website": "الموقع الإلكتروني",
+    "addressLine1": "العنوان السطر 1",
+    "addressLine2": "العنوان السطر 2",
+    "city": "المدينة",
+    "state": "المحافظة/الولاية",
+    "country": "الدولة",
+    "postalCode": "الرمز البريدي",
+    "timezone": "المنطقة الزمنية",
+    "remarks": "ملاحظات",
+    "headOffice": "المكتب الرئيسي",
+    "headOfficeCannotDelete": "لا يمكن حذف فرع المكتب الرئيسي",
+    "headOfficeCannotDeactivate": "لا يمكن تعطيل فرع المكتب الرئيسي",
+    "colCode": "الرمز",
+    "colName": "الاسم",
+    "colCurrency": "العملة",
+    "colCity": "المدينة",
+    "colCountry": "الدولة",
+    "validation": {
+      "currencyRequired": "العملة مطلوبة"
+    }
+  },
+  "documentType": {
+    "code": "رمز المستند",
+    "name": "اسم المستند",
+    "defaultPrefix": "البادئة الافتراضية",
+    "module": "الوحدة",
+    "sortOrder": "ترتيب الفرز",
+    "system": "نظام",
+    "systemCannotDelete": "لا يمكن حذف أنواع المستندات النظامية",
+    "colCode": "الرمز",
+    "colName": "الاسم",
+    "colDefaultPrefix": "البادئة الافتراضية",
+    "colModule": "الوحدة",
+    "colSortOrder": "ترتيب الفرز",
+    "validation": {
+      "moduleRequired": "الوحدة مطلوبة"
+    }
+  },
+  "documentNumberSeries": {
+    "seriesName": "اسم السلسلة",
+    "branch": "الفرع",
+    "documentType": "نوع المستند",
+    "prefix": "البادئة",
+    "suffix": "اللاحقة",
+    "separator": "الفاصل",
+    "numberLength": "طول الرقم",
+    "startingNumber": "الرقم الابتدائي",
+    "nextNumber": "الرقم التالي",
+    "resetPolicy": "سياسة إعادة التعيين",
+    "default": "افتراضي",
+    "locked": "مقفل",
+    "effectiveFrom": "تاريخ السريان (من)",
+    "effectiveTo": "تاريخ السريان (إلى)",
+    "lastGeneratedAt": "آخر توليد",
+    "cannotDeleteGenerated": "قامت هذه السلسلة بتوليد مستندات ولا يمكن حذفها. قم بإلغاء تفعيلها بدلاً من ذلك.",
+    "lockedFieldsHint": "قامت هذه السلسلة بتوليد مستندات. حقول الترقيم مقفلة؛ يمكن تغيير تاريخ السريان (إلى) والحالة النشطة فقط.",
+    "validation": {
+      "documentTypeRequired": "يرجى اختيار نوع مستند",
+      "prefixRequired": "البادئة مطلوبة",
+      "numberLengthMin": "يجب أن يكون طول الرقم 1 على الأقل",
+      "startingNumberPositive": "يجب أن يكون الرقم الابتدائي أكبر من صفر"
+    }
+  },
+  "role": {
+    "title": "الدور",
+    "code": "رمز الدور",
+    "name": "اسم الدور",
+    "system": "نظام",
+    "systemCannotDelete": "لا يمكن حذف الأدوار النظامية",
+    "permissions": "الصلاحيات",
+    "colCode": "الرمز",
+    "colName": "الاسم",
+    "colMenu": "القائمة",
+    "colAll": "الكل",
+    "colDataScope": "نطاق البيانات"
+  },
+  "userPermissionOverride": {
+    "title": "استثناءات الصلاحيات",
+    "add": "إضافة استثناء",
+    "empty": "لا توجد استثناءات — وصول هذا المستخدم يأتي بالكامل من دوره.",
+    "colMenu": "القائمة",
+    "colFlags": "الصلاحيات",
+    "colType": "النوع",
+    "menuRequired": "يرجى اختيار قائمة"
   }
 }

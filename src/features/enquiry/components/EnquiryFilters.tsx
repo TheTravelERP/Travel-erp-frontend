@@ -2,14 +2,16 @@
 
 import {
   Box,
-  TextField,
   Button,
   Grid,
+  MenuItem,
+  TextField,
   Typography,
   Stack,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import DropdownAutocomplete from "../../../components/common/DropdownAutocomplete";
+import QuickDateRangeFilter from "../../../components/common/QuickDateRangeFilter";
 
 /* ================= TYPES ================= */
 
@@ -20,6 +22,7 @@ export interface EnquiryFilterValues {
   to_date?: string;
   lead_source?: string;
   enquiry_priority?: string;
+  is_active?: string;
 }
 
 interface EnquiryFiltersProps {
@@ -58,27 +61,11 @@ export default function EnquiryFilters({
 
       <Grid container spacing={2}>
         {/* Date Range */}
-        <Grid size={{ xs: 12, md: 3 }}>
-          <TextField
-            label={t("common.fromDate")}
-            type="date"
-            fullWidth
-            value={value.from_date ?? ""}
-            slotProps={{ inputLabel: { shrink: true } }}
-            onChange={(e) => onChange({ from_date: e.target.value })}
-          />
-        </Grid>
-
-        <Grid size={{ xs: 12, md: 3 }}>
-          <TextField
-            label={t("common.toDate")}
-            type="date"
-            fullWidth
-            value={value.to_date ?? ""}
-            slotProps={{ inputLabel: { shrink: true } }}
-            onChange={(e) => onChange({ to_date: e.target.value })}
-          />
-        </Grid>
+        <QuickDateRangeFilter
+          fromDate={value.from_date}
+          toDate={value.to_date}
+          onChange={onChange}
+        />
 
         {/* Conversion Status */}
         <Grid size={{ xs: 12, md: 3 }}>
@@ -123,6 +110,21 @@ export default function EnquiryFilters({
             allowAdd={false}
             pagination={false}
           />
+        </Grid>
+
+        {/* Status */}
+        <Grid size={{ xs: 12, md: 3 }}>
+          <TextField
+            select
+            fullWidth
+            label={t("common.status")}
+            value={value.is_active ?? ""}
+            onChange={(e) => onChange({ is_active: e.target.value || undefined })}
+          >
+            <MenuItem value="">{t("common.all")}</MenuItem>
+            <MenuItem value="true">{t("common.active")}</MenuItem>
+            <MenuItem value="false">{t("common.inactive")}</MenuItem>
+          </TextField>
         </Grid>
 
         {/* Actions */}

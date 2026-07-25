@@ -33,6 +33,10 @@ export interface GetAirlinesParams {
   page?: number;
   page_size?: number;
   search?: string;
+  country?: string;
+  from_date?: string;
+  to_date?: string;
+  is_active?: boolean;
   is_deleted?: boolean;
 
   sort_by?: string;

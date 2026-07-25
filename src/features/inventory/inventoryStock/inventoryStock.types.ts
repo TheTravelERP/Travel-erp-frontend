@@ -61,6 +61,8 @@ export interface GetInventoryStocksParams {
   service_type?: string;
   contract_uuid?: string;
   status?: string;
+  from_date?: string;
+  to_date?: string;
   is_deleted?: boolean;
 
   sort_by?: string;

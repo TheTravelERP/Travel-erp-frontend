@@ -11,6 +11,8 @@ export interface CustomerFormInput {
   gender?: string;
   dob?: string;
   nationality?: string;
+  country?: string;
+  agent_uuid?: string;
 
   passport_no?: string;
   passport_issue_date?: string;
@@ -19,6 +21,7 @@ export interface CustomerFormInput {
 
   email?: string;
   mobile: string;
+  alternate_mobile?: string;
 
   gstin?: string;
   billing_address?: string;
@@ -56,6 +59,9 @@ export interface CustomerListItem {
   mobile: string;
   email?: string;
   nationality?: string;
+  country?: string;
+  agent_uuid?: string;
+  agent_name?: string;
   passport_no?: string;
   passport_expiry_date?: string;
   created_at: string;
@@ -72,7 +78,12 @@ export interface GetCustomersParams {
   search?: string;
 
   nationality?: string;
+  country?: string;
   gender?: string;
+  agent_uuid?: string;
+  from_date?: string;
+  to_date?: string;
+  is_active?: boolean;
 
   is_deleted?: boolean;
 

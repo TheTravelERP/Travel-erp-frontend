@@ -19,7 +19,7 @@ export default function UserCreatePage() {
       );
       await createUser(cleaned as any);
       showSnackbar({
-        message: t('settings.userCreatedAssignPermissions'),
+        message: t('common.createdSuccess'),
         severity: 'success',
       });
       navigate('/app/settings/users');

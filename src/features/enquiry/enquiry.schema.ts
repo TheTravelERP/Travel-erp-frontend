@@ -1,6 +1,7 @@
 // src/features/enquiry/enquiry.schema.ts
 import * as z from 'zod';
 import type { TFunction } from 'i18next';
+import { MOBILE_NUMBER_REGEX } from '../../utils/validator';
 
 export const getEnquirySchema = (t: TFunction) =>
   z
@@ -10,6 +11,7 @@ export const getEnquirySchema = (t: TFunction) =>
       customer_mode: z.enum(['new', 'existing']),
       customer_name: z.string().trim().optional(),
       customer_mobile: z.string().optional(),
+      customer_alternate_mobile: z.string().optional(),
       customer_email: z.string().email().optional().or(z.literal('')),
 
       // package
@@ -57,10 +59,19 @@ export const getEnquirySchema = (t: TFunction) =>
       (data) =>
         data.customer_mode !== 'new' ||
         !data.customer_mobile ||
-        /^\+[1-9][0-9]{7,15}$/.test(data.customer_mobile),
+        MOBILE_NUMBER_REGEX.test(data.customer_mobile),
       {
         message: t('validation.internationalMobile'),
         path: ['customer_mobile'],
+      }
+    )
+    .refine(
+      (data) =>
+        !data.customer_alternate_mobile ||
+        MOBILE_NUMBER_REGEX.test(data.customer_alternate_mobile),
+      {
+        message: t('validation.internationalMobile'),
+        path: ['customer_alternate_mobile'],
       }
     )
     .refine(

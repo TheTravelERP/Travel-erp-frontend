@@ -14,15 +14,23 @@ import { useEntityDropdown } from "../../hooks/useEntityDropdown";
 interface EntityAutocompleteProps {
   name: string;
   label: string;
-  control: any;
   dropdownName: string;
   pageSize?: number;
+  disabled?: boolean;
+
+  // React Hook Form mode (default) — requires `control`.
+  control?: any;
+  useForm?: boolean;
+
+  // Filter mode (useForm={false}) — plain controlled value/onChange, no form.
+  value?: string | null;
+  onChange?: (value: string | null) => void;
 
   // Optional features
   onAddNew?: () => void;
   allowAdd?: boolean;
 
-  // Generic autofill mapping
+  // Generic autofill mapping (React Hook Form mode only)
   setValue?: any;
   autoFillMap?: Record<string, string>;
 }
@@ -35,132 +43,150 @@ export default function EntityAutocomplete({
   control,
   dropdownName,
   pageSize = 20,
+  disabled = false,
   onAddNew,
   allowAdd = false,
   setValue,
   autoFillMap,
+  useForm = true,
+  value,
+  onChange,
 }: EntityAutocompleteProps) {
   const { options, loading, setSearch, loadMore } = useEntityDropdown({
     dropdownName,
     pageSize,
   });
 
-  return (
-    <Controller
-      name={name}
-      control={control}
-      defaultValue={null}
-      render={({ field, fieldState }) => {
-        /* ---------------- HANDLE SELECTED ---------------- */
+  const renderAutocomplete = (
+    currentValue: string | null | undefined,
+    handleChange: (value: string | null) => void,
+    error?: boolean,
+    helperText?: string,
+  ) => {
+    const selected =
+      options.find((o) => o.value === currentValue) ||
+      (currentValue
+        ? { label: "Loading...", value: currentValue }
+        : null);
 
-        const selected =
-          options.find((o) => o.value === field.value) ||
-          (field.value
-            ? { label: "Loading...", value: field.value }
-            : null);
+    return (
+      <Autocomplete
+        value={selected}
+        options={options}
+        loading={loading}
+        disabled={disabled}
 
-        return (
-          <Autocomplete
-            value={selected}
-            options={options}
-            loading={loading}
+        /* ---------------- LABEL ---------------- */
+        getOptionLabel={(option: any) => option?.label || ""}
 
-            /* ---------------- LABEL ---------------- */
-            getOptionLabel={(option: any) => option?.label || ""}
+        /* ---------------- EQUALITY ---------------- */
+        isOptionEqualToValue={(opt: any, val: any) =>
+          opt?.value === val?.value
+        }
 
-            /* ---------------- EQUALITY ---------------- */
-            isOptionEqualToValue={(opt: any, val: any) =>
-              opt?.value === val?.value
-            }
+        /* ---------------- SEARCH ---------------- */
+        onInputChange={(_, value, reason) => {
+          if (reason === "input") {
+            setSearch(value);
+          }
+        }}
 
-            /* ---------------- SEARCH ---------------- */
-            onInputChange={(_, value, reason) => {
-              if (reason === "input") {
-                setSearch(value);
-              }
-            }}
+        /* ---------------- CHANGE ---------------- */
+        onChange={(_, val: any) => {
+          // 🔹 ADD NEW
+          if (val?.value === "__add__") {
+            onAddNew?.();
+            return;
+          }
 
-            /* ---------------- CHANGE ---------------- */
-            onChange={(_, val: any) => {
-              // 🔹 ADD NEW
-              if (val?.value === "__add__") {
-                onAddNew?.();
-                return;
-              }
+          handleChange(val ? val.value : null);
 
-              field.onChange(val ? val.value : null);
-
-              // 🔹 GENERIC AUTOFILL (REUSABLE)
-              if (val && setValue && autoFillMap) {
-                Object.entries(autoFillMap).forEach(
-                  ([formField, key]) => {
-                    if (val[key] !== undefined) {
-                      setValue(formField, val[key]);
-                    }
-                  }
-                );
-              }
-            }}
-
-            /* ---------------- ADD NEW OPTION ---------------- */
-            filterOptions={(opts, params) => {
-              const filtered = [...opts];
-
-              const exists = opts.some(
-                (o: any) =>
-                  o.label?.toLowerCase() ===
-                  params.inputValue.toLowerCase()
-              );
-
-              if (allowAdd && params.inputValue !== "" && !exists) {
-                filtered.push({
-                  label: `Add "${params.inputValue}"`,
-                  value: "__add__",
-                });
-              }
-
-              return filtered;
-            }}
-
-            /* ---------------- INFINITE SCROLL ---------------- */
-            ListboxProps={{
-              onScroll: (e: any) => {
-                const node = e.currentTarget;
-
-                if (
-                  node.scrollTop + node.clientHeight >=
-                    node.scrollHeight - 20 &&
-                  !loading
-                ) {
-                  loadMore();
+          // 🔹 GENERIC AUTOFILL (REUSABLE, form mode only)
+          if (val && setValue && autoFillMap) {
+            Object.entries(autoFillMap).forEach(
+              ([formField, key]) => {
+                if (val[key] !== undefined) {
+                  setValue(formField, val[key]);
                 }
-              },
-            }}
+              }
+            );
+          }
+        }}
 
-            /* ---------------- INPUT ---------------- */
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label={label}
-                fullWidth
-                error={!!fieldState.error}
-                helperText={fieldState.error?.message}
-                InputProps={{
-                  ...params.InputProps,
-                  endAdornment: (
-                    <>
-                      {loading && (
-                        <CircularProgress size={18} />
-                      )}
-                      {params.InputProps.endAdornment}
-                    </>
-                  ),
-                }}
-              />
-            )}
+        /* ---------------- ADD NEW OPTION ---------------- */
+        filterOptions={(opts, params) => {
+          const filtered = [...opts];
+
+          const exists = opts.some(
+            (o: any) =>
+              o.label?.toLowerCase() ===
+              params.inputValue.toLowerCase()
+          );
+
+          if (allowAdd && params.inputValue !== "" && !exists) {
+            filtered.push({
+              label: `Add "${params.inputValue}"`,
+              value: "__add__",
+            });
+          }
+
+          return filtered;
+        }}
+
+        /* ---------------- INFINITE SCROLL ---------------- */
+        ListboxProps={{
+          onScroll: (e: any) => {
+            const node = e.currentTarget;
+
+            if (
+              node.scrollTop + node.clientHeight >=
+                node.scrollHeight - 20 &&
+              !loading
+            ) {
+              loadMore();
+            }
+          },
+        }}
+
+        /* ---------------- INPUT ---------------- */
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label={label}
+            fullWidth
+            error={error}
+            helperText={helperText}
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loading && (
+                    <CircularProgress size={18} />
+                  )}
+                  {params.InputProps.endAdornment}
+                </>
+              ),
+            }}
           />
-        );
-      }}
-    />
-  );
+        )}
+      />
+    );
+  };
+
+  // ✅ FORM MODE
+  if (useForm && control) {
+    return (
+      <Controller
+        name={name}
+        control={control}
+        defaultValue={null}
+        render={({ field, fieldState }) =>
+          renderAutocomplete(field.value, field.onChange, !!fieldState.error, fieldState.error?.message)
+        }
+      />
+    );
+  }
+
+  // ✅ FILTER MODE
+  return renderAutocomplete(value, onChange ?? (() => {}));
 }

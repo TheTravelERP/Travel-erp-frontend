@@ -1,20 +1,28 @@
 // src/features/inventory/vendorContract/pages/VendorContractListPage.tsx
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Box, Paper } from "@mui/material";
+import { Box, Paper, Collapse } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
 import AddIcon from "@mui/icons-material/Add";
 import ListAltIcon from "@mui/icons-material/ListAlt";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import DownloadIcon from "@mui/icons-material/Download";
+import UploadIcon from "@mui/icons-material/Upload";
 
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { SearchInput } from "../../../../components/ui/SearchInput";
 import ListPageToolbar from "../../../../components/common/ListPageToolbar";
+import ImportResultDialog from "../../../../components/common/ImportResultDialog";
 import VendorContractTable from "../components/VendorContractTable";
+import VendorContractFilters, {
+  type VendorContractFilterValues,
+} from "../components/VendorContractFilters";
 
 import { usePermission } from "../../../../hooks/usePermission";
-import { getVendorContracts } from "../vendorContract.api";
+import { useCsvImport } from "../../../../hooks/useCsvImport";
+import { getVendorContracts, importVendorContractsFromCsv } from "../vendorContract.api";
 import type { VendorContractListItem } from "../vendorContract.types";
 
 export default function VendorContractListPage() {
@@ -22,6 +30,8 @@ export default function VendorContractListPage() {
   const { t } = useTranslation();
   const perms = usePermission("inventory.contracts");
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const [showFilters, setShowFilters] = useState(false);
 
   const page = Number(searchParams.get("page") || 1);
   const pageSize = Number(searchParams.get("page_size") || 10);
@@ -36,15 +46,22 @@ export default function VendorContractListPage() {
     updateURL({ sort_by: columnId, sort_order: nextOrder, page: 1 });
   };
 
-  const search = searchParams.get("search") || "";
-  const [draftSearch, setDraftSearch] = useState(search);
+  const appliedFilters: VendorContractFilterValues = {
+    search: searchParams.get("search") || "",
+    contract_type: searchParams.get("contract_type") || "",
+    status: searchParams.get("status") || "",
+    from_date: searchParams.get("from_date") || "",
+    to_date: searchParams.get("to_date") || "",
+  };
+
+  const [draftFilters, setDraftFilters] = useState<VendorContractFilterValues>(appliedFilters);
 
   const applyWildSearch = () => {
-    updateURL({ search: draftSearch, page: 1 });
+    updateURL({ search: draftFilters.search, page: 1 });
   };
 
   const clearWildSearch = () => {
-    setDraftSearch("");
+    setDraftFilters((prev) => ({ ...prev, search: "" }));
     updateURL({ search: undefined, page: 1 });
   };
 
@@ -63,7 +80,7 @@ export default function VendorContractListPage() {
           is_deleted: isTrash,
           sort_by: sortBy,
           sort_order: sortOrder,
-          search,
+          ...appliedFilters,
         },
         signal,
       );
@@ -76,6 +93,24 @@ export default function VendorContractListPage() {
       if (!signal?.aborted) setLoading(false);
     }
   };
+
+  const handleExport = (format: "csv" | "excel" | "pdf") => {
+    const params = new URLSearchParams(location.search);
+    params.set("format", format);
+    window.open(
+      `${import.meta.env.VITE_API_BASE_URL}/api/v1/vendor-contracts/export?${params}`,
+      "_blank",
+    );
+  };
+
+  const {
+    fileInputRef,
+    result: importResult,
+    dialogOpen: importDialogOpen,
+    closeDialog: closeImportDialog,
+    openFilePicker,
+    onFileInputChange,
+  } = useCsvImport(importVendorContractsFromCsv, fetchData);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -120,6 +155,33 @@ export default function VendorContractListPage() {
                 onClick: () => navigate("/app/inventory/contracts/create"),
               }
         }
+        secondaryActions={[
+          {
+            key: "filters",
+            label: t("common.filters"),
+            icon: <FilterListIcon />,
+            variant: showFilters ? "contained" : "outlined",
+            onClick: () => setShowFilters((v) => !v),
+          },
+          {
+            key: "export",
+            label: t("common.export"),
+            icon: <DownloadIcon />,
+            show: perms.can_export && !isTrash,
+            menuItems: [
+              { label: t("common.exportCsv"), onClick: () => handleExport("csv") },
+              { label: t("common.exportExcel"), onClick: () => handleExport("excel") },
+              { label: t("common.exportPdf"), onClick: () => handleExport("pdf") },
+            ],
+          },
+          {
+            key: "import",
+            label: t("common.importCsv"),
+            icon: <UploadIcon />,
+            show: perms.can_import && !isTrash,
+            onClick: openFilePicker,
+          },
+        ]}
         overflowActions={[
           {
             key: "view-trash",
@@ -130,11 +192,26 @@ export default function VendorContractListPage() {
         ]}
       />
 
+      <input ref={fileInputRef} type="file" accept=".csv" hidden onChange={onFileInputChange} />
+      <ImportResultDialog open={importDialogOpen} result={importResult} onClose={closeImportDialog} />
+
       <Paper sx={{ p: 2 }}>
+        <Collapse in={showFilters}>
+          <VendorContractFilters
+            value={draftFilters}
+            onChange={(v) => setDraftFilters((prev) => ({ ...prev, ...v }))}
+            onApply={() => updateURL({ ...draftFilters, page: 1 })}
+            onReset={() => {
+              setDraftFilters({});
+              setSearchParams({ page: "1", page_size: String(pageSize) });
+            }}
+          />
+        </Collapse>
+
         <SearchInput
           placeholder={t("common.searchByCodeName")}
-          value={draftSearch}
-          onChange={(e) => setDraftSearch(e.target.value)}
+          value={draftFilters.search || ""}
+          onChange={(e) => setDraftFilters({ ...draftFilters, search: e.target.value })}
           onSearch={applyWildSearch}
           onClear={clearWildSearch}
           sx={{ mb: 2 }}

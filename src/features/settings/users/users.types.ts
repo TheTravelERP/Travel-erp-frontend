@@ -31,6 +31,8 @@ export interface UserCreateInput extends UserProfileFields {
   mobile: string;
   user_type: UserType;
   password: string;
+  role_uuid: string;
+  default_branch_uuid: string;
 }
 
 export interface UserUpdateInput extends UserProfileFields {
@@ -38,6 +40,8 @@ export interface UserUpdateInput extends UserProfileFields {
   mobile?: string;
   user_type?: UserType;
   status?: UserStatus;
+  role_uuid?: string | null;
+  default_branch_uuid?: string | null;
 }
 
 /* ==========================================================
@@ -55,6 +59,10 @@ export interface UserListItem extends UserProfileFields {
   age: number | null;
   last_login: string | null;
   created_at: string;
+  role_uuid?: string | null;
+  role_name?: string | null;
+  default_branch_uuid?: string | null;
+  default_branch_name?: string | null;
 }
 
 export interface UserDetail extends UserListItem {
@@ -73,6 +81,8 @@ export interface GetUsersParams {
   status?: string;
   designation?: string;
   gender?: string;
+  from_date?: string;
+  to_date?: string;
   is_deleted?: boolean;
 
   sort_by?: string;

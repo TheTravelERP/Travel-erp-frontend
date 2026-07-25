@@ -77,3 +77,18 @@ export async function bulkRestoreVendors(uuids: string[]): Promise<VendorBulkAct
   });
   return data;
 }
+
+/* ==========================================================
+   IMPORT
+========================================================== */
+
+import type { ImportResult } from "../../../components/common/ImportResultDialog";
+
+export async function importVendorsFromCsv(file: File): Promise<ImportResult> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const { data } = await api.post<ImportResult>("/api/v1/vendors/import", formData);
+
+  return data;
+}

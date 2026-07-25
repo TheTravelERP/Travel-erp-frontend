@@ -67,6 +67,10 @@ export interface GetHotelsParams {
   page_size?: number;
   search?: string;
   city?: string;
+  star_rating?: string | number;
+  from_date?: string;
+  to_date?: string;
+  is_active?: boolean;
   is_deleted?: boolean;
 
   sort_by?: string;

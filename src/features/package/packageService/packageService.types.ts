@@ -67,6 +67,9 @@ export interface GetPackageServicesParams {
   search?: string;
   package_uuid?: string;
   service_type?: string;
+  from_date?: string;
+  to_date?: string;
+  is_active?: boolean;
   is_deleted?: boolean;
 
   sort_by?: string;

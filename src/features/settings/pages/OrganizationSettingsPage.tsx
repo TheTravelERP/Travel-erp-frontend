@@ -22,6 +22,7 @@ import {
 } from '../../../services/organization.service';
 import { uploadFile } from '../../../services/upload.service';
 import FileUploadField from '../../../components/common/FileUploadField';
+import MobileNumberField from '../../../components/common/MobileNumberField';
 import { useSnackbar } from '../../../components/ui/SnackbarProvider';
 
 const DATE_FORMATS = ['YYYY-MM-DD', 'DD/MM/YYYY', 'MM/DD/YYYY'];
@@ -125,7 +126,12 @@ export default function OrganizationSettingsPage() {
             <TextField fullWidth label={t('common.email')} value={form.email ?? ''} onChange={(e) => setField('email', e.target.value)} />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField fullWidth label={t('common.mobile')} value={form.mobile ?? ''} onChange={(e) => setField('mobile', e.target.value)} placeholder="+14155550100" />
+            <MobileNumberField
+              useForm={false}
+              label={t('common.mobile')}
+              value={form.mobile ?? ''}
+              onChange={(value) => setField('mobile', value)}
+            />
           </Grid>
           <Grid size={{ xs: 12 }}>
             <TextField fullWidth label={t('settings.address')} value={form.address ?? ''} onChange={(e) => setField('address', e.target.value)} />

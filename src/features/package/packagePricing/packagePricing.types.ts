@@ -57,6 +57,9 @@ export interface GetPackagePricingsParams {
   search?: string;
   package_uuid?: string;
   price_category?: string;
+  from_date?: string;
+  to_date?: string;
+  is_active?: boolean;
   is_deleted?: boolean;
 
   sort_by?: string;

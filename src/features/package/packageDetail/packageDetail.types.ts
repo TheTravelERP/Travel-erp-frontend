@@ -52,6 +52,9 @@ export interface GetPackageDetailsParams {
   page?: number;
   page_size?: number;
   search?: string;
+  is_active?: boolean;
+  from_date?: string;
+  to_date?: string;
   is_deleted?: boolean;
 
   sort_by?: string;

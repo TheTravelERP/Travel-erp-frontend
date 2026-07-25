@@ -7,12 +7,15 @@
     "edit": "संपादित करें",
     "delete": "हटाएं",
     "view": "देखें",
+    "clone": "क्लोन करें",
     "save": "सहेजें",
     "discard": "रद्द करें",
     "back": "वापस",
     "reset": "रीसेट करें",
     "clear": "साफ़ करें",
     "close": "बंद करें",
+    "row": "पंक्ति",
+    "error": "त्रुटि",
     "cancel": "रद्द करें",
     "restore": "पुनर्स्थापित करें",
     "search": "खोजें",
@@ -41,6 +44,13 @@
     "customerName": "ग्राहक का नाम",
     "fromDate": "प्रारंभ तिथि",
     "toDate": "अंतिम तिथि",
+    "dateRange": "दिनांक सीमा",
+    "today": "आज",
+    "thisWeek": "इस सप्ताह",
+    "thisMonth": "इस महीने",
+    "thisYear": "इस वर्ष",
+    "thisFinancialYear": "इस वित्तीय वर्ष",
+    "dateRangeInvalid": "प्रारंभ तिथि, अंतिम तिथि से पहले या उसके बराबर होनी चाहिए",
     "actions": "कार्रवाई",
     "createdOn": "बनाया गया",
     "new": "नया",
@@ -91,7 +101,11 @@
       "november": "नवंबर",
       "december": "दिसंबर"
     },
-    "searchByCodeName": "कोड और नाम से खोजें..."
+    "searchByCodeName": "कोड और नाम से खोजें...",
+    "yes": "हाँ",
+    "no": "नहीं",
+    "address": "पता",
+    "description": "विवरण"
   },
   "profile": {
     "home": "होम",
@@ -191,7 +205,7 @@
     "settings": "सेटिंग्स",
     "settings.organization": "संगठन",
     "settings.users": "उपयोगकर्ता",
-    "settings.permissions": "अनुमतियाँ",
+    "settings.permissions": "रोल मास्टर",
     "settings.dropdown": "ड्रॉपडाउन कॉन्फ़िग",
     "settings.finance": "मुद्रा और कर",
     "settings.invoice_branding": "इनवॉइस और ब्रांडिंग",
@@ -203,9 +217,12 @@
     "packages.pricing": "पैकेज मूल्य निर्धारण",
     "packages.services": "पैकेज सेवाएं",
     "inventory.ziyarat": "ज़ियारत",
-    "inventory.vendor_master": "विक्रेता"
+    "inventory.vendor_master": "विक्रेता",
+    "settings.branch_master": "शाखा मास्टर",
+    "settings.document_type_master": "दस्तावेज़ प्रकार मास्टर"
   },
   "enquiry": {
+    "alternateMobile": "वैकल्पिक मोबाइल नंबर",
     "conversionStatus": "रूपांतरण स्थिति",
     "leadSource": "लीड स्रोत",
     "searchPlaceholder": "ग्राहक, मोबाइल, पैकेज से खोजें...",
@@ -237,7 +254,10 @@
   },
   "customer": {
     "searchPlaceholder": "नाम, मोबाइल, ईमेल, पासपोर्ट से खोजें...",
+    "alternateMobile": "वैकल्पिक मोबाइल नंबर",
     "nationality": "राष्ट्रीयता",
+    "country": "देश",
+    "agent": "एजेंट",
     "passportDetails": "पासपोर्ट विवरण",
     "passportNumber": "पासपोर्ट नंबर",
     "passportIssueDate": "पासपोर्ट जारी करने की तिथि",
@@ -310,6 +330,7 @@
     "name": "नाम",
     "shortName": "संक्षिप्त नाम",
     "status": "स्थिति",
+    "packageStatus": "पैकेज स्थिति",
     "featured": "विशेष रुप से प्रदर्शित",
     "active": "सक्रिय",
     "routeSection": "मार्ग और तिथियां",
@@ -393,7 +414,9 @@
     "currentPasswordRequired": "वर्तमान पासवर्ड आवश्यक है",
     "nameRequired": "नाम आवश्यक है",
     "codeRequired": "कोड आवश्यक है",
-    "endDateBeforeStartDate": "समाप्ति तिथि प्रारंभ तिथि से पहले नहीं हो सकती"
+    "endDateBeforeStartDate": "समाप्ति तिथि प्रारंभ तिथि से पहले नहीं हो सकती",
+    "roleRequired": "कृपया एक रोल चुनें",
+    "branchRequired": "कृपया एक शाखा चुनें"
   },
   "auth": {
     "appTitle": "Travel ERP",
@@ -490,7 +513,7 @@
     "pdfFooterText": "PDF फ़ुटर टेक्स्ट",
     "account": "खाता",
     "fullName": "पूरा नाम",
-    "role": "भूमिका",
+    "role": "उपयोगकर्ता प्रकार",
     "userType": {
       "Admin": "एडमिन",
       "Employee": "कर्मचारी",
@@ -520,8 +543,7 @@
       "Inactive": "निष्क्रिय",
       "Suspended": "निलंबित"
     },
-    "any": "कोई भी",
-    "userCreatedAssignPermissions": "उपयोगकर्ता बनाया गया। अनुमतियों के अंतर्गत उनके लिए अनुमतियाँ असाइन करें।"
+    "any": "कोई भी"
   },
   "packagePricing": {
     "package": "पैकेज",
@@ -731,5 +753,98 @@
     "validation": {
       "nameRequired": "ज़ियारत नाम आवश्यक है"
     }
+  },
+  "branch": {
+    "title": "शाखा",
+    "code": "शाखा कोड",
+    "name": "शाखा का नाम",
+    "legalName": "कानूनी नाम",
+    "currency": "मुद्रा",
+    "phone": "फ़ोन",
+    "email": "ईमेल",
+    "website": "वेबसाइट",
+    "addressLine1": "पता पंक्ति 1",
+    "addressLine2": "पता पंक्ति 2",
+    "city": "शहर",
+    "state": "राज्य",
+    "country": "देश",
+    "postalCode": "पिन कोड",
+    "timezone": "समय क्षेत्र",
+    "remarks": "टिप्पणी",
+    "headOffice": "मुख्यालय",
+    "headOfficeCannotDelete": "मुख्यालय शाखा को हटाया नहीं जा सकता",
+    "headOfficeCannotDeactivate": "मुख्यालय शाखा को निष्क्रिय नहीं किया जा सकता",
+    "colCode": "कोड",
+    "colName": "नाम",
+    "colCurrency": "मुद्रा",
+    "colCity": "शहर",
+    "colCountry": "देश",
+    "validation": {
+      "currencyRequired": "मुद्रा आवश्यक है"
+    }
+  },
+  "documentType": {
+    "code": "दस्तावेज़ कोड",
+    "name": "दस्तावेज़ का नाम",
+    "defaultPrefix": "डिफ़ॉल्ट प्रीफ़िक्स",
+    "module": "मॉड्यूल",
+    "sortOrder": "क्रम",
+    "system": "सिस्टम",
+    "systemCannotDelete": "सिस्टम दस्तावेज़ प्रकार हटाए नहीं जा सकते",
+    "colCode": "कोड",
+    "colName": "नाम",
+    "colDefaultPrefix": "डिफ़ॉल्ट प्रीफ़िक्स",
+    "colModule": "मॉड्यूल",
+    "colSortOrder": "क्रम",
+    "validation": {
+      "moduleRequired": "मॉड्यूल आवश्यक है"
+    }
+  },
+  "documentNumberSeries": {
+    "seriesName": "सीरीज़ का नाम",
+    "branch": "शाखा",
+    "documentType": "दस्तावेज़ प्रकार",
+    "prefix": "प्रीफ़िक्स",
+    "suffix": "सफ़िक्स",
+    "separator": "विभाजक",
+    "numberLength": "नंबर की लंबाई",
+    "startingNumber": "प्रारंभिक नंबर",
+    "nextNumber": "अगला नंबर",
+    "resetPolicy": "रीसेट नीति",
+    "default": "डिफ़ॉल्ट",
+    "locked": "लॉक किया गया",
+    "effectiveFrom": "प्रभावी तिथि (से)",
+    "effectiveTo": "प्रभावी तिथि (तक)",
+    "lastGeneratedAt": "अंतिम जनरेशन समय",
+    "cannotDeleteGenerated": "इस सीरीज़ से दस्तावेज़ जनरेट हो चुके हैं इसलिए इसे हटाया नहीं जा सकता। इसके बजाय इसे निष्क्रिय करें।",
+    "lockedFieldsHint": "इस सीरीज़ से दस्तावेज़ जनरेट हो चुके हैं। नंबरिंग फ़ील्ड लॉक हैं; केवल प्रभावी तिथि (तक) और सक्रिय स्थिति बदली जा सकती है।",
+    "validation": {
+      "documentTypeRequired": "कृपया एक दस्तावेज़ प्रकार चुनें",
+      "prefixRequired": "प्रीफ़िक्स आवश्यक है",
+      "numberLengthMin": "नंबर की लंबाई कम से कम 1 होनी चाहिए",
+      "startingNumberPositive": "प्रारंभिक नंबर शून्य से अधिक होना चाहिए"
+    }
+  },
+  "role": {
+    "title": "रोल",
+    "code": "रोल कोड",
+    "name": "रोल का नाम",
+    "system": "सिस्टम",
+    "systemCannotDelete": "सिस्टम रोल हटाए नहीं जा सकते",
+    "permissions": "अनुमतियाँ",
+    "colCode": "कोड",
+    "colName": "नाम",
+    "colMenu": "मेनू",
+    "colAll": "सभी",
+    "colDataScope": "डेटा स्कोप"
+  },
+  "userPermissionOverride": {
+    "title": "अनुमति अपवाद",
+    "add": "अपवाद जोड़ें",
+    "empty": "कोई अपवाद नहीं — इस उपयोगकर्ता की पहुंच पूरी तरह से उनकी भूमिका से आती है।",
+    "colMenu": "मेनू",
+    "colFlags": "अनुमतियाँ",
+    "colType": "प्रकार",
+    "menuRequired": "कृपया एक मेनू चुनें"
   }
 }

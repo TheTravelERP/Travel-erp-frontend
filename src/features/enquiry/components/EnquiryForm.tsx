@@ -24,6 +24,7 @@ import PackageSelector from "../../package/components/PackageSelector";
 export type EnquiryFormInput = z.infer<ReturnType<typeof getEnquirySchema>>;
 
 import DropdownAutocomplete from "../../../components/common/DropdownAutocomplete";
+import MobileNumberField from "../../../components/common/MobileNumberField";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../utils/mergeFormDefaults";
@@ -39,6 +40,7 @@ const emptyValues = {
   customer_mode: "new" as const,
   customer_name: "",
   customer_mobile: "",
+  customer_alternate_mobile: "",
   customer_email: "",
   pkg_uuid: null,
   package_mode: "custom" as const,
@@ -175,6 +177,14 @@ export default function EnquiryForm({
                   useForm={true}
                   allowAdd={false}
                   pagination
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 3 }}>
+                <MobileNumberField
+                  name="customer_alternate_mobile"
+                  control={control}
+                  label={t("enquiry.alternateMobile")}
                 />
               </Grid>
 

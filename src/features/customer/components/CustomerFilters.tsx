@@ -2,21 +2,30 @@
 
 import {
   Box,
-  TextField,
   Button,
   Grid,
+  MenuItem,
+  TextField,
   Typography,
   Stack,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
+import CountryAutocomplete from "../../../components/common/CountryAutocomplete";
 import DropdownAutocomplete from "../../../components/common/DropdownAutocomplete";
+import EntityAutocomplete from "../../../components/common/EntityAutocomplete";
+import QuickDateRangeFilter from "../../../components/common/QuickDateRangeFilter";
 
 /* ================= TYPES ================= */
 
 export interface CustomerFilterValues {
   search?: string;
   nationality?: string;
+  country?: string;
   gender?: string;
+  agent_uuid?: string;
+  from_date?: string;
+  to_date?: string;
+  is_active?: string;
 }
 
 interface CustomerFiltersProps {
@@ -54,16 +63,33 @@ export default function CustomerFilters({
       </Stack>
 
       <Grid container spacing={2}>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <TextField
-            fullWidth
-            label={t("customer.nationality")}
-            value={value.nationality ?? ""}
-            onChange={(e) => onChange({ nationality: e.target.value || undefined })}
+        <QuickDateRangeFilter
+          fromDate={value.from_date}
+          toDate={value.to_date}
+          onChange={onChange}
+        />
+
+        <Grid size={{ xs: 12, md: 3 }}>
+          <CountryAutocomplete
+            field="label"
+            label={t("customer.country")}
+            useForm={false}
+            value={value.country ?? null}
+            onChange={(val) => onChange({ country: val || undefined })}
           />
         </Grid>
 
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid size={{ xs: 12, md: 3 }}>
+          <CountryAutocomplete
+            field="nationality"
+            label={t("customer.nationality")}
+            useForm={false}
+            value={value.nationality ?? null}
+            onChange={(val) => onChange({ nationality: val || undefined })}
+          />
+        </Grid>
+
+        <Grid size={{ xs: 12, md: 3 }}>
           <DropdownAutocomplete
             name="gender"
             label={t("settings.gender")}
@@ -73,6 +99,31 @@ export default function CustomerFilters({
             allowAdd={false}
             pagination={false}
           />
+        </Grid>
+
+        <Grid size={{ xs: 12, md: 3 }}>
+          <EntityAutocomplete
+            name="agent_uuid"
+            label={t("customer.agent")}
+            dropdownName="users"
+            useForm={false}
+            value={value.agent_uuid ?? null}
+            onChange={(val) => onChange({ agent_uuid: val || undefined })}
+          />
+        </Grid>
+
+        <Grid size={{ xs: 12, md: 3 }}>
+          <TextField
+            select
+            fullWidth
+            label={t("common.status")}
+            value={value.is_active ?? ""}
+            onChange={(e) => onChange({ is_active: e.target.value || undefined })}
+          >
+            <MenuItem value="">{t("common.all")}</MenuItem>
+            <MenuItem value="true">{t("common.active")}</MenuItem>
+            <MenuItem value="false">{t("common.inactive")}</MenuItem>
+          </TextField>
         </Grid>
 
         <Grid size={12} display="flex" justifyContent="flex-end" gap={1} mt={1}>

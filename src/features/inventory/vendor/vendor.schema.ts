@@ -1,6 +1,7 @@
 // src/features/inventory/vendor/vendor.schema.ts
 import * as z from 'zod';
 import type { TFunction } from 'i18next';
+import { MOBILE_NUMBER_REGEX } from '../../../utils/validator';
 
 export const getVendorSchema = (t: TFunction) =>
   z.object({
@@ -8,7 +9,13 @@ export const getVendorSchema = (t: TFunction) =>
     vendor_name: z.string().trim().min(1, t('validation.nameRequired')).max(200),
     vendor_type: z.string().trim().optional(),
     contact_person: z.string().trim().optional(),
-    mobile: z.string().trim().optional(),
+    mobile: z
+      .string()
+      .trim()
+      .optional()
+      .refine((value) => !value || MOBILE_NUMBER_REGEX.test(value), {
+        message: t('validation.internationalMobile'),
+      }),
     email: z.string().trim().optional(),
     website: z.string().trim().optional(),
     gstin: z.string().trim().optional(),

@@ -19,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 import { getVendorSchema } from "../vendor.schema";
 import type { VendorFormInput } from "../vendor.types";
 import DropdownAutocomplete from "../../../../components/common/DropdownAutocomplete";
+import MobileNumberField from "../../../../components/common/MobileNumberField";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
 
@@ -138,11 +139,7 @@ export default function VendorForm({
           </Grid>
 
           <Grid size={{ xs: 12, sm: 4 }}>
-            <Controller
-              name="mobile"
-              control={control}
-              render={({ field }) => <TextField {...field} label={t("vendor.mobile")} fullWidth />}
-            />
+            <MobileNumberField name="mobile" control={control} label={t("vendor.mobile")} />
           </Grid>
 
           <Grid size={{ xs: 12, sm: 4 }}>

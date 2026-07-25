@@ -1,6 +1,7 @@
 // src/features/inventory/hotel/hotel.schema.ts
 import * as z from 'zod';
 import type { TFunction } from 'i18next';
+import { MOBILE_NUMBER_REGEX } from '../../../utils/validator';
 
 export const getHotelSchema = (t: TFunction) =>
   z.object({
@@ -19,7 +20,13 @@ export const getHotelSchema = (t: TFunction) =>
     google_map: z.string().trim().optional(),
     distance_from_haram: z.coerce.number().optional(),
 
-    phone: z.string().trim().optional(),
+    phone: z
+      .string()
+      .trim()
+      .optional()
+      .refine((value) => !value || MOBILE_NUMBER_REGEX.test(value), {
+        message: t('validation.internationalMobile'),
+      }),
     email: z.string().trim().optional(),
     website: z.string().trim().optional(),
 

@@ -26,9 +26,12 @@ import SettingsPage from '../../features/settings';
 import ChangePasswordPage from '../../features/profile/pages/ChangePasswordPage';
 import OrganizationSettingsPage from '../../features/settings/pages/OrganizationSettingsPage';
 import UsersRoutes from '../../features/settings/users/users.routes';
-import PermissionsPage from '../../features/settings/pages/PermissionsPage';
+import RoleRoutes from '../../features/settings/role/role.routes';
 import FinanceSettingsPage from '../../features/settings/pages/FinanceSettingsPage';
 import InvoiceBrandingSettingsPage from '../../features/settings/pages/InvoiceBrandingSettingsPage';
+import BranchRoutes from '../../features/settings/branch/branch.routes';
+import DocumentTypeRoutes from '../../features/settings/documentType/documentType.routes';
+import DocumentNumberSeriesRoutes from '../../features/settings/documentNumberSeries/documentNumberSeries.routes';
 import ComingSoonPage from '../../components/common/ComingSoonPage';
 
 // Menu items with no built page yet — each renders a translated "Coming
@@ -94,7 +97,6 @@ const COMING_SOON_ROUTES: { menuId: string; path: string }[] = [
   { menuId: 'reports.tasks', path: '/app/reports/tasks' },
   { menuId: 'reports.custom_builder', path: '/app/reports/custom' },
   { menuId: 'settings.dropdown', path: '/app/settings/dropdown' },
-  { menuId: 'settings.doc_numbering', path: '/app/settings/doc-numbering' },
   { menuId: 'settings.subscription', path: '/app/settings/subscription' },
   { menuId: 'settings.notifications', path: '/app/settings/notifications' },
   { menuId: 'settings.integrations', path: '/app/settings/integrations' },
@@ -152,14 +154,7 @@ export default function AppRouter() {
           }
         />
         <Route path="/app/settings/users/*" element={<UsersRoutes />} />
-        <Route
-          path="/app/settings/permissions"
-          element={
-            <PermissionRoute menuId="settings.permissions">
-              <PermissionsPage />
-            </PermissionRoute>
-          }
-        />
+        <Route path="/app/settings/roles/*" element={<RoleRoutes />} />
         <Route
           path="/app/settings/finance"
           element={
@@ -176,6 +171,9 @@ export default function AppRouter() {
             </PermissionRoute>
           }
         />
+        <Route path="/app/settings/branch-master/*" element={<BranchRoutes />} />
+        <Route path="/app/settings/document-type-master/*" element={<DocumentTypeRoutes />} />
+        <Route path="/app/settings/doc-numbering/*" element={<DocumentNumberSeriesRoutes />} />
 
         {/* Not-yet-built modules */}
         {COMING_SOON_ROUTES.map(({ menuId, path }) => (

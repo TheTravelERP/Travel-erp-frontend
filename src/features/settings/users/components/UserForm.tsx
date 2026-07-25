@@ -1,18 +1,22 @@
 // src/features/settings/users/components/UserForm.tsx
 import { Box, Button, TextField, Typography, Paper, Divider, MenuItem, Grid } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { getUserCreateSchema, getUserUpdateSchema, type UserCreateFormInput, type UserUpdateFormInput } from '../users.schema';
 import DropdownAutocomplete from '../../../../components/common/DropdownAutocomplete';
+import EntityAutocomplete from '../../../../components/common/EntityAutocomplete';
+import MobileNumberField from '../../../../components/common/MobileNumberField';
 import PasswordField from '../../../../components/common/PasswordField';
 import FileUploadField from '../../../../components/common/FileUploadField';
 import { uploadFile } from '../../../../services/upload.service';
 import { useSnackbar } from '../../../../components/ui/SnackbarProvider';
 import { mergeFormDefaults } from '../../../../utils/mergeFormDefaults';
+import { getBranches } from '../../branch/branch.api';
+import type { BranchListItem } from '../../branch/branch.types';
 
 const USER_TYPES = ['Admin', 'Employee', 'Agent'];
 const STATUSES = ['Active', 'Inactive', 'Suspended'];
@@ -46,6 +50,8 @@ const emptyValues: UserFormInput = {
   identification_type: '',
   identification_number: '',
   identification_file_url: '',
+  role_uuid: '',
+  default_branch_uuid: '',
 };
 
 export default function UserForm({ mode, defaultValues, onSubmit, loading = false }: UserFormProps) {
@@ -76,6 +82,32 @@ export default function UserForm({ mode, defaultValues, onSubmit, loading = fals
 
   const pictureUrl = watch('picture_url');
   const identificationFileUrl = watch('identification_file_url');
+
+  const [branches, setBranches] = useState<BranchListItem[]>([]);
+  const [branchesLoading, setBranchesLoading] = useState(true);
+  const branchUuid = watch('default_branch_uuid' as any);
+
+  useEffect(() => {
+    let cancelled = false;
+    getBranches({ page: 1, page_size: 100, is_active: true })
+      .then((res) => {
+        if (cancelled) return;
+        setBranches(res.data);
+        // Only one branch in the org (the common case, e.g. just Head
+        // Office) — pick it automatically instead of making the admin
+        // choose from a list of one.
+        if (res.data.length === 1 && !branchUuid) {
+          setValue('default_branch_uuid' as any, res.data[0].uuid);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setBranchesLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Box
@@ -124,20 +156,7 @@ export default function UserForm({ mode, defaultValues, onSubmit, loading = fals
               </Grid>
 
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Controller
-                  name="mobile"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label={t('common.mobile')}
-                      fullWidth
-                      placeholder="+14155550100"
-                      error={!!errors.mobile}
-                      helperText={errors.mobile?.message}
-                    />
-                  )}
-                />
+                <MobileNumberField name="mobile" control={control} label={t('common.mobile')} />
               </Grid>
 
               <Grid size={{ xs: 12, sm: mode === 'create' ? 3 : 6 }}>
@@ -149,6 +168,41 @@ export default function UserForm({ mode, defaultValues, onSubmit, loading = fals
                       {USER_TYPES.map((type) => (
                         <MenuItem key={type} value={type}>
                           {t(`settings.userType.${type}`, { defaultValue: type })}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <EntityAutocomplete
+                  name="role_uuid"
+                  label={t('role.title')}
+                  control={control}
+                  dropdownName="roles"
+                  allowAdd={false}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <Controller
+                  name={'default_branch_uuid' as any}
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      select
+                      label={t('branch.title')}
+                      fullWidth
+                      required
+                      disabled={branchesLoading || branches.length === 1}
+                      error={!!(errors as any).default_branch_uuid}
+                      helperText={(errors as any).default_branch_uuid?.message}
+                    >
+                      {branches.map((b) => (
+                        <MenuItem key={b.uuid} value={b.uuid}>
+                          {b.branch_name}
                         </MenuItem>
                       ))}
                     </TextField>
@@ -330,12 +384,10 @@ export default function UserForm({ mode, defaultValues, onSubmit, loading = fals
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Controller
+                <MobileNumberField
                   name="emergency_contact_number"
                   control={control}
-                  render={({ field }) => (
-                    <TextField {...field} label={t('settings.contactNumber')} fullWidth placeholder="+14155550100" />
-                  )}
+                  label={t('settings.contactNumber')}
                 />
               </Grid>
             </Grid>

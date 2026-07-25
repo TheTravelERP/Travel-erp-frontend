@@ -1,6 +1,7 @@
 // src/features/customer/customer.schema.ts
 import * as z from 'zod';
 import type { TFunction } from 'i18next';
+import { MOBILE_NUMBER_REGEX } from '../../utils/validator';
 
 export const getCustomerSchema = (t: TFunction) =>
   z.object({
@@ -10,6 +11,8 @@ export const getCustomerSchema = (t: TFunction) =>
     gender: z.string().trim().optional(),
     dob: z.string().optional(),
     nationality: z.string().trim().optional(),
+    country: z.string().trim().optional(),
+    agent_uuid: z.string().trim().optional(),
 
     passport_no: z.string().trim().optional(),
     passport_issue_date: z.string().optional(),
@@ -27,7 +30,14 @@ export const getCustomerSchema = (t: TFunction) =>
       .string()
       .trim()
       .min(1, t('validation.mobileRequired'))
-      .refine((value) => /^\+[1-9][0-9]{7,15}$/.test(value), {
+      .refine((value) => MOBILE_NUMBER_REGEX.test(value), {
+        message: t('validation.internationalMobile'),
+      }),
+    alternate_mobile: z
+      .string()
+      .trim()
+      .optional()
+      .refine((value) => !value || MOBILE_NUMBER_REGEX.test(value), {
         message: t('validation.internationalMobile'),
       }),
 

@@ -45,6 +45,9 @@ export interface GetPackageTypesParams {
   page_size?: number;
   search?: string;
   category?: string;
+  from_date?: string;
+  to_date?: string;
+  is_active?: boolean;
   is_deleted?: boolean;
 
   sort_by?: string;

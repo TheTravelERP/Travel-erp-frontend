@@ -110,3 +110,12 @@ export async function bulkRestorePackagePricings(
   );
   return data;
 }
+
+import type { ImportResult } from "../../../components/common/ImportResultDialog";
+
+export async function importPackagePricingsFromCsv(file: File): Promise<ImportResult> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data } = await api.post<ImportResult>("/api/v1/package-pricings/import", formData);
+  return data;
+}

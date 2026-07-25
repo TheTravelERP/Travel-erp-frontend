@@ -32,6 +32,10 @@ export interface GetZiyaratsParams {
   page?: number;
   page_size?: number;
   search?: string;
+  city?: string;
+  from_date?: string;
+  to_date?: string;
+  is_active?: boolean;
   is_deleted?: boolean;
 
   sort_by?: string;

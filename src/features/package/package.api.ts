@@ -104,3 +104,12 @@ export async function bulkRestorePackages(uuids: string[]): Promise<PackageBulkA
   });
   return data;
 }
+
+import type { ImportResult } from "../../components/common/ImportResultDialog";
+
+export async function importPackagesFromCsv(file: File): Promise<ImportResult> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data } = await api.post<ImportResult>("/api/v1/packages/import", formData);
+  return data;
+}

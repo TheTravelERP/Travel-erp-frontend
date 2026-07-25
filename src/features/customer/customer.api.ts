@@ -133,3 +133,20 @@ export async function bulkRestoreCustomers(
 
   return data;
 }
+
+/* ==========================================================
+   IMPORT
+========================================================== */
+
+import type { ImportResult } from "../../components/common/ImportResultDialog";
+
+export async function importCustomersFromCsv(file: File): Promise<ImportResult> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const { data } = await api.post<ImportResult>("/api/v1/customers/import", formData, {
+    withCredentials: true,
+  });
+
+  return data;
+}

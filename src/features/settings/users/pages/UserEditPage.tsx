@@ -5,6 +5,7 @@ import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import UserForm from '../components/UserForm';
+import UserPermissionOverrides from '../components/UserPermissionOverrides';
 import { getUserById, updateUser } from '../users.api';
 import type { UserDetail } from '../users.types';
 import { useSnackbar } from '../../../../components/ui/SnackbarProvider';
@@ -97,11 +98,19 @@ export default function UserEditPage() {
               identification_type: user.identification_type ?? '',
               identification_number: user.identification_number ?? '',
               identification_file_url: user.identification_file_url ?? '',
+              role_uuid: user.role_uuid ?? '',
+              default_branch_uuid: user.default_branch_uuid ?? '',
             }}
             onSubmit={handleUpdate}
           />
         )}
       </Paper>
+
+      {!loading && user && (
+        <Box sx={{ mt: 3 }}>
+          <UserPermissionOverrides userUuid={user.uuid} />
+        </Box>
+      )}
     </Box>
   );
 }

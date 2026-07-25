@@ -59,6 +59,7 @@ export default function EnquiryListPage() {
     lead_source: searchParams.get("lead_source") || "",
     from_date: searchParams.get("from_date") || "",
     to_date: searchParams.get("to_date") || "",
+    is_active: searchParams.get("is_active") || "",
   };
 
   /* ---------- DRAFT FILTERS (UI ONLY) ---------- */
@@ -99,6 +100,10 @@ export default function EnquiryListPage() {
           sort_by: sortBy,
           sort_order: sortOrder,
           ...appliedFilters,
+          is_active:
+            appliedFilters.is_active === undefined || appliedFilters.is_active === ""
+              ? undefined
+              : appliedFilters.is_active === "true",
         },
         signal,
       );

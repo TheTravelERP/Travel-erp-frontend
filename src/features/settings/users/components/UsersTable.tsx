@@ -27,7 +27,6 @@ import {
 
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import LockPersonIcon from '@mui/icons-material/LockPerson';
 import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash';
 
@@ -208,13 +207,6 @@ export default function UsersTable({
           <>
             <IconButton size="small" onClick={() => navigate(`/app/settings/users/${row.uuid}/edit`)}>
               <EditIcon fontSize="small" />
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={() => navigate(`/app/settings/permissions?userUuid=${row.uuid}`)}
-              title="Manage permissions"
-            >
-              <LockPersonIcon fontSize="small" />
             </IconButton>
             <IconButton
               size="small"

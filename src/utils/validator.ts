@@ -8,6 +8,12 @@ import type { TFunction } from "i18next";
  * so error text follows the user's selected language.
  */
 
+// E.164: leading '+', then 8-15 digits total (no leading zero) — the ITU cap
+// on a full international number (country code + subscriber number). Single
+// source of truth for every `+`-prefixed mobile/phone field project-wide —
+// mirrors app/validators/common_validators.py::validate_mobile on the backend.
+export const MOBILE_NUMBER_REGEX = /^\+[1-9]\d{7,14}$/;
+
 export const getValidators = (t: TFunction) => ({
   email: z
     .string()
@@ -40,11 +46,6 @@ export const getValidators = (t: TFunction) => ({
     .string()
     .length(2, t("validation.countryCodeLength"))
     .regex(/^[A-Z]{2}$/, t("validation.countryCodeFormat")),
-
-  internationalMobile: z
-    .string()
-    .trim()
-    .regex(/^\+[1-9][0-9]{6,14}$/, t("validation.internationalMobile")),
 
   otp: z
     .string()

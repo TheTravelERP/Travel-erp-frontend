@@ -1,0 +1,59 @@
+// src/features/settings/documentType/pages/DocumentTypeCreatePage.tsx
+import { Box, Breadcrumbs, Link, Paper, Typography } from "@mui/material";
+import { Navigate, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+
+import DocumentTypeForm from "../components/DocumentTypeForm";
+import type { DocumentTypeFormInput } from "../documentType.types";
+import { createDocumentType } from "../documentType.api";
+import { usePermission } from "../../../../hooks/usePermission";
+import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
+import { getErrorMessage } from "../../../../utils/errorMessage";
+import { Link as RouterLink } from "react-router-dom";
+
+export default function DocumentTypeCreatePage() {
+  const navigate = useNavigate();
+  const { showSnackbar } = useSnackbar();
+  const { t } = useTranslation();
+
+  const perms = usePermission("settings.document_type_master");
+
+  if (!perms.can_create) {
+    return <Navigate to="/app/unauthorized" replace />;
+  }
+
+  async function handleCreate(data: DocumentTypeFormInput) {
+    try {
+      await createDocumentType(data);
+      showSnackbar({ message: t("common.createdSuccess"), severity: "success" });
+      navigate("/app/settings/document-type-master");
+    } catch (err: any) {
+      showSnackbar({
+        message: getErrorMessage(err, t("common.createFailed")),
+        severity: "error",
+      });
+    }
+  }
+
+  return (
+    <Box sx={{ p: { xs: 1, md: 1 } }}>
+      <Typography variant="h6" fontWeight={700}>
+        {t("common.create")}
+      </Typography>
+
+      <Breadcrumbs sx={{ mb: 2 }}>
+        <Link component={RouterLink} to="/app/dashboard" underline="hover">
+          {t("menu.dashboard")}
+        </Link>
+        <Link component={RouterLink} to="/app/settings/document-type-master" underline="hover">
+          {t("menu.settings.document_type_master")}
+        </Link>
+        <Typography color="text.primary">{t("common.create")}</Typography>
+      </Breadcrumbs>
+
+      <Paper sx={{ p: 3, borderRadius: 2 }}>
+        <DocumentTypeForm onSubmit={handleCreate} />
+      </Paper>
+    </Box>
+  );
+}

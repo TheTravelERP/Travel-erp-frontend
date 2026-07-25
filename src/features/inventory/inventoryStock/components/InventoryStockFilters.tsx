@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import DropdownAutocomplete from "../../../../components/common/DropdownAutocomplete";
+import QuickDateRangeFilter from "../../../../components/common/QuickDateRangeFilter";
 import { useEntityDropdown } from "../../../../hooks/useEntityDropdown";
 
 /* ================= TYPES ================= */
@@ -21,6 +22,8 @@ export interface InventoryStockFilterValues {
   service_type?: string;
   contract_uuid?: string;
   status?: string;
+  from_date?: string;
+  to_date?: string;
 }
 
 interface InventoryStockFiltersProps {
@@ -64,7 +67,13 @@ export default function InventoryStockFilters({
       </Stack>
 
       <Grid container spacing={2}>
-        <Grid size={{ xs: 12, md: 4 }}>
+        <QuickDateRangeFilter
+          fromDate={value.from_date}
+          toDate={value.to_date}
+          onChange={onChange}
+        />
+
+        <Grid size={{ xs: 12, md: 3}}>
           <DropdownAutocomplete
             name="service_type"
             dropdownName="inventory_service_type"
@@ -77,7 +86,7 @@ export default function InventoryStockFilters({
           />
         </Grid>
 
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid size={{ xs: 12, md: 3}}>
           <Autocomplete
             options={options}
             loading={loading}
@@ -94,7 +103,7 @@ export default function InventoryStockFilters({
           />
         </Grid>
 
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid size={{ xs: 12, md: 2}}>
           <TextField
             select
             fullWidth

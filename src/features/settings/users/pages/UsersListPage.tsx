@@ -6,16 +6,20 @@ import { Box, Paper, Collapse } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import ListAltIcon from '@mui/icons-material/ListAlt';
+import DownloadIcon from '@mui/icons-material/Download';
+import UploadIcon from '@mui/icons-material/Upload';
 
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { SearchInput } from '../../../../components/ui/SearchInput';
 import ListPageToolbar from '../../../../components/common/ListPageToolbar';
+import ImportResultDialog from '../../../../components/common/ImportResultDialog';
 import UsersTable from '../components/UsersTable';
 import UsersFilters, { type UsersFilterValues } from '../components/UsersFilters';
 
 import { usePermission } from '../../../../hooks/usePermission';
-import { getUsers } from '../users.api';
+import { useCsvImport } from '../../../../hooks/useCsvImport';
+import { getUsers, importUsersFromCsv } from '../users.api';
 import type { UserListItem } from '../users.types';
 
 export default function UsersListPage() {
@@ -44,6 +48,8 @@ export default function UsersListPage() {
     status: searchParams.get('status') || '',
     designation: searchParams.get('designation') || '',
     gender: searchParams.get('gender') || '',
+    from_date: searchParams.get('from_date') || '',
+    to_date: searchParams.get('to_date') || '',
   };
 
   const [draftFilters, setDraftFilters] = useState<UsersFilterValues>(appliedFilters);
@@ -91,6 +97,24 @@ export default function UsersListPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
+  const handleExport = (format: 'csv' | 'excel' | 'pdf') => {
+    const params = new URLSearchParams(location.search);
+    params.set('format', format);
+    window.open(
+      `${import.meta.env.VITE_API_BASE_URL}/api/v1/settings/users/export?${params}`,
+      '_blank',
+    );
+  };
+
+  const {
+    fileInputRef,
+    result: importResult,
+    dialogOpen: importDialogOpen,
+    closeDialog: closeImportDialog,
+    openFilePicker,
+    onFileInputChange,
+  } = useCsvImport(importUsersFromCsv, fetchData);
+
   const updateURL = (params: Record<string, any>) => {
     const next = new URLSearchParams(searchParams);
     Object.entries(params).forEach(([key, value]) => {
@@ -135,6 +159,24 @@ export default function UsersListPage() {
             variant: showFilters ? 'contained' : 'outlined',
             onClick: () => setShowFilters((v) => !v),
           },
+          {
+            key: 'export',
+            label: 'Export',
+            icon: <DownloadIcon />,
+            show: perms.can_export && !isTrash,
+            menuItems: [
+              { label: 'Export CSV', onClick: () => handleExport('csv') },
+              { label: 'Export Excel', onClick: () => handleExport('excel') },
+              { label: 'Export PDF', onClick: () => handleExport('pdf') },
+            ],
+          },
+          {
+            key: 'import',
+            label: 'Import CSV',
+            icon: <UploadIcon />,
+            show: perms.can_import && !isTrash,
+            onClick: openFilePicker,
+          },
         ]}
         overflowActions={[
           {
@@ -145,6 +187,9 @@ export default function UsersListPage() {
           },
         ]}
       />
+
+      <input ref={fileInputRef} type="file" accept=".csv" hidden onChange={onFileInputChange} />
+      <ImportResultDialog open={importDialogOpen} result={importResult} onClose={closeImportDialog} />
 
       <Paper sx={{ p: 2 }}>
         <Collapse in={showFilters}>

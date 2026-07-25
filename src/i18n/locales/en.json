@@ -7,12 +7,15 @@
     "edit": "Edit",
     "delete": "Delete",
     "view": "View",
+    "clone": "Clone",
     "save": "Save",
     "discard": "Discard",
     "back": "Back",
     "reset": "Reset",
     "clear": "Clear",
     "close": "Close",
+    "row": "Row",
+    "error": "Error",
     "cancel": "Cancel",
     "restore": "Restore",
     "search": "Search",
@@ -41,6 +44,13 @@
     "customerName": "Customer Name",
     "fromDate": "From Date",
     "toDate": "To Date",
+    "dateRange": "Date Range",
+    "today": "Today",
+    "thisWeek": "This Week",
+    "thisMonth": "This Month",
+    "thisYear": "This Year",
+    "thisFinancialYear": "This Financial Year",
+    "dateRangeInvalid": "From Date must be on or before To Date",
     "actions": "Actions",
     "createdOn": "Created On",
     "new": "New",
@@ -91,7 +101,11 @@
       "november": "November",
       "december": "December"
     },
-    "searchByCodeName": "Search by code and name..."
+    "searchByCodeName": "Search by code and name...",
+    "yes": "Yes",
+    "no": "No",
+    "address": "Address",
+    "description": "Description"
   },
   "profile": {
     "home": "Home",
@@ -191,7 +205,7 @@
     "settings": "Settings",
     "settings.organization": "Organization",
     "settings.users": "Users",
-    "settings.permissions": "Permissions",
+    "settings.permissions": "Role Master",
     "settings.dropdown": "Dropdown Config",
     "settings.finance": "Currency & Tax",
     "settings.invoice_branding": "Invoice & Branding",
@@ -203,9 +217,12 @@
     "packages.pricing": "Package Pricing",
     "packages.services": "Package Services",
     "inventory.ziyarat": "Ziyarat",
-    "inventory.vendor_master": "Vendor Master"
+    "inventory.vendor_master": "Vendor Master",
+    "settings.branch_master": "Branch Master",
+    "settings.document_type_master": "Document Type Master"
   },
   "enquiry": {
+    "alternateMobile": "Alternate Mobile Number",
     "conversionStatus": "Conversion Status",
     "leadSource": "Lead Source",
     "searchPlaceholder": "Search by customer, mobile, package...",
@@ -237,7 +254,10 @@
   },
   "customer": {
     "searchPlaceholder": "Search by name, mobile, email, passport...",
+    "alternateMobile": "Alternate Mobile Number",
     "nationality": "Nationality",
+    "country": "Country",
+    "agent": "Agent",
     "passportDetails": "Passport Details",
     "passportNumber": "Passport Number",
     "passportIssueDate": "Passport Issue Date",
@@ -310,6 +330,7 @@
     "name": "Name",
     "shortName": "Short Name",
     "status": "Status",
+    "packageStatus": "Package Status",
     "featured": "Featured",
     "active": "Active",
     "routeSection": "Route & Dates",
@@ -393,7 +414,9 @@
     "currentPasswordRequired": "Current password is required",
     "nameRequired": "Name is required",
     "codeRequired": "Code is required",
-    "endDateBeforeStartDate": "End date cannot be earlier than start date"
+    "endDateBeforeStartDate": "End date cannot be earlier than start date",
+    "roleRequired": "Please select a Role",
+    "branchRequired": "Please select a Branch"
   },
   "auth": {
     "appTitle": "Travel ERP",
@@ -490,7 +513,7 @@
     "pdfFooterText": "PDF Footer Text",
     "account": "Account",
     "fullName": "Full Name",
-    "role": "Role",
+    "role": "User Type",
     "userType": {
       "Admin": "Admin",
       "Employee": "Employee",
@@ -520,8 +543,7 @@
       "Inactive": "Inactive",
       "Suspended": "Suspended"
     },
-    "any": "Any",
-    "userCreatedAssignPermissions": "User created. Assign permissions for them under Permissions."
+    "any": "Any"
   },
   "packagePricing": {
     "package": "Package",
@@ -731,5 +753,98 @@
     "validation": {
       "nameRequired": "Ziyarat name is required"
     }
+  },
+  "branch": {
+    "title": "Branch",
+    "code": "Branch Code",
+    "name": "Branch Name",
+    "legalName": "Legal Name",
+    "currency": "Currency",
+    "phone": "Phone",
+    "email": "Email",
+    "website": "Website",
+    "addressLine1": "Address Line 1",
+    "addressLine2": "Address Line 2",
+    "city": "City",
+    "state": "State",
+    "country": "Country",
+    "postalCode": "Postal Code",
+    "timezone": "Timezone",
+    "remarks": "Remarks",
+    "headOffice": "Head Office",
+    "headOfficeCannotDelete": "Head Office branch cannot be deleted",
+    "headOfficeCannotDeactivate": "Head Office branch cannot be deactivated",
+    "colCode": "Code",
+    "colName": "Name",
+    "colCurrency": "Currency",
+    "colCity": "City",
+    "colCountry": "Country",
+    "validation": {
+      "currencyRequired": "Currency is required"
+    }
+  },
+  "documentType": {
+    "code": "Document Code",
+    "name": "Document Name",
+    "defaultPrefix": "Default Prefix",
+    "module": "Module",
+    "sortOrder": "Sort Order",
+    "system": "System",
+    "systemCannotDelete": "System document types cannot be deleted",
+    "colCode": "Code",
+    "colName": "Name",
+    "colDefaultPrefix": "Default Prefix",
+    "colModule": "Module",
+    "colSortOrder": "Sort Order",
+    "validation": {
+      "moduleRequired": "Module is required"
+    }
+  },
+  "documentNumberSeries": {
+    "seriesName": "Series Name",
+    "branch": "Branch",
+    "documentType": "Document Type",
+    "prefix": "Prefix",
+    "suffix": "Suffix",
+    "separator": "Separator",
+    "numberLength": "Number Length",
+    "startingNumber": "Starting Number",
+    "nextNumber": "Next Number",
+    "resetPolicy": "Reset Policy",
+    "default": "Default",
+    "locked": "Locked",
+    "effectiveFrom": "Effective From",
+    "effectiveTo": "Effective To",
+    "lastGeneratedAt": "Last Generated At",
+    "cannotDeleteGenerated": "This series has generated documents and cannot be deleted. Deactivate it instead.",
+    "lockedFieldsHint": "This series has generated documents. Numbering fields are locked; only Effective To and Active status can be changed.",
+    "validation": {
+      "documentTypeRequired": "Please select a Document Type",
+      "prefixRequired": "Prefix is required",
+      "numberLengthMin": "Number length must be at least 1",
+      "startingNumberPositive": "Starting number must be greater than zero"
+    }
+  },
+  "role": {
+    "title": "Role",
+    "code": "Role Code",
+    "name": "Role Name",
+    "system": "System",
+    "systemCannotDelete": "System roles cannot be deleted",
+    "permissions": "Permissions",
+    "colCode": "Code",
+    "colName": "Name",
+    "colMenu": "Menu",
+    "colAll": "All",
+    "colDataScope": "Data Scope"
+  },
+  "userPermissionOverride": {
+    "title": "Permission Overrides",
+    "add": "Add Override",
+    "empty": "No exceptions — this user's access comes entirely from their Role.",
+    "colMenu": "Menu",
+    "colFlags": "Permissions",
+    "colType": "Type",
+    "menuRequired": "Please select a menu"
   }
 }

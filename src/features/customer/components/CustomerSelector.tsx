@@ -20,6 +20,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 
 import EntityAutocomplete from '../../../components/common/EntityAutocomplete';
+import MobileNumberField from '../../../components/common/MobileNumberField';
 
 /* ---------------- TYPES ---------------- */
 interface CustomerSelectorProps {
@@ -123,21 +124,7 @@ export default function CustomerSelector({
             </Grid>
 
             <Grid size={{ xs: 12, sm: 4 }}>
-              <Controller
-                name="customer_mobile"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={t('common.mobile')}
-                    required
-                    placeholder="+14155550100"
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
-                  />
-                )}
-              />
+              <MobileNumberField name="customer_mobile" control={control} label={t('common.mobile')} required />
             </Grid>
             <Grid size={{ xs: 12, sm: 4 }}>
               <Controller

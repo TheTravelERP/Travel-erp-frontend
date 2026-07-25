@@ -1,20 +1,28 @@
 // src/features/inventory/vendor/pages/VendorListPage.tsx
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Box, Paper } from "@mui/material";
+import { Box, Paper, Collapse } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
 import AddIcon from "@mui/icons-material/Add";
+import FilterListIcon from "@mui/icons-material/FilterList";
 import ListAltIcon from "@mui/icons-material/ListAlt";
+import DownloadIcon from "@mui/icons-material/Download";
+import UploadIcon from "@mui/icons-material/Upload";
 
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { SearchInput } from "../../../../components/ui/SearchInput";
 import ListPageToolbar from "../../../../components/common/ListPageToolbar";
+import ImportResultDialog from "../../../../components/common/ImportResultDialog";
 import VendorTable from "../components/VendorTable";
+import VendorFilters, {
+  type VendorFilterValues,
+} from "../components/VendorFilters";
 
 import { usePermission } from "../../../../hooks/usePermission";
-import { getVendors } from "../vendor.api";
+import { useCsvImport } from "../../../../hooks/useCsvImport";
+import { getVendors, importVendorsFromCsv } from "../vendor.api";
 import type { VendorListItem } from "../vendor.types";
 
 export default function VendorListPage() {
@@ -22,6 +30,9 @@ export default function VendorListPage() {
   const { t } = useTranslation();
   const perms = usePermission("inventory.vendor_master");
   const [searchParams, setSearchParams] = useSearchParams();
+
+  /* ---------- UI ---------- */
+  const [showFilters, setShowFilters] = useState(false);
 
   const page = Number(searchParams.get("page") || 1);
   const pageSize = Number(searchParams.get("page_size") || 10);
@@ -36,16 +47,33 @@ export default function VendorListPage() {
     updateURL({ sort_by: columnId, sort_order: nextOrder, page: 1 });
   };
 
-  const search = searchParams.get("search") || "";
-  const [draftSearch, setDraftSearch] = useState(search);
+  /* ---------- APPLIED FILTERS (FROM URL) ---------- */
+  const appliedFilters: VendorFilterValues = {
+    search: searchParams.get("search") || "",
+    vendor_type: searchParams.get("vendor_type") || "",
+    status: searchParams.get("status") || "",
+    from_date: searchParams.get("from_date") || "",
+    to_date: searchParams.get("to_date") || "",
+  };
+
+  /* ---------- DRAFT FILTERS (UI ONLY) ---------- */
+  const [draftFilters, setDraftFilters] =
+    useState<VendorFilterValues>(appliedFilters);
 
   const applyWildSearch = () => {
-    updateURL({ search: draftSearch, page: 1 });
+    updateURL({
+      search: draftFilters.search,
+      page: 1,
+    });
   };
 
   const clearWildSearch = () => {
-    setDraftSearch("");
-    updateURL({ search: undefined, page: 1 });
+    setDraftFilters((prev) => ({ ...prev, search: "" }));
+
+    updateURL({
+      search: undefined,
+      page: 1,
+    });
   };
 
   const [rows, setRows] = useState<VendorListItem[]>([]);
@@ -63,7 +91,7 @@ export default function VendorListPage() {
           is_deleted: isTrash,
           sort_by: sortBy,
           sort_order: sortOrder,
-          search,
+          ...appliedFilters,
         },
         signal,
       );
@@ -82,6 +110,27 @@ export default function VendorListPage() {
     fetchData(controller.signal);
     return () => controller.abort();
   }, [searchParams]);
+
+  /* ---------- EXPORT ---------- */
+  const handleExport = (format: "csv" | "excel" | "pdf") => {
+    const params = new URLSearchParams(location.search);
+    params.set("format", format);
+
+    window.open(
+      `${import.meta.env.VITE_API_BASE_URL}/api/v1/vendors/export?${params}`,
+      "_blank",
+    );
+  };
+
+  /* ---------- IMPORT ---------- */
+  const {
+    fileInputRef,
+    result: importResult,
+    dialogOpen: importDialogOpen,
+    closeDialog: closeImportDialog,
+    openFilePicker,
+    onFileInputChange,
+  } = useCsvImport(importVendorsFromCsv, fetchData);
 
   const updateURL = (params: Record<string, any>) => {
     const next = new URLSearchParams(searchParams);
@@ -120,6 +169,33 @@ export default function VendorListPage() {
                 onClick: () => navigate("/app/inventory/vendor-master/create"),
               }
         }
+        secondaryActions={[
+          {
+            key: "filters",
+            label: t("common.filters"),
+            icon: <FilterListIcon />,
+            variant: showFilters ? "contained" : "outlined",
+            onClick: () => setShowFilters((v) => !v),
+          },
+          {
+            key: "export",
+            label: t("common.export"),
+            icon: <DownloadIcon />,
+            show: perms.can_export && !isTrash,
+            menuItems: [
+              { label: t("common.exportCsv"), onClick: () => handleExport("csv") },
+              { label: t("common.exportExcel"), onClick: () => handleExport("excel") },
+              { label: t("common.exportPdf"), onClick: () => handleExport("pdf") },
+            ],
+          },
+          {
+            key: "import",
+            label: t("common.importCsv"),
+            icon: <UploadIcon />,
+            show: perms.can_import && !isTrash,
+            onClick: openFilePicker,
+          },
+        ]}
         overflowActions={[
           {
             key: "view-trash",
@@ -130,11 +206,36 @@ export default function VendorListPage() {
         ]}
       />
 
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".csv"
+        hidden
+        onChange={onFileInputChange}
+      />
+      <ImportResultDialog open={importDialogOpen} result={importResult} onClose={closeImportDialog} />
+
       <Paper sx={{ p: 2 }}>
+        <Collapse in={showFilters}>
+          <VendorFilters
+            value={draftFilters}
+            onChange={(v) => setDraftFilters((prev) => ({ ...prev, ...v }))}
+            onApply={() => {
+              updateURL({ ...draftFilters, page: 1 });
+            }}
+            onReset={() => {
+              setDraftFilters({});
+              setSearchParams({ page: "1", page_size: String(pageSize) });
+            }}
+          />
+        </Collapse>
+
         <SearchInput
           placeholder={t("common.searchByCodeName")}
-          value={draftSearch}
-          onChange={(e) => setDraftSearch(e.target.value)}
+          value={draftFilters.search || ""}
+          onChange={(e) =>
+            setDraftFilters({ ...draftFilters, search: e.target.value })
+          }
           onSearch={applyWildSearch}
           onClear={clearWildSearch}
           sx={{ mb: 2 }}

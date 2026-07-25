@@ -7,12 +7,15 @@
     "edit": "Editar",
     "delete": "Eliminar",
     "view": "Ver",
+    "clone": "Duplicar",
     "save": "Guardar",
     "discard": "Descartar",
     "back": "Atrás",
     "reset": "Restablecer",
     "clear": "Limpiar",
     "close": "Cerrar",
+    "row": "Fila",
+    "error": "Error",
     "cancel": "Cancelar",
     "restore": "Restaurar",
     "search": "Buscar",
@@ -41,6 +44,13 @@
     "customerName": "Nombre del cliente",
     "fromDate": "Fecha desde",
     "toDate": "Fecha hasta",
+    "dateRange": "Rango de fechas",
+    "today": "Hoy",
+    "thisWeek": "Esta semana",
+    "thisMonth": "Este mes",
+    "thisYear": "Este año",
+    "thisFinancialYear": "Este año fiscal",
+    "dateRangeInvalid": "La fecha desde debe ser anterior o igual a la fecha hasta",
     "actions": "Acciones",
     "createdOn": "Creado el",
     "new": "Nuevo",
@@ -91,7 +101,11 @@
       "november": "Noviembre",
       "december": "Diciembre"
     },
-    "searchByCodeName": "Buscar por código y nombre..."
+    "searchByCodeName": "Buscar por código y nombre...",
+    "yes": "Sí",
+    "no": "No",
+    "address": "Dirección",
+    "description": "Descripción"
   },
   "profile": {
     "home": "Inicio",
@@ -191,7 +205,7 @@
     "settings": "Configuración",
     "settings.organization": "Organización",
     "settings.users": "Usuarios",
-    "settings.permissions": "Permisos",
+    "settings.permissions": "Maestro de roles",
     "settings.dropdown": "Configuración de listas desplegables",
     "settings.finance": "Moneda e impuestos",
     "settings.invoice_branding": "Facturación e imagen de marca",
@@ -203,9 +217,12 @@
     "packages.pricing": "Precios de paquetes",
     "packages.services": "Servicios del paquete",
     "inventory.ziyarat": "Ziyarat",
-    "inventory.vendor_master": "Proveedores"
+    "inventory.vendor_master": "Proveedores",
+    "settings.branch_master": "Maestro de sucursales",
+    "settings.document_type_master": "Maestro de tipos de documento"
   },
   "enquiry": {
+    "alternateMobile": "Número de móvil alternativo",
     "conversionStatus": "Estado de conversión",
     "leadSource": "Origen",
     "searchPlaceholder": "Buscar por cliente, móvil, paquete...",
@@ -237,7 +254,10 @@
   },
   "customer": {
     "searchPlaceholder": "Buscar por nombre, móvil, correo, pasaporte...",
+    "alternateMobile": "Número de móvil alternativo",
     "nationality": "Nacionalidad",
+    "country": "País",
+    "agent": "Agente",
     "passportDetails": "Datos del pasaporte",
     "passportNumber": "Número de pasaporte",
     "passportIssueDate": "Fecha de emisión del pasaporte",
@@ -310,6 +330,7 @@
     "name": "Nombre",
     "shortName": "Nombre corto",
     "status": "Estado",
+    "packageStatus": "Estado del paquete",
     "featured": "Destacado",
     "active": "Activo",
     "routeSection": "Ruta y fechas",
@@ -393,7 +414,9 @@
     "currentPasswordRequired": "La contraseña actual es obligatoria",
     "nameRequired": "El nombre es obligatorio",
     "codeRequired": "El código es obligatorio",
-    "endDateBeforeStartDate": "La fecha de fin no puede ser anterior a la fecha de inicio"
+    "endDateBeforeStartDate": "La fecha de fin no puede ser anterior a la fecha de inicio",
+    "roleRequired": "Seleccione un rol",
+    "branchRequired": "Seleccione una sucursal"
   },
   "auth": {
     "appTitle": "Travel ERP",
@@ -490,7 +513,7 @@
     "pdfFooterText": "Texto de pie de página del PDF",
     "account": "Cuenta",
     "fullName": "Nombre completo",
-    "role": "Rol",
+    "role": "Tipo de usuario",
     "userType": {
       "Admin": "Administrador",
       "Employee": "Empleado",
@@ -520,8 +543,7 @@
       "Inactive": "Inactivo",
       "Suspended": "Suspendido"
     },
-    "any": "Cualquiera",
-    "userCreatedAssignPermissions": "Usuario creado. Asígnale permisos en Permisos."
+    "any": "Cualquiera"
   },
   "packagePricing": {
     "package": "Paquete",
@@ -731,5 +753,98 @@
     "validation": {
       "nameRequired": "El nombre de la Ziyarat es obligatorio"
     }
+  },
+  "branch": {
+    "title": "Sucursal",
+    "code": "Código de sucursal",
+    "name": "Nombre de la sucursal",
+    "legalName": "Razón social",
+    "currency": "Moneda",
+    "phone": "Teléfono",
+    "email": "Correo electrónico",
+    "website": "Sitio web",
+    "addressLine1": "Dirección línea 1",
+    "addressLine2": "Dirección línea 2",
+    "city": "Ciudad",
+    "state": "Estado/Provincia",
+    "country": "País",
+    "postalCode": "Código postal",
+    "timezone": "Zona horaria",
+    "remarks": "Observaciones",
+    "headOffice": "Oficina central",
+    "headOfficeCannotDelete": "La oficina central no se puede eliminar",
+    "headOfficeCannotDeactivate": "La oficina central no se puede desactivar",
+    "colCode": "Código",
+    "colName": "Nombre",
+    "colCurrency": "Moneda",
+    "colCity": "Ciudad",
+    "colCountry": "País",
+    "validation": {
+      "currencyRequired": "La moneda es obligatoria"
+    }
+  },
+  "documentType": {
+    "code": "Código de documento",
+    "name": "Nombre de documento",
+    "defaultPrefix": "Prefijo predeterminado",
+    "module": "Módulo",
+    "sortOrder": "Orden",
+    "system": "Sistema",
+    "systemCannotDelete": "Los tipos de documento del sistema no se pueden eliminar",
+    "colCode": "Código",
+    "colName": "Nombre",
+    "colDefaultPrefix": "Prefijo predeterminado",
+    "colModule": "Módulo",
+    "colSortOrder": "Orden",
+    "validation": {
+      "moduleRequired": "El módulo es obligatorio"
+    }
+  },
+  "documentNumberSeries": {
+    "seriesName": "Nombre de la serie",
+    "branch": "Sucursal",
+    "documentType": "Tipo de documento",
+    "prefix": "Prefijo",
+    "suffix": "Sufijo",
+    "separator": "Separador",
+    "numberLength": "Longitud del número",
+    "startingNumber": "Número inicial",
+    "nextNumber": "Número siguiente",
+    "resetPolicy": "Política de reinicio",
+    "default": "Predeterminado",
+    "locked": "Bloqueado",
+    "effectiveFrom": "Vigente desde",
+    "effectiveTo": "Vigente hasta",
+    "lastGeneratedAt": "Última generación",
+    "cannotDeleteGenerated": "Esta serie ha generado documentos y no se puede eliminar. Desactívela en su lugar.",
+    "lockedFieldsHint": "Esta serie ha generado documentos. Los campos de numeración están bloqueados; solo se pueden cambiar Vigente hasta y el estado activo.",
+    "validation": {
+      "documentTypeRequired": "Seleccione un tipo de documento",
+      "prefixRequired": "El prefijo es obligatorio",
+      "numberLengthMin": "La longitud del número debe ser al menos 1",
+      "startingNumberPositive": "El número inicial debe ser mayor que cero"
+    }
+  },
+  "role": {
+    "title": "Rol",
+    "code": "Código de rol",
+    "name": "Nombre del rol",
+    "system": "Sistema",
+    "systemCannotDelete": "Los roles del sistema no se pueden eliminar",
+    "permissions": "Permisos",
+    "colCode": "Código",
+    "colName": "Nombre",
+    "colMenu": "Menú",
+    "colAll": "Todo",
+    "colDataScope": "Alcance de datos"
+  },
+  "userPermissionOverride": {
+    "title": "Excepciones de permisos",
+    "add": "Agregar excepción",
+    "empty": "Sin excepciones — el acceso de este usuario proviene completamente de su rol.",
+    "colMenu": "Menú",
+    "colFlags": "Permisos",
+    "colType": "Tipo",
+    "menuRequired": "Seleccione un menú"
   }
 }

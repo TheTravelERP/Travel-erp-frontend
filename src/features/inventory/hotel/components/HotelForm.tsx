@@ -19,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 
 import { getHotelSchema } from "../hotel.schema";
 import type { HotelFormInput } from "../hotel.types";
+import MobileNumberField from "../../../../components/common/MobileNumberField";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
 
@@ -288,11 +289,7 @@ export default function HotelForm({ defaultValues, onSubmit, loading = false }: 
 
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 4 }}>
-            <Controller
-              name="phone"
-              control={control}
-              render={({ field }) => <TextField {...field} label={t("hotel.phone")} fullWidth />}
-            />
+            <MobileNumberField name="phone" control={control} label={t("hotel.phone")} />
           </Grid>
 
           <Grid size={{ xs: 12, sm: 4 }}>

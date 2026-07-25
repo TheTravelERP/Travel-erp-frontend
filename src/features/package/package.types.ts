@@ -79,6 +79,10 @@ export interface GetPackagesParams {
   page_size?: number;
   search?: string;
   status?: string;
+  package_type_uuid?: string;
+  from_date?: string;
+  to_date?: string;
+  is_active?: boolean;
   is_deleted?: boolean;
 
   sort_by?: string;

@@ -12,6 +12,7 @@ export interface EnquiryFormInput {
 
   customer_name?: string;
   customer_mobile?: string;
+  customer_alternate_mobile?: string;
   customer_email?: string;
 
   pkg_uuid?: string | null;
@@ -79,6 +80,7 @@ export interface GetEnquiriesParams {
 
   from_date?: string;
   to_date?: string;
+  is_active?: boolean;
   is_deleted?: boolean;
 
   sort_by?: string;

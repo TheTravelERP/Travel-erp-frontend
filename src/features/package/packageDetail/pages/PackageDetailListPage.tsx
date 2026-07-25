@@ -1,20 +1,28 @@
 // src/features/package/packageDetail/pages/PackageDetailListPage.tsx
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Box, Paper } from "@mui/material";
+import { Box, Collapse, Paper } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
 import AddIcon from "@mui/icons-material/Add";
 import ListAltIcon from "@mui/icons-material/ListAlt";
+import DownloadIcon from "@mui/icons-material/Download";
+import UploadIcon from "@mui/icons-material/Upload";
+import FilterListIcon from "@mui/icons-material/FilterList";
 
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { SearchInput } from "../../../../components/ui/SearchInput";
 import ListPageToolbar from "../../../../components/common/ListPageToolbar";
+import ImportResultDialog from "../../../../components/common/ImportResultDialog";
 import PackageDetailTable from "../components/PackageDetailTable";
+import PackageDetailFilters, {
+  type PackageDetailFilterValues,
+} from "../components/PackageDetailFilters";
 
 import { usePermission } from "../../../../hooks/usePermission";
-import { getPackageDetails } from "../packageDetail.api";
+import { useCsvImport } from "../../../../hooks/useCsvImport";
+import { getPackageDetails, importPackageDetailsFromCsv } from "../packageDetail.api";
 import type { PackageDetailListItem } from "../packageDetail.types";
 
 /* ================= COMPONENT ================= */
@@ -24,6 +32,9 @@ export default function PackageDetailListPage() {
   const { t } = useTranslation();
   const perms = usePermission("packages.details");
   const [searchParams, setSearchParams] = useSearchParams();
+
+  /* ---------- FILTERS UI ---------- */
+  const [showFilters, setShowFilters] = useState(false);
 
   /* ---------- PAGINATION (URL SOURCE OF TRUTH) ---------- */
   const page = Number(searchParams.get("page") || 1);
@@ -53,6 +64,18 @@ export default function PackageDetailListPage() {
     updateURL({ search: undefined, page: 1 });
   };
 
+  /* ---------- APPLIED FILTERS (FROM URL) ---------- */
+  const appliedFilters: PackageDetailFilterValues = {
+    search,
+    is_active: searchParams.get("is_active") || "",
+    from_date: searchParams.get("from_date") || "",
+    to_date: searchParams.get("to_date") || "",
+  };
+
+  /* ---------- DRAFT FILTERS (UI ONLY) ---------- */
+  const [draftFilters, setDraftFilters] =
+    useState<PackageDetailFilterValues>(appliedFilters);
+
   /* ---------- DATA ---------- */
   const [rows, setRows] = useState<PackageDetailListItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -70,6 +93,12 @@ export default function PackageDetailListPage() {
           sort_by: sortBy,
           sort_order: sortOrder,
           search,
+          is_active:
+            appliedFilters.is_active === undefined || appliedFilters.is_active === ""
+              ? undefined
+              : appliedFilters.is_active === "true",
+          from_date: appliedFilters.from_date || undefined,
+          to_date: appliedFilters.to_date || undefined,
         },
         signal,
       );
@@ -88,6 +117,27 @@ export default function PackageDetailListPage() {
     fetchData(controller.signal);
     return () => controller.abort();
   }, [searchParams]);
+
+  /* ---------- EXPORT ---------- */
+  const handleExport = (format: "csv" | "excel" | "pdf") => {
+    const params = new URLSearchParams(location.search);
+    params.set("format", format);
+
+    window.open(
+      `${import.meta.env.VITE_API_BASE_URL}/api/v1/package-details/export?${params}`,
+      "_blank",
+    );
+  };
+
+  /* ---------- IMPORT ---------- */
+  const {
+    fileInputRef,
+    result: importResult,
+    dialogOpen: importDialogOpen,
+    closeDialog: closeImportDialog,
+    openFilePicker,
+    onFileInputChange,
+  } = useCsvImport(importPackageDetailsFromCsv, fetchData);
 
   /* ---------- HELPERS ---------- */
   const updateURL = (params: Record<string, any>) => {
@@ -129,6 +179,33 @@ export default function PackageDetailListPage() {
                 onClick: () => navigate("/app/packages/details/create"),
               }
         }
+        secondaryActions={[
+          {
+            key: "filters",
+            label: t("common.filters"),
+            icon: <FilterListIcon />,
+            variant: showFilters ? "contained" : "outlined",
+            onClick: () => setShowFilters((v) => !v),
+          },
+          {
+            key: "export",
+            label: t("common.export"),
+            icon: <DownloadIcon />,
+            show: perms.can_export && !isTrash,
+            menuItems: [
+              { label: t("common.exportCsv"), onClick: () => handleExport("csv") },
+              { label: t("common.exportExcel"), onClick: () => handleExport("excel") },
+              { label: t("common.exportPdf"), onClick: () => handleExport("pdf") },
+            ],
+          },
+          {
+            key: "import",
+            label: t("common.importCsv"),
+            icon: <UploadIcon />,
+            show: perms.can_import && !isTrash,
+            onClick: openFilePicker,
+          },
+        ]}
         overflowActions={[
           {
             key: "view-trash",
@@ -139,7 +216,28 @@ export default function PackageDetailListPage() {
         ]}
       />
 
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".csv"
+        hidden
+        onChange={onFileInputChange}
+      />
+      <ImportResultDialog open={importDialogOpen} result={importResult} onClose={closeImportDialog} />
+
       <Paper sx={{ p: 2 }}>
+        <Collapse in={showFilters}>
+          <PackageDetailFilters
+            value={draftFilters}
+            onChange={(v) => setDraftFilters((prev) => ({ ...prev, ...v }))}
+            onApply={() => updateURL({ ...draftFilters, page: 1 })}
+            onReset={() => {
+              setDraftFilters({});
+              setSearchParams({ page: "1", page_size: String(pageSize) });
+            }}
+          />
+        </Collapse>
+
         <SearchInput
           placeholder={t("packageDetail.searchPlaceholder")}
           value={draftSearch}

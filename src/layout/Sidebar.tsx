@@ -90,11 +90,15 @@ export default function Sidebar({ open, drawerWidth = 280 }: any) {
 
   const filterViewable = (items: any[]) =>
     items
-      .filter((item) => item.permissions?.can_view !== false)
       .map((item) => ({
         ...item,
         children: item.children ? filterViewable(item.children) : undefined,
-      }));
+      }))
+      // A group header (e.g. "CRM") has no page of its own and no explicit
+      // view grant, but must still show whenever any child under it is
+      // visible — only drop an item if it's both un-viewable itself AND has
+      // no visible children left.
+      .filter((item) => item.permissions?.can_view !== false || (item.children && item.children.length > 0));
 
   const menuItems = filterViewable(menu);
 

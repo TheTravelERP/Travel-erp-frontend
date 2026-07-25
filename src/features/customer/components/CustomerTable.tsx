@@ -74,6 +74,8 @@ function getColumns(t: TFunction): TableColumn[] {
     { id: "mobile", label: t("common.mobile"), sortable: true, minWidth: 150 },
     { id: "email", label: t("common.email"), sortable: true, minWidth: 200 },
     { id: "nationality", label: t("customer.nationality"), sortable: true, minWidth: 130 },
+    { id: "country", label: t("customer.country"), sortable: true, minWidth: 130 },
+    { id: "agent_name", label: t("customer.agent"), minWidth: 150 },
     { id: "passport_no", label: t("customer.passportNumber"), sortable: true, minWidth: 140 },
     { id: "created_at", label: t("common.createdOn"), sortable: true, minWidth: 130 },
   ];
@@ -251,6 +253,11 @@ export default function CustomerTable({
                   <Typography variant="caption">{row.nationality || "-"}</Typography>
                   <Typography variant="caption">{formatDate(row.created_at)}</Typography>
                 </Stack>
+
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography variant="caption">{row.country || "-"}</Typography>
+                  <Typography variant="caption">{row.agent_name || "-"}</Typography>
+                </Stack>
               </CardContent>
             </Paper>
           ))
@@ -337,7 +344,7 @@ export default function CustomerTable({
             {loading &&
               [...Array(pageSize)].map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell colSpan={8}>
+                  <TableCell colSpan={10}>
                     <Skeleton height={40} />
                   </TableCell>
                 </TableRow>
@@ -356,6 +363,8 @@ export default function CustomerTable({
                   <TableCell>{row.mobile}</TableCell>
                   <TableCell>{row.email || "-"}</TableCell>
                   <TableCell>{row.nationality || "-"}</TableCell>
+                  <TableCell>{row.country || "-"}</TableCell>
+                  <TableCell>{row.agent_name || "-"}</TableCell>
                   <TableCell>{row.passport_no || "-"}</TableCell>
                   <TableCell>{new Date(row.created_at).toLocaleDateString()}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>

@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 
 import { getAirlineSchema } from "../airline.schema";
 import type { AirlineFormInput } from "../airline.types";
+import MobileNumberField from "../../../../components/common/MobileNumberField";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
 
@@ -139,11 +140,7 @@ export default function AirlineForm({ defaultValues, onSubmit, loading = false }
           </Grid>
 
           <Grid size={{ xs: 12, sm: 4 }}>
-            <Controller
-              name="phone"
-              control={control}
-              render={({ field }) => <TextField {...field} label={t("airline.phone")} fullWidth />}
-            />
+            <MobileNumberField name="phone" control={control} label={t("airline.phone")} />
           </Grid>
 
           <Grid size={{ xs: 12, sm: 4 }}>
