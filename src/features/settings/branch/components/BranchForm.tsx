@@ -36,8 +36,12 @@ const emptyValues: BranchFormInput = {
   branch_code: "",
   branch_name: "",
   legal_name: "",
-  currency_code: "",
-  phone: "",
+  localization_profile_uuid: "",
+  contact_person_name: "",
+  manager_uuid: "",
+  office_phone: "",
+  emergency_phone: "",
+  whatsapp_number: "",
   email: "",
   website: "",
   address_line1: "",
@@ -46,7 +50,10 @@ const emptyValues: BranchFormInput = {
   state: "",
   country: "",
   postal_code: "",
-  timezone: "",
+  latitude: undefined,
+  longitude: undefined,
+  working_from: "",
+  working_to: "",
   remarks: "",
   is_active: true,
 };
@@ -86,12 +93,16 @@ export default function BranchForm({
       )}
       noValidate
     >
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        {isHeadOffice && (
-          <Box mb={2}>
-            <Chip size="small" color="primary" label={t("branch.headOffice")} />
-          </Box>
-        )}
+      {isHeadOffice && (
+        <Box mb={2}>
+          <Chip size="small" color="primary" label={t("branch.headOffice")} />
+        </Box>
+      )}
+
+      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+          {t("branch.sectionGeneral")}
+        </Typography>
 
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 4 }}>
@@ -136,20 +147,76 @@ export default function BranchForm({
             />
           </Grid>
 
+          <Grid size={{ xs: 12, sm: 6 }} sx={{ display: "flex", alignItems: "center" }}>
+            <Controller
+              name="is_active"
+              control={control}
+              render={({ field }) => (
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={!!field.value}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                      disabled={isHeadOffice}
+                    />
+                  }
+                  label={t("common.active")}
+                />
+              )}
+            />
+            {isHeadOffice && (
+              <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                {t("branch.headOfficeCannotDeactivate")}
+              </Typography>
+            )}
+          </Grid>
+        </Grid>
+      </Paper>
+
+      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+          {t("branch.sectionContact")}
+        </Typography>
+
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Controller
+              name="contact_person_name"
+              control={control}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  label={t("branch.contactPerson")}
+                  fullWidth
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                />
+              )}
+            />
+          </Grid>
+
           <Grid size={{ xs: 12, sm: 6 }}>
             <EntityAutocomplete
-              name="currency_code"
-              label={t("branch.currency")}
+              name="manager_uuid"
+              label={t("branch.manager")}
               control={control}
-              dropdownName="currency_master"
+              dropdownName="users"
             />
           </Grid>
 
           <Grid size={{ xs: 12, sm: 4 }}>
-            <MobileNumberField name="phone" control={control} label={t("branch.phone")} />
+            <MobileNumberField name="office_phone" control={control} label={t("branch.officePhone")} />
           </Grid>
 
           <Grid size={{ xs: 12, sm: 4 }}>
+            <MobileNumberField name="emergency_phone" control={control} label={t("branch.emergencyPhone")} />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <MobileNumberField name="whatsapp_number" control={control} label={t("branch.whatsappNumber")} />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6 }}>
             <Controller
               name="email"
               control={control}
@@ -157,14 +224,22 @@ export default function BranchForm({
             />
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 4 }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <Controller
               name="website"
               control={control}
               render={({ field }) => <TextField {...field} label={t("branch.website")} fullWidth />}
             />
           </Grid>
+        </Grid>
+      </Paper>
 
+      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+          {t("common.address")}
+        </Typography>
+
+        <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <Controller
               name="address_line1"
@@ -213,38 +288,103 @@ export default function BranchForm({
             />
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 4 }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <Controller
-              name="timezone"
+              name="latitude"
               control={control}
-              render={({ field }) => <TextField {...field} label={t("branch.timezone")} fullWidth />}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 4 }} sx={{ display: "flex", alignItems: "center" }}>
-            <Controller
-              name="is_active"
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={!!field.value}
-                      onChange={(e) => field.onChange(e.target.checked)}
-                      disabled={isHeadOffice}
-                    />
-                  }
-                  label={t("common.active")}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  value={field.value ?? ""}
+                  type="number"
+                  label={t("branch.latitude")}
+                  fullWidth
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
                 />
               )}
             />
-            {isHeadOffice && (
-              <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-                {t("branch.headOfficeCannotDeactivate")}
-              </Typography>
-            )}
           </Grid>
 
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Controller
+              name="longitude"
+              control={control}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  value={field.value ?? ""}
+                  type="number"
+                  label={t("branch.longitude")}
+                  fullWidth
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                />
+              )}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Controller
+              name="working_from"
+              control={control}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  type="time"
+                  label={t("branch.workingFrom")}
+                  fullWidth
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                />
+              )}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Controller
+              name="working_to"
+              control={control}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  type="time"
+                  label={t("branch.workingTo")}
+                  fullWidth
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                />
+              )}
+            />
+          </Grid>
+        </Grid>
+      </Paper>
+
+      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+          {t("branch.sectionLocalization")}
+        </Typography>
+
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <EntityAutocomplete
+              name="localization_profile_uuid"
+              label={t("menu.settings.localization_profile")}
+              control={control}
+              dropdownName="localization_profile"
+            />
+          </Grid>
+        </Grid>
+      </Paper>
+
+      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+          {t("branch.sectionOther")}
+        </Typography>
+
+        <Grid container spacing={2}>
           <Grid size={{ xs: 12 }}>
             <Controller
               name="remarks"

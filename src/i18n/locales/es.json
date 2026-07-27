@@ -207,7 +207,6 @@
     "settings.users": "Usuarios",
     "settings.permissions": "Maestro de roles",
     "settings.dropdown": "Configuración de listas desplegables",
-    "settings.finance": "Moneda e impuestos",
     "settings.invoice_branding": "Facturación e imagen de marca",
     "settings.doc_numbering": "Numeración de documentos",
     "settings.subscription": "Suscripción y facturación",
@@ -219,7 +218,12 @@
     "inventory.ziyarat": "Ziyarat",
     "inventory.vendor_master": "Proveedores",
     "settings.branch_master": "Maestro de sucursales",
-    "settings.document_type_master": "Maestro de tipos de documento"
+    "settings.document_type_master": "Maestro de tipos de documento",
+    "settings.currency_master": "Maestro de monedas",
+    "settings.exchange_rate_master": "Maestro de tipos de cambio",
+    "settings.currency_rate_policy": "Política de tipo de cambio",
+    "settings.tax_registration": "Registro fiscal",
+    "settings.localization_profile": "Perfiles de localización"
   },
   "enquiry": {
     "alternateMobile": "Número de móvil alternativo",
@@ -416,7 +420,8 @@
     "codeRequired": "El código es obligatorio",
     "endDateBeforeStartDate": "La fecha de fin no puede ser anterior a la fecha de inicio",
     "roleRequired": "Seleccione un rol",
-    "branchRequired": "Seleccione una sucursal"
+    "branchRequired": "Seleccione una sucursal",
+    "endTimeBeforeStartTime": "La hora de fin no puede ser anterior a la hora de inicio"
   },
   "auth": {
     "appTitle": "Travel ERP",
@@ -473,8 +478,6 @@
     "city": "Ciudad",
     "stateRegion": "Estado / Región",
     "setAtSignup": "Definido durante el registro",
-    "baseCurrency": "Moneda base",
-    "editUnderCurrencyTax": "Editar en Moneda e impuestos",
     "taxRegistration": "Registro fiscal",
     "taxRegistrationHint": "Como se llame en tu país — NIF, número de IVA, EIN, ABN.",
     "registrationLabel": "Etiqueta de registro",
@@ -488,16 +491,6 @@
     "time24h": "24 horas",
     "time12h": "12 horas (AM/PM)",
     "financialYearStarts": "Inicio del año fiscal",
-    "currency": "Moneda",
-    "baseCurrencyHint": "Código ISO de 3 letras, ej. USD, EUR, AED, INR",
-    "decimalPlaces": "Decimales",
-    "taxRates": "Tasas de impuesto",
-    "addRate": "Agregar tasa",
-    "taxRatesHint": "Agrega los impuestos que apliquen en tu zona de operación — IVA, GST, impuesto sobre ventas, etc.",
-    "defaultRate": "Tasa predeterminada",
-    "name": "Nombre",
-    "percent": "Porcentaje",
-    "noTaxRatesYet": "Aún no hay tasas de impuesto.",
     "invoice": "Factura",
     "invoiceNumberingHint": "Las series de numeración y prefijos están en Numeración de documentos — esto define el aspecto y contenido de las facturas.",
     "pricesTaxInclusive": "Los precios incluyen impuestos",
@@ -759,17 +752,25 @@
     "code": "Código de sucursal",
     "name": "Nombre de la sucursal",
     "legalName": "Razón social",
+    "contactPerson": "Persona de contacto",
+    "manager": "Gerente de sucursal",
     "currency": "Moneda",
-    "phone": "Teléfono",
+    "officePhone": "Teléfono de oficina",
     "email": "Correo electrónico",
     "website": "Sitio web",
+    "emergencyPhone": "Teléfono de emergencia",
+    "whatsappNumber": "Número de WhatsApp",
     "addressLine1": "Dirección línea 1",
     "addressLine2": "Dirección línea 2",
     "city": "Ciudad",
     "state": "Estado/Provincia",
     "country": "País",
     "postalCode": "Código postal",
+    "latitude": "Latitud",
+    "longitude": "Longitud",
     "timezone": "Zona horaria",
+    "workingFrom": "Horario de apertura",
+    "workingTo": "Horario de cierre",
     "remarks": "Observaciones",
     "headOffice": "Oficina central",
     "headOfficeCannotDelete": "La oficina central no se puede eliminar",
@@ -781,7 +782,11 @@
     "colCountry": "País",
     "validation": {
       "currencyRequired": "La moneda es obligatoria"
-    }
+    },
+    "sectionGeneral": "General",
+    "sectionContact": "Contacto",
+    "sectionLocalization": "Localización",
+    "sectionOther": "Otro"
   },
   "documentType": {
     "code": "Código de documento",
@@ -798,6 +803,82 @@
     "colSortOrder": "Orden",
     "validation": {
       "moduleRequired": "El módulo es obligatorio"
+    }
+  },
+  "currencyMaster": {
+    "code": "Código de moneda",
+    "name": "Nombre de la moneda",
+    "symbol": "Símbolo",
+    "decimalPlaces": "Decimales",
+    "colCode": "Código",
+    "colName": "Nombre",
+    "colSymbol": "Símbolo",
+    "colDecimalPlaces": "Decimales",
+    "validation": {
+      "codeLength": "El código debe tener exactamente 3 caracteres (ISO 4217)"
+    }
+  },
+  "exchangeRate": {
+    "fromCurrency": "Moneda origen",
+    "toCurrency": "Moneda destino",
+    "rate": "Tasa",
+    "effectiveFrom": "Vigente desde",
+    "effectiveTo": "Vigente hasta (opcional)",
+    "colFrom": "De",
+    "colTo": "A",
+    "colRate": "Tasa",
+    "colEffectiveFrom": "Vigente desde",
+    "colEffectiveTo": "Vigente hasta",
+    "validation": {
+      "ratePositive": "La tasa debe ser un número positivo",
+      "effectiveFromRequired": "La fecha de inicio de vigencia es obligatoria",
+      "currenciesMustDiffer": "Las monedas de origen y destino deben ser diferentes",
+      "effectiveToBeforeFrom": "La fecha de fin no puede ser anterior a la de inicio"
+    }
+  },
+  "currencyRatePolicy": {
+    "rateSource": "Origen de la tasa",
+    "markupPercent": "Recargo / Descuento %",
+    "manualRate": "Tasa manual",
+    "validation": {
+      "markupPercentRequired": "El recargo % es obligatorio cuando el origen es Recargo",
+      "manualRateRequired": "La tasa manual es obligatoria cuando el origen es Manual"
+    }
+  },
+  "taxRegistration": {
+    "label": "Etiqueta",
+    "registrationNumber": "Número de registro",
+    "colLabel": "Etiqueta",
+    "colNumber": "Número de registro",
+    "validation": {
+      "labelRequired": "La etiqueta es obligatoria",
+      "numberRequired": "El número de registro es obligatorio"
+    }
+  },
+  "localizationProfile": {
+    "sectionGeneral": "General",
+    "profileName": "Nombre del perfil",
+    "defaultCurrency": "Moneda predeterminada",
+    "financialYearStartMonth": "Mes de inicio del año fiscal",
+    "numberFormat": "Formato numérico",
+    "defaultDecimalPlaces": "Decimales predeterminados",
+    "taxCalculationMethod": "Método de cálculo de impuestos",
+    "roundOffMethod": "Método de redondeo",
+    "taxComponents": "Componentes de impuestos",
+    "addTaxComponent": "Agregar componente de impuesto",
+    "noTaxComponentsYet": "Aún no se han agregado componentes de impuestos",
+    "taxName": "Nombre del impuesto",
+    "taxPercent": "Impuesto %",
+    "taxType": "Tipo de impuesto",
+    "sequence": "Secuencia",
+    "colName": "Nombre del perfil",
+    "colCurrency": "Moneda",
+    "validation": {
+      "timezoneRequired": "La zona horaria es obligatoria",
+      "registrationLabelRequired": "La etiqueta de registro es obligatoria",
+      "taxNameRequired": "El nombre del impuesto es obligatorio",
+      "taxPercentPositive": "El impuesto % debe ser cero o mayor",
+      "duplicateTaxComponentName": "Los nombres de los componentes de impuestos deben ser únicos dentro de un perfil"
     }
   },
   "documentNumberSeries": {

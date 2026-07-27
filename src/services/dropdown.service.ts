@@ -60,3 +60,20 @@ export const getEntityDropdownOptions = async (
 
   return data;
 };
+
+/**
+ * Exact-match lookup by value_column — resolves a pre-filled edit-form
+ * value (often a uuid) that the fuzzy `search` param above can't find,
+ * since search only matches label-oriented search_columns.
+ */
+export const getEntityDropdownOptionByValue = async (
+  params: { dropdown_name: string; value: string },
+  signal?: AbortSignal
+): Promise<DropdownOption | null> => {
+  const { data } = await api.get('/api/v1/common/dropdowns/entity/by-value', {
+    params,
+    signal,
+  });
+
+  return data.item ?? null;
+};

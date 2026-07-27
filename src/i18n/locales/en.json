@@ -207,7 +207,6 @@
     "settings.users": "Users",
     "settings.permissions": "Role Master",
     "settings.dropdown": "Dropdown Config",
-    "settings.finance": "Currency & Tax",
     "settings.invoice_branding": "Invoice & Branding",
     "settings.doc_numbering": "Document Numbering",
     "settings.subscription": "Subscription & Billing",
@@ -219,7 +218,12 @@
     "inventory.ziyarat": "Ziyarat",
     "inventory.vendor_master": "Vendor Master",
     "settings.branch_master": "Branch Master",
-    "settings.document_type_master": "Document Type Master"
+    "settings.document_type_master": "Document Type Master",
+    "settings.currency_master": "Currency Master",
+    "settings.exchange_rate_master": "Exchange Rate Master",
+    "settings.currency_rate_policy": "Currency Rate Policy",
+    "settings.tax_registration": "Tax Registration",
+    "settings.localization_profile": "Localization Profiles"
   },
   "enquiry": {
     "alternateMobile": "Alternate Mobile Number",
@@ -416,7 +420,8 @@
     "codeRequired": "Code is required",
     "endDateBeforeStartDate": "End date cannot be earlier than start date",
     "roleRequired": "Please select a Role",
-    "branchRequired": "Please select a Branch"
+    "branchRequired": "Please select a Branch",
+    "endTimeBeforeStartTime": "End time cannot be earlier than start time"
   },
   "auth": {
     "appTitle": "Travel ERP",
@@ -473,8 +478,6 @@
     "city": "City",
     "stateRegion": "State / Region",
     "setAtSignup": "Set at signup",
-    "baseCurrency": "Base Currency",
-    "editUnderCurrencyTax": "Edit under Currency & Tax",
     "taxRegistration": "Tax registration",
     "taxRegistrationHint": "Whatever your country calls it — GSTIN, VAT number, EIN, ABN.",
     "registrationLabel": "Registration Label",
@@ -488,16 +491,6 @@
     "time24h": "24-hour",
     "time12h": "12-hour (AM/PM)",
     "financialYearStarts": "Financial Year Starts",
-    "currency": "Currency",
-    "baseCurrencyHint": "3-letter ISO code, e.g. USD, EUR, AED, INR",
-    "decimalPlaces": "Decimal Places",
-    "taxRates": "Tax Rates",
-    "addRate": "Add Rate",
-    "taxRatesHint": "Add whichever taxes apply where you operate — VAT, GST, sales tax, and so on.",
-    "defaultRate": "Default rate",
-    "name": "Name",
-    "percent": "Percent",
-    "noTaxRatesYet": "No tax rates yet.",
     "invoice": "Invoice",
     "invoiceNumberingHint": "Numbering series and prefixes live under Document Numbering — this covers how invoices read and look.",
     "pricesTaxInclusive": "Prices are tax-inclusive",
@@ -759,17 +752,25 @@
     "code": "Branch Code",
     "name": "Branch Name",
     "legalName": "Legal Name",
+    "contactPerson": "Contact Person",
+    "manager": "Branch Manager",
     "currency": "Currency",
-    "phone": "Phone",
+    "officePhone": "Office Phone",
     "email": "Email",
     "website": "Website",
+    "emergencyPhone": "Emergency Phone",
+    "whatsappNumber": "WhatsApp Number",
     "addressLine1": "Address Line 1",
     "addressLine2": "Address Line 2",
     "city": "City",
     "state": "State",
     "country": "Country",
     "postalCode": "Postal Code",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
     "timezone": "Timezone",
+    "workingFrom": "Working From",
+    "workingTo": "Working To",
     "remarks": "Remarks",
     "headOffice": "Head Office",
     "headOfficeCannotDelete": "Head Office branch cannot be deleted",
@@ -781,7 +782,11 @@
     "colCountry": "Country",
     "validation": {
       "currencyRequired": "Currency is required"
-    }
+    },
+    "sectionGeneral": "General",
+    "sectionContact": "Contact",
+    "sectionLocalization": "Localization",
+    "sectionOther": "Other"
   },
   "documentType": {
     "code": "Document Code",
@@ -798,6 +803,82 @@
     "colSortOrder": "Sort Order",
     "validation": {
       "moduleRequired": "Module is required"
+    }
+  },
+  "currencyMaster": {
+    "code": "Currency Code",
+    "name": "Currency Name",
+    "symbol": "Symbol",
+    "decimalPlaces": "Decimal Places",
+    "colCode": "Code",
+    "colName": "Name",
+    "colSymbol": "Symbol",
+    "colDecimalPlaces": "Decimal Places",
+    "validation": {
+      "codeLength": "Code must be exactly 3 characters (ISO 4217)"
+    }
+  },
+  "exchangeRate": {
+    "fromCurrency": "From Currency",
+    "toCurrency": "To Currency",
+    "rate": "Rate",
+    "effectiveFrom": "Effective From",
+    "effectiveTo": "Effective To (optional)",
+    "colFrom": "From",
+    "colTo": "To",
+    "colRate": "Rate",
+    "colEffectiveFrom": "Effective From",
+    "colEffectiveTo": "Effective To",
+    "validation": {
+      "ratePositive": "Rate must be a positive number",
+      "effectiveFromRequired": "Effective from date is required",
+      "currenciesMustDiffer": "From and to currencies must differ",
+      "effectiveToBeforeFrom": "Effective to cannot be earlier than effective from"
+    }
+  },
+  "currencyRatePolicy": {
+    "rateSource": "Rate Source",
+    "markupPercent": "Markup / Markdown %",
+    "manualRate": "Manual Rate",
+    "validation": {
+      "markupPercentRequired": "Markup % is required when rate source is Markup",
+      "manualRateRequired": "Manual rate is required when rate source is Manual"
+    }
+  },
+  "taxRegistration": {
+    "label": "Label",
+    "registrationNumber": "Registration Number",
+    "colLabel": "Label",
+    "colNumber": "Registration Number",
+    "validation": {
+      "labelRequired": "Label is required",
+      "numberRequired": "Registration number is required"
+    }
+  },
+  "localizationProfile": {
+    "sectionGeneral": "General",
+    "profileName": "Profile Name",
+    "defaultCurrency": "Default Currency",
+    "financialYearStartMonth": "Financial Year Start Month",
+    "numberFormat": "Number Format",
+    "defaultDecimalPlaces": "Default Decimal Places",
+    "taxCalculationMethod": "Tax Calculation Method",
+    "roundOffMethod": "Round-off Method",
+    "taxComponents": "Tax Components",
+    "addTaxComponent": "Add Tax Component",
+    "noTaxComponentsYet": "No tax components added yet",
+    "taxName": "Tax Name",
+    "taxPercent": "Tax %",
+    "taxType": "Tax Type",
+    "sequence": "Sequence",
+    "colName": "Profile Name",
+    "colCurrency": "Currency",
+    "validation": {
+      "timezoneRequired": "Timezone is required",
+      "registrationLabelRequired": "Registration label is required",
+      "taxNameRequired": "Tax name is required",
+      "taxPercentPositive": "Tax % must be zero or greater",
+      "duplicateTaxComponentName": "Tax component names must be unique within a profile"
     }
   },
   "documentNumberSeries": {

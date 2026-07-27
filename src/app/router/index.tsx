@@ -27,10 +27,14 @@ import ChangePasswordPage from '../../features/profile/pages/ChangePasswordPage'
 import OrganizationSettingsPage from '../../features/settings/pages/OrganizationSettingsPage';
 import UsersRoutes from '../../features/settings/users/users.routes';
 import RoleRoutes from '../../features/settings/role/role.routes';
-import FinanceSettingsPage from '../../features/settings/pages/FinanceSettingsPage';
 import InvoiceBrandingSettingsPage from '../../features/settings/pages/InvoiceBrandingSettingsPage';
 import BranchRoutes from '../../features/settings/branch/branch.routes';
 import DocumentTypeRoutes from '../../features/settings/documentType/documentType.routes';
+import CurrencyMasterRoutes from '../../features/settings/currencyMaster/currencyMaster.routes';
+import ExchangeRateRoutes from '../../features/settings/exchangeRate/exchangeRate.routes';
+import CurrencyRatePolicyRoutes from '../../features/settings/currencyRatePolicy/currencyRatePolicy.routes';
+import TaxRegistrationRoutes from '../../features/settings/taxRegistration/taxRegistration.routes';
+import LocalizationProfileRoutes from '../../features/settings/localizationProfile/localizationProfile.routes';
 import DocumentNumberSeriesRoutes from '../../features/settings/documentNumberSeries/documentNumberSeries.routes';
 import ComingSoonPage from '../../components/common/ComingSoonPage';
 
@@ -156,14 +160,6 @@ export default function AppRouter() {
         <Route path="/app/settings/users/*" element={<UsersRoutes />} />
         <Route path="/app/settings/roles/*" element={<RoleRoutes />} />
         <Route
-          path="/app/settings/finance"
-          element={
-            <PermissionRoute menuId="settings.finance">
-              <FinanceSettingsPage />
-            </PermissionRoute>
-          }
-        />
-        <Route
           path="/app/settings/invoice-branding"
           element={
             <PermissionRoute menuId="settings.invoice_branding">
@@ -173,6 +169,11 @@ export default function AppRouter() {
         />
         <Route path="/app/settings/branch-master/*" element={<BranchRoutes />} />
         <Route path="/app/settings/document-type-master/*" element={<DocumentTypeRoutes />} />
+        <Route path="/app/settings/currency-master/*" element={<CurrencyMasterRoutes />} />
+        <Route path="/app/settings/exchange-rate-master/*" element={<ExchangeRateRoutes />} />
+        <Route path="/app/settings/currency-rate-policy/*" element={<CurrencyRatePolicyRoutes />} />
+        <Route path="/app/settings/tax-registration/*" element={<TaxRegistrationRoutes />} />
+        <Route path="/app/settings/localization-profiles/*" element={<LocalizationProfileRoutes />} />
         <Route path="/app/settings/doc-numbering/*" element={<DocumentNumberSeriesRoutes />} />
 
         {/* Not-yet-built modules */}

@@ -207,7 +207,6 @@
     "settings.users": "المستخدمون",
     "settings.permissions": "سجل الأدوار",
     "settings.dropdown": "إعدادات القوائم المنسدلة",
-    "settings.finance": "العملة والضريبة",
     "settings.invoice_branding": "الفواتير والعلامة التجارية",
     "settings.doc_numbering": "ترقيم المستندات",
     "settings.subscription": "الاشتراك والفوترة",
@@ -219,7 +218,12 @@
     "inventory.ziyarat": "الزيارة",
     "inventory.vendor_master": "الموردون",
     "settings.branch_master": "سجل الفروع",
-    "settings.document_type_master": "سجل أنواع المستندات"
+    "settings.document_type_master": "سجل أنواع المستندات",
+    "settings.currency_master": "سجل العملات",
+    "settings.exchange_rate_master": "سجل أسعار الصرف",
+    "settings.currency_rate_policy": "سياسة سعر الصرف",
+    "settings.tax_registration": "التسجيل الضريبي",
+    "settings.localization_profile": "ملفات التوطين"
   },
   "enquiry": {
     "alternateMobile": "رقم الجوال البديل",
@@ -416,7 +420,8 @@
     "codeRequired": "الرمز مطلوب",
     "endDateBeforeStartDate": "لا يمكن أن يكون تاريخ الانتهاء أقدم من تاريخ البدء",
     "roleRequired": "يرجى اختيار دور",
-    "branchRequired": "يرجى اختيار فرع"
+    "branchRequired": "يرجى اختيار فرع",
+    "endTimeBeforeStartTime": "لا يمكن أن يكون وقت الانتهاء قبل وقت البدء"
   },
   "auth": {
     "appTitle": "Travel ERP",
@@ -473,8 +478,6 @@
     "city": "المدينة",
     "stateRegion": "الولاية / المنطقة",
     "setAtSignup": "تم تعيينه عند التسجيل",
-    "baseCurrency": "العملة الأساسية",
-    "editUnderCurrencyTax": "التعديل ضمن العملة والضريبة",
     "taxRegistration": "التسجيل الضريبي",
     "taxRegistrationHint": "أيًّا كان الاسم المستخدم في دولتك — الرقم الضريبي، رقم ضريبة القيمة المضافة، EIN، ABN.",
     "registrationLabel": "تسمية التسجيل",
@@ -488,16 +491,6 @@
     "time24h": "24 ساعة",
     "time12h": "12 ساعة (ص/م)",
     "financialYearStarts": "بداية السنة المالية",
-    "currency": "العملة",
-    "baseCurrencyHint": "رمز ISO من 3 أحرف، مثال: USD، EUR، AED، INR",
-    "decimalPlaces": "الخانات العشرية",
-    "taxRates": "نسب الضريبة",
-    "addRate": "إضافة نسبة",
-    "taxRatesHint": "أضف أي ضرائب تنطبق في منطقة عملك — ضريبة القيمة المضافة، GST، ضريبة المبيعات، وغيرها.",
-    "defaultRate": "النسبة الافتراضية",
-    "name": "الاسم",
-    "percent": "النسبة المئوية",
-    "noTaxRatesYet": "لا توجد نسب ضريبة بعد.",
     "invoice": "الفاتورة",
     "invoiceNumberingHint": "سلاسل الترقيم والبادئات موجودة ضمن ترقيم المستندات — هذا القسم يحدد شكل الفواتير ومحتواها.",
     "pricesTaxInclusive": "الأسعار شاملة الضريبة",
@@ -759,17 +752,25 @@
     "code": "رمز الفرع",
     "name": "اسم الفرع",
     "legalName": "الاسم القانوني",
+    "contactPerson": "الشخص المسؤول",
+    "manager": "مدير الفرع",
     "currency": "العملة",
-    "phone": "الهاتف",
+    "officePhone": "هاتف المكتب",
     "email": "البريد الإلكتروني",
     "website": "الموقع الإلكتروني",
+    "emergencyPhone": "هاتف الطوارئ",
+    "whatsappNumber": "رقم واتساب",
     "addressLine1": "العنوان السطر 1",
     "addressLine2": "العنوان السطر 2",
     "city": "المدينة",
     "state": "المحافظة/الولاية",
     "country": "الدولة",
     "postalCode": "الرمز البريدي",
+    "latitude": "خط العرض",
+    "longitude": "خط الطول",
     "timezone": "المنطقة الزمنية",
+    "workingFrom": "بداية وقت العمل",
+    "workingTo": "نهاية وقت العمل",
     "remarks": "ملاحظات",
     "headOffice": "المكتب الرئيسي",
     "headOfficeCannotDelete": "لا يمكن حذف فرع المكتب الرئيسي",
@@ -781,7 +782,11 @@
     "colCountry": "الدولة",
     "validation": {
       "currencyRequired": "العملة مطلوبة"
-    }
+    },
+    "sectionGeneral": "عام",
+    "sectionContact": "التواصل",
+    "sectionLocalization": "الإعدادات المحلية",
+    "sectionOther": "أخرى"
   },
   "documentType": {
     "code": "رمز المستند",
@@ -798,6 +803,82 @@
     "colSortOrder": "ترتيب الفرز",
     "validation": {
       "moduleRequired": "الوحدة مطلوبة"
+    }
+  },
+  "currencyMaster": {
+    "code": "رمز العملة",
+    "name": "اسم العملة",
+    "symbol": "الرمز",
+    "decimalPlaces": "الخانات العشرية",
+    "colCode": "الرمز",
+    "colName": "الاسم",
+    "colSymbol": "الرمز",
+    "colDecimalPlaces": "الخانات العشرية",
+    "validation": {
+      "codeLength": "يجب أن يتكون الرمز من 3 أحرف بالضبط (ISO 4217)"
+    }
+  },
+  "exchangeRate": {
+    "fromCurrency": "من عملة",
+    "toCurrency": "إلى عملة",
+    "rate": "السعر",
+    "effectiveFrom": "ساري من",
+    "effectiveTo": "ساري حتى (اختياري)",
+    "colFrom": "من",
+    "colTo": "إلى",
+    "colRate": "السعر",
+    "colEffectiveFrom": "ساري من",
+    "colEffectiveTo": "ساري حتى",
+    "validation": {
+      "ratePositive": "يجب أن يكون السعر رقمًا موجبًا",
+      "effectiveFromRequired": "تاريخ البدء مطلوب",
+      "currenciesMustDiffer": "يجب أن تختلف عملة المصدر عن عملة الهدف",
+      "effectiveToBeforeFrom": "لا يمكن أن يكون تاريخ الانتهاء قبل تاريخ البدء"
+    }
+  },
+  "currencyRatePolicy": {
+    "rateSource": "مصدر السعر",
+    "markupPercent": "نسبة الزيادة / النقصان %",
+    "manualRate": "السعر اليدوي",
+    "validation": {
+      "markupPercentRequired": "نسبة الزيادة مطلوبة عندما يكون مصدر السعر زيادة",
+      "manualRateRequired": "السعر اليدوي مطلوب عندما يكون مصدر السعر يدويًا"
+    }
+  },
+  "taxRegistration": {
+    "label": "التسمية",
+    "registrationNumber": "رقم التسجيل",
+    "colLabel": "التسمية",
+    "colNumber": "رقم التسجيل",
+    "validation": {
+      "labelRequired": "التسمية مطلوبة",
+      "numberRequired": "رقم التسجيل مطلوب"
+    }
+  },
+  "localizationProfile": {
+    "sectionGeneral": "عام",
+    "profileName": "اسم الملف الشخصي",
+    "defaultCurrency": "العملة الافتراضية",
+    "financialYearStartMonth": "شهر بداية السنة المالية",
+    "numberFormat": "تنسيق الأرقام",
+    "defaultDecimalPlaces": "الخانات العشرية الافتراضية",
+    "taxCalculationMethod": "طريقة حساب الضريبة",
+    "roundOffMethod": "طريقة التقريب",
+    "taxComponents": "مكونات الضريبة",
+    "addTaxComponent": "إضافة مكون ضريبي",
+    "noTaxComponentsYet": "لم تتم إضافة أي مكونات ضريبية بعد",
+    "taxName": "اسم الضريبة",
+    "taxPercent": "نسبة الضريبة %",
+    "taxType": "نوع الضريبة",
+    "sequence": "التسلسل",
+    "colName": "اسم الملف الشخصي",
+    "colCurrency": "العملة",
+    "validation": {
+      "timezoneRequired": "المنطقة الزمنية مطلوبة",
+      "registrationLabelRequired": "تسمية التسجيل مطلوبة",
+      "taxNameRequired": "اسم الضريبة مطلوب",
+      "taxPercentPositive": "يجب أن تكون نسبة الضريبة صفرًا أو أكثر",
+      "duplicateTaxComponentName": "يجب أن تكون أسماء مكونات الضريبة فريدة ضمن الملف الشخصي"
     }
   },
   "documentNumberSeries": {

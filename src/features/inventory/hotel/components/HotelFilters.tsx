@@ -64,7 +64,7 @@ export default function HotelFilters({
           onChange={onChange}
         />
 
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid size={{ xs: 12, md: 2 }}>
           <TextField
             fullWidth
             label={t("hotel.city")}
@@ -73,7 +73,7 @@ export default function HotelFilters({
           />
         </Grid>
 
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid size={{ xs: 12, md: 2 }}>
           <TextField
             fullWidth
             type="number"
@@ -84,7 +84,7 @@ export default function HotelFilters({
           />
         </Grid>
 
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid size={{ xs: 12, md: 2 }}>
           <TextField
             select
             fullWidth

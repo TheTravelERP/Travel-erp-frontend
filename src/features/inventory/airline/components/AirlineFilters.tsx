@@ -63,7 +63,7 @@ export default function AirlineFilters({
           onChange={onChange}
         />
 
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid size={{ xs: 12, md: 3 }}>
           <TextField
             fullWidth
             label={t("airline.country")}
@@ -72,7 +72,7 @@ export default function AirlineFilters({
           />
         </Grid>
 
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid size={{ xs: 12, md: 2 }}>
           <TextField
             select
             fullWidth

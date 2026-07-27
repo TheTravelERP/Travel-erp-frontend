@@ -52,7 +52,7 @@ export default function EntityAutocomplete({
   value,
   onChange,
 }: EntityAutocompleteProps) {
-  const { options, loading, setSearch, loadMore } = useEntityDropdown({
+  const { options, loading, setSearch, loadMore, ensureOptionLoaded } = useEntityDropdown({
     dropdownName,
     pageSize,
   });
@@ -68,6 +68,14 @@ export default function EntityAutocomplete({
       (currentValue
         ? { label: "Loading...", value: currentValue }
         : null);
+
+    // Fire-and-forget: resolves the currently selected value into `options`
+    // when it falls outside the first unsearched page (e.g. editing a
+    // record whose stored value isn't near the top of an alphabetical
+    // list) — without this, `selected` above falls back to a permanent
+    // "Loading..." placeholder that never resolves. Guarded internally
+    // (resolvedValuesRef) so this is a no-op once the value is loaded.
+    void ensureOptionLoaded(currentValue);
 
     return (
       <Autocomplete

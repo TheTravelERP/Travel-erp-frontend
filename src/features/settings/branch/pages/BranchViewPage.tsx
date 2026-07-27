@@ -128,8 +128,51 @@ export default function BranchViewPage() {
             </Grid>
 
             <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="caption">{t("branch.phone")}</Typography>
-              <Typography mt={0.5}>{branch.phone || "-"}</Typography>
+              <Typography variant="caption">{t("common.status")}</Typography>
+              <Typography mt={0.5}>
+                <Chip
+                  size="small"
+                  label={branch.is_active ? t("common.active") : t("common.inactive")}
+                  color={branch.is_active ? "success" : "default"}
+                />
+              </Typography>
+            </Grid>
+          </Grid>
+        </Paper>
+
+        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+          <Typography variant="subtitle1" fontWeight={600} color="primary" sx={{ mb: 2 }}>
+            {t("branch.sectionContact")}
+          </Typography>
+
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Typography variant="caption">{t("branch.contactPerson")}</Typography>
+              <Typography mt={0.5}>{branch.contact_person_name || "-"}</Typography>
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Typography variant="caption">{t("branch.manager")}</Typography>
+              <Typography mt={0.5}>
+                {branch.manager_name
+                  ? `${branch.manager_name}${branch.manager_email ? ` (${branch.manager_email})` : ""}`
+                  : "-"}
+              </Typography>
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Typography variant="caption">{t("branch.officePhone")}</Typography>
+              <Typography mt={0.5}>{branch.office_phone || "-"}</Typography>
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Typography variant="caption">{t("branch.emergencyPhone")}</Typography>
+              <Typography mt={0.5}>{branch.emergency_phone || "-"}</Typography>
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Typography variant="caption">{t("branch.whatsappNumber")}</Typography>
+              <Typography mt={0.5}>{branch.whatsapp_number || "-"}</Typography>
             </Grid>
 
             <Grid size={{ xs: 12, md: 4 }}>
@@ -140,6 +183,21 @@ export default function BranchViewPage() {
             <Grid size={{ xs: 12, md: 4 }}>
               <Typography variant="caption">{t("branch.website")}</Typography>
               <Typography mt={0.5}>{branch.website || "-"}</Typography>
+            </Grid>
+          </Grid>
+        </Paper>
+
+        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+          <Typography variant="subtitle1" fontWeight={600} color="primary" sx={{ mb: 2 }}>
+            {t("common.address")}
+          </Typography>
+
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12 }}>
+              <Typography variant="caption">{t("common.address")}</Typography>
+              <Typography mt={0.5} whiteSpace="pre-wrap">
+                {[branch.address_line1, branch.address_line2].filter(Boolean).join(", ") || "-"}
+              </Typography>
             </Grid>
 
             <Grid size={{ xs: 12, md: 4 }}>
@@ -163,28 +221,38 @@ export default function BranchViewPage() {
             </Grid>
 
             <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="caption">{t("branch.timezone")}</Typography>
-              <Typography mt={0.5}>{branch.timezone || "-"}</Typography>
+              <Typography variant="caption">{t("branch.latitude")}</Typography>
+              <Typography mt={0.5}>{branch.latitude ?? "-"}</Typography>
             </Grid>
 
             <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="caption">{t("common.status")}</Typography>
-              <Typography mt={0.5}>
-                <Chip
-                  size="small"
-                  label={branch.is_active ? t("common.active") : t("common.inactive")}
-                  color={branch.is_active ? "success" : "default"}
-                />
-              </Typography>
+              <Typography variant="caption">{t("branch.longitude")}</Typography>
+              <Typography mt={0.5}>{branch.longitude ?? "-"}</Typography>
             </Grid>
 
-            <Grid size={{ xs: 12 }}>
-              <Typography variant="caption">{t("common.address")}</Typography>
-              <Typography mt={0.5} whiteSpace="pre-wrap">
-                {[branch.address_line1, branch.address_line2].filter(Boolean).join(", ") || "-"}
-              </Typography>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Typography variant="caption">{t("branch.workingFrom")}</Typography>
+              <Typography mt={0.5}>{branch.working_from || "-"}</Typography>
             </Grid>
 
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Typography variant="caption">{t("branch.workingTo")}</Typography>
+              <Typography mt={0.5}>{branch.working_to || "-"}</Typography>
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Typography variant="caption">{t("branch.timezone")}</Typography>
+              <Typography mt={0.5}>{branch.timezone || "-"}</Typography>
+            </Grid>
+          </Grid>
+        </Paper>
+
+        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+          <Typography variant="subtitle1" fontWeight={600} color="primary" sx={{ mb: 2 }}>
+            {t("branch.sectionOther")}
+          </Typography>
+
+          <Grid container spacing={3}>
             <Grid size={{ xs: 12 }}>
               <Typography variant="caption">{t("branch.remarks")}</Typography>
               <Typography mt={0.5} whiteSpace="pre-wrap">

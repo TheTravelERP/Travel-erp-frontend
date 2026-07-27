@@ -186,27 +186,13 @@ export default function UserForm({ mode, defaultValues, onSubmit, loading = fals
               </Grid>
 
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Controller
-                  name={'default_branch_uuid' as any}
+                <EntityAutocomplete
+                  name="default_branch_uuid"
+                  label={t('branch.title')}
                   control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      select
-                      label={t('branch.title')}
-                      fullWidth
-                      required
-                      disabled={branchesLoading || branches.length === 1}
-                      error={!!(errors as any).default_branch_uuid}
-                      helperText={(errors as any).default_branch_uuid?.message}
-                    >
-                      {branches.map((b) => (
-                        <MenuItem key={b.uuid} value={b.uuid}>
-                          {b.branch_name}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  )}
+                  dropdownName="branch"
+                  disabled={branchesLoading || branches.length === 1}
+                  allowAdd={false}
                 />
               </Grid>
 

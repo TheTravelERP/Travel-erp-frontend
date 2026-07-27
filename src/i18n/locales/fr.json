@@ -207,7 +207,6 @@
     "settings.users": "Utilisateurs",
     "settings.permissions": "Gestion des rôles",
     "settings.dropdown": "Configuration des listes déroulantes",
-    "settings.finance": "Devise et taxe",
     "settings.invoice_branding": "Facturation et image de marque",
     "settings.doc_numbering": "Numérotation des documents",
     "settings.subscription": "Abonnement et facturation",
@@ -219,7 +218,12 @@
     "inventory.ziyarat": "Ziyarat",
     "inventory.vendor_master": "Fournisseurs",
     "settings.branch_master": "Gestion des succursales",
-    "settings.document_type_master": "Types de documents"
+    "settings.document_type_master": "Types de documents",
+    "settings.currency_master": "Référentiel des devises",
+    "settings.exchange_rate_master": "Référentiel des taux de change",
+    "settings.currency_rate_policy": "Politique de taux de change",
+    "settings.tax_registration": "Enregistrement fiscal",
+    "settings.localization_profile": "Profils de localisation"
   },
   "enquiry": {
     "alternateMobile": "Numéro de mobile alternatif",
@@ -416,7 +420,8 @@
     "codeRequired": "Le code est requis",
     "endDateBeforeStartDate": "La date de fin ne peut pas être antérieure à la date de début",
     "roleRequired": "Veuillez sélectionner un rôle",
-    "branchRequired": "Veuillez sélectionner une succursale"
+    "branchRequired": "Veuillez sélectionner une succursale",
+    "endTimeBeforeStartTime": "L'heure de fin ne peut pas être antérieure à l'heure de début"
   },
   "auth": {
     "appTitle": "Travel ERP",
@@ -473,8 +478,6 @@
     "city": "Ville",
     "stateRegion": "État / Région",
     "setAtSignup": "Défini lors de l'inscription",
-    "baseCurrency": "Devise de base",
-    "editUnderCurrencyTax": "Modifier sous Devise et taxes",
     "taxRegistration": "Immatriculation fiscale",
     "taxRegistrationHint": "Quel que soit le nom utilisé dans votre pays — numéro de TVA, EIN, ABN.",
     "registrationLabel": "Libellé d'immatriculation",
@@ -488,16 +491,6 @@
     "time24h": "24 heures",
     "time12h": "12 heures (AM/PM)",
     "financialYearStarts": "Début de l'exercice financier",
-    "currency": "Devise",
-    "baseCurrencyHint": "Code ISO à 3 lettres, ex. USD, EUR, AED, INR",
-    "decimalPlaces": "Décimales",
-    "taxRates": "Taux de taxe",
-    "addRate": "Ajouter un taux",
-    "taxRatesHint": "Ajoutez les taxes applicables dans votre zone d'activité — TVA, GST, taxe de vente, etc.",
-    "defaultRate": "Taux par défaut",
-    "name": "Nom",
-    "percent": "Pourcentage",
-    "noTaxRatesYet": "Aucun taux de taxe pour le moment.",
     "invoice": "Facture",
     "invoiceNumberingHint": "Les séries de numérotation et préfixes se trouvent sous Numérotation des documents — ceci définit l'apparence des factures.",
     "pricesTaxInclusive": "Les prix incluent la taxe",
@@ -759,17 +752,25 @@
     "code": "Code de succursale",
     "name": "Nom de la succursale",
     "legalName": "Raison sociale",
+    "contactPerson": "Personne à contacter",
+    "manager": "Responsable de la succursale",
     "currency": "Devise",
-    "phone": "Téléphone",
+    "officePhone": "Téléphone du bureau",
     "email": "E-mail",
     "website": "Site web",
+    "emergencyPhone": "Téléphone d'urgence",
+    "whatsappNumber": "Numéro WhatsApp",
     "addressLine1": "Adresse ligne 1",
     "addressLine2": "Adresse ligne 2",
     "city": "Ville",
     "state": "État / Région",
     "country": "Pays",
     "postalCode": "Code postal",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
     "timezone": "Fuseau horaire",
+    "workingFrom": "Horaire d'ouverture",
+    "workingTo": "Horaire de fermeture",
     "remarks": "Remarques",
     "headOffice": "Siège social",
     "headOfficeCannotDelete": "Le siège social ne peut pas être supprimé",
@@ -781,7 +782,11 @@
     "colCountry": "Pays",
     "validation": {
       "currencyRequired": "La devise est requise"
-    }
+    },
+    "sectionGeneral": "Général",
+    "sectionContact": "Contact",
+    "sectionLocalization": "Localisation",
+    "sectionOther": "Autre"
   },
   "documentType": {
     "code": "Code du document",
@@ -798,6 +803,82 @@
     "colSortOrder": "Ordre de tri",
     "validation": {
       "moduleRequired": "Le module est requis"
+    }
+  },
+  "currencyMaster": {
+    "code": "Code de devise",
+    "name": "Nom de la devise",
+    "symbol": "Symbole",
+    "decimalPlaces": "Décimales",
+    "colCode": "Code",
+    "colName": "Nom",
+    "colSymbol": "Symbole",
+    "colDecimalPlaces": "Décimales",
+    "validation": {
+      "codeLength": "Le code doit comporter exactement 3 caractères (ISO 4217)"
+    }
+  },
+  "exchangeRate": {
+    "fromCurrency": "Devise source",
+    "toCurrency": "Devise cible",
+    "rate": "Taux",
+    "effectiveFrom": "Valable à partir du",
+    "effectiveTo": "Valable jusqu'au (optionnel)",
+    "colFrom": "De",
+    "colTo": "À",
+    "colRate": "Taux",
+    "colEffectiveFrom": "Valable à partir du",
+    "colEffectiveTo": "Valable jusqu'au",
+    "validation": {
+      "ratePositive": "Le taux doit être un nombre positif",
+      "effectiveFromRequired": "La date de début de validité est requise",
+      "currenciesMustDiffer": "Les devises source et cible doivent être différentes",
+      "effectiveToBeforeFrom": "La date de fin ne peut pas être antérieure à la date de début"
+    }
+  },
+  "currencyRatePolicy": {
+    "rateSource": "Source du taux",
+    "markupPercent": "Majoration / Réduction %",
+    "manualRate": "Taux manuel",
+    "validation": {
+      "markupPercentRequired": "La majoration % est requise lorsque la source est Majoration",
+      "manualRateRequired": "Le taux manuel est requis lorsque la source est Manuel"
+    }
+  },
+  "taxRegistration": {
+    "label": "Libellé",
+    "registrationNumber": "Numéro d'enregistrement",
+    "colLabel": "Libellé",
+    "colNumber": "Numéro d'enregistrement",
+    "validation": {
+      "labelRequired": "Le libellé est requis",
+      "numberRequired": "Le numéro d'enregistrement est requis"
+    }
+  },
+  "localizationProfile": {
+    "sectionGeneral": "Général",
+    "profileName": "Nom du profil",
+    "defaultCurrency": "Devise par défaut",
+    "financialYearStartMonth": "Mois de début d'exercice",
+    "numberFormat": "Format numérique",
+    "defaultDecimalPlaces": "Décimales par défaut",
+    "taxCalculationMethod": "Méthode de calcul de taxe",
+    "roundOffMethod": "Méthode d'arrondi",
+    "taxComponents": "Composants de taxe",
+    "addTaxComponent": "Ajouter un composant",
+    "noTaxComponentsYet": "Aucun composant de taxe ajouté",
+    "taxName": "Nom de la taxe",
+    "taxPercent": "Taxe %",
+    "taxType": "Type de taxe",
+    "sequence": "Séquence",
+    "colName": "Nom du profil",
+    "colCurrency": "Devise",
+    "validation": {
+      "timezoneRequired": "Le fuseau horaire est requis",
+      "registrationLabelRequired": "Le libellé d'enregistrement est requis",
+      "taxNameRequired": "Le nom de la taxe est requis",
+      "taxPercentPositive": "La taxe % doit être supérieure ou égale à zéro",
+      "duplicateTaxComponentName": "Les noms des composants de taxe doivent être uniques dans un profil"
     }
   },
   "documentNumberSeries": {

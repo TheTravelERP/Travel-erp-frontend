@@ -74,7 +74,7 @@ export default function VendorFilters({
           />
         </Grid>
 
-        <Grid size={{ xs: 12, md: 3 }}>
+        <Grid size={{ xs: 12, md: 2 }}>
           <DropdownAutocomplete
             name="status"
             dropdownName="vendor_status"

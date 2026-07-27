@@ -39,6 +39,17 @@ export interface OrganizationProfile {
   city: string | null;
   state: string | null;
   country_code: string;
+
+  // Editable FKs (Localization redesign) — the org picks these instead of
+  // entering the flattened fields below directly.
+  localization_profile_uuid: string | null;
+  tax_registration_uuid: string | null;
+
+  // Response-only from here down — server-computed from the linked
+  // LocalizationProfile/TaxRegistration. Shape kept stable on purpose:
+  // useFinancialYearStartMonth() (src/hooks/useOrganizationSettings.ts) is
+  // consumed by ~18 files via QuickDateRangeFilter, so financial_year_start_month
+  // (and these siblings) must keep flowing through this exact contract.
   tax_registration_label: string | null;
   tax_registration_number: string | null;
   timezone: string;
@@ -48,8 +59,33 @@ export interface OrganizationProfile {
   base_currency: string;
 }
 
+// Only the fields the backend's OrganizationProfileUpdate schema actually
+// accepts — the flattened locale/tax fields above are response-only now.
 export type OrganizationProfileUpdate = Partial<
-  Omit<OrganizationProfile, 'org_id' | 'country_code'>
+  Pick<
+    OrganizationProfile,
+    | 'name'
+    | 'legal_name'
+    | 'logo_url'
+    | 'header_image_url'
+    | 'footer_image_url'
+    | 'doc1_label'
+    | 'doc1_url'
+    | 'doc2_label'
+    | 'doc2_url'
+    | 'doc3_label'
+    | 'doc3_url'
+    | 'doc4_label'
+    | 'doc4_url'
+    | 'website'
+    | 'email'
+    | 'mobile'
+    | 'address'
+    | 'city'
+    | 'state'
+    | 'localization_profile_uuid'
+    | 'tax_registration_uuid'
+  >
 >;
 
 export const fetchOrganizationSettings = async (signal?: AbortSignal): Promise<OrganizationProfile> => {

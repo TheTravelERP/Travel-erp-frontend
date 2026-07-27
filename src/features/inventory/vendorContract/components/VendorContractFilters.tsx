@@ -65,7 +65,7 @@ export default function VendorContractFilters({
           />
         </Grid>
 
-        <Grid size={{ xs: 12, md: 3 }}>
+        <Grid size={{ xs: 12, md: 2 }}>
           <TextField
             select
             label={t("vendorContract.status")}

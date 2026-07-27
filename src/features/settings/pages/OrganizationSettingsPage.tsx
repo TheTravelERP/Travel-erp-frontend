@@ -7,7 +7,6 @@ import {
   Paper,
   Grid,
   TextField,
-  MenuItem,
   Button,
   CircularProgress,
   Divider,
@@ -23,10 +22,9 @@ import {
 import { uploadFile } from '../../../services/upload.service';
 import FileUploadField from '../../../components/common/FileUploadField';
 import MobileNumberField from '../../../components/common/MobileNumberField';
+import EntityAutocomplete from '../../../components/common/EntityAutocomplete';
 import { useSnackbar } from '../../../components/ui/SnackbarProvider';
 
-const DATE_FORMATS = ['YYYY-MM-DD', 'DD/MM/YYYY', 'MM/DD/YYYY'];
-const TIME_FORMAT_VALUES = ['24h', '12h'] as const;
 const MONTH_KEYS = [
   'january', 'february', 'march', 'april', 'may', 'june',
   'july', 'august', 'september', 'october', 'november', 'december',
@@ -39,8 +37,8 @@ const EDITABLE_FIELDS = [
   'doc1_label', 'doc1_url', 'doc2_label', 'doc2_url',
   'doc3_label', 'doc3_url', 'doc4_label', 'doc4_url',
   'website', 'email', 'mobile',
-  'address', 'city', 'state', 'tax_registration_label', 'tax_registration_number',
-  'timezone', 'date_format', 'time_format', 'financial_year_start_month',
+  'address', 'city', 'state',
+  'localization_profile_uuid', 'tax_registration_uuid',
 ] as const;
 
 export default function OrganizationSettingsPage() {
@@ -76,7 +74,13 @@ export default function OrganizationSettingsPage() {
     try {
       const payload: OrganizationProfileUpdate = {};
       for (const key of EDITABLE_FIELDS) {
-        (payload as any)[key] = form[key];
+        const value = form[key];
+        // localization_profile_uuid/tax_registration_uuid are real UUID
+        // fields on the backend — omit rather than send "" when unset.
+        if (value === '' && (key === 'localization_profile_uuid' || key === 'tax_registration_uuid')) {
+          continue;
+        }
+        (payload as any)[key] = value;
       }
       const updated = await updateOrganizationSettings(payload);
       setForm(updated);
@@ -144,9 +148,6 @@ export default function OrganizationSettingsPage() {
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
             <TextField fullWidth label={t('common.country')} value={form.country_code} disabled helperText={t('settings.setAtSignup')} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField fullWidth label={t('settings.baseCurrency')} value={form.base_currency} disabled helperText={t('settings.editUnderCurrencyTax')} />
           </Grid>
         </Grid>
 
@@ -224,21 +225,20 @@ export default function OrganizationSettingsPage() {
         </Typography>
         <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
-              fullWidth
-              label={t('settings.registrationLabel')}
-              placeholder={t('settings.registrationLabelPlaceholder')}
-              value={form.tax_registration_label ?? ''}
-              onChange={(e) => setField('tax_registration_label', e.target.value)}
+            <EntityAutocomplete
+              name="tax_registration_uuid"
+              label={t('menu.settings.tax_registration')}
+              dropdownName="tax_registration"
+              useForm={false}
+              value={form.tax_registration_uuid}
+              onChange={(v) => setField('tax_registration_uuid', v ?? '')}
             />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
-              fullWidth
-              label={t('settings.registrationNumber')}
-              value={form.tax_registration_number ?? ''}
-              onChange={(e) => setField('tax_registration_number', e.target.value)}
-            />
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <TextField fullWidth label={t('settings.registrationLabel')} value={form.tax_registration_label ?? '-'} disabled />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <TextField fullWidth label={t('settings.registrationNumber')} value={form.tax_registration_number ?? '-'} disabled />
           </Grid>
         </Grid>
 
@@ -249,40 +249,40 @@ export default function OrganizationSettingsPage() {
         </Typography>
         <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
-              fullWidth
-              label={t('settings.timezone')}
-              value={form.timezone}
-              onChange={(e) => setField('timezone', e.target.value)}
-              placeholder={t('settings.timezonePlaceholder')}
+            <EntityAutocomplete
+              name="localization_profile_uuid"
+              label={t('menu.settings.localization_profile')}
+              dropdownName="localization_profile"
+              useForm={false}
+              value={form.localization_profile_uuid}
+              onChange={(v) => setField('localization_profile_uuid', v ?? '')}
             />
           </Grid>
+        </Grid>
+
+        <Typography variant="body2" color="text.secondary" gutterBottom>
+          {t('localizationProfile.sectionGeneral')}
+        </Typography>
+        <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid size={{ xs: 12, sm: 3 }}>
-            <TextField select fullWidth label={t('settings.dateFormat')} value={form.date_format} onChange={(e) => setField('date_format', e.target.value)}>
-              {DATE_FORMATS.map((f) => (
-                <MenuItem key={f} value={f}>{f}</MenuItem>
-              ))}
-            </TextField>
+            <TextField fullWidth label={t('localizationProfile.defaultCurrency')} value={form.base_currency} disabled />
           </Grid>
           <Grid size={{ xs: 12, sm: 3 }}>
-            <TextField select fullWidth label={t('settings.timeFormat')} value={form.time_format} onChange={(e) => setField('time_format', e.target.value)}>
-              {TIME_FORMAT_VALUES.map((v) => (
-                <MenuItem key={v} value={v}>{t(`settings.time${v}`)}</MenuItem>
-              ))}
-            </TextField>
+            <TextField fullWidth label={t('settings.timezone')} value={form.timezone} disabled />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <TextField fullWidth label={t('settings.dateFormat')} value={form.date_format} disabled />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <TextField fullWidth label={t('settings.timeFormat')} value={t(`settings.time${form.time_format}`)} disabled />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
-              select
               fullWidth
               label={t('settings.financialYearStarts')}
-              value={form.financial_year_start_month}
-              onChange={(e) => setField('financial_year_start_month', Number(e.target.value))}
-            >
-              {MONTH_KEYS.map((m, i) => (
-                <MenuItem key={m} value={i + 1}>{t(`common.months.${m}`)}</MenuItem>
-              ))}
-            </TextField>
+              value={t(`common.months.${MONTH_KEYS[form.financial_year_start_month - 1]}`)}
+              disabled
+            />
           </Grid>
         </Grid>
 

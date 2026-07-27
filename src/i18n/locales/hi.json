@@ -207,7 +207,6 @@
     "settings.users": "उपयोगकर्ता",
     "settings.permissions": "रोल मास्टर",
     "settings.dropdown": "ड्रॉपडाउन कॉन्फ़िग",
-    "settings.finance": "मुद्रा और कर",
     "settings.invoice_branding": "इनवॉइस और ब्रांडिंग",
     "settings.doc_numbering": "दस्तावेज़ नंबरिंग",
     "settings.subscription": "सदस्यता और बिलिंग",
@@ -219,7 +218,12 @@
     "inventory.ziyarat": "ज़ियारत",
     "inventory.vendor_master": "विक्रेता",
     "settings.branch_master": "शाखा मास्टर",
-    "settings.document_type_master": "दस्तावेज़ प्रकार मास्टर"
+    "settings.document_type_master": "दस्तावेज़ प्रकार मास्टर",
+    "settings.currency_master": "मुद्रा मास्टर",
+    "settings.exchange_rate_master": "विनिमय दर मास्टर",
+    "settings.currency_rate_policy": "मुद्रा दर नीति",
+    "settings.tax_registration": "कर पंजीकरण",
+    "settings.localization_profile": "स्थानीयकरण प्रोफ़ाइल"
   },
   "enquiry": {
     "alternateMobile": "वैकल्पिक मोबाइल नंबर",
@@ -416,7 +420,8 @@
     "codeRequired": "कोड आवश्यक है",
     "endDateBeforeStartDate": "समाप्ति तिथि प्रारंभ तिथि से पहले नहीं हो सकती",
     "roleRequired": "कृपया एक रोल चुनें",
-    "branchRequired": "कृपया एक शाखा चुनें"
+    "branchRequired": "कृपया एक शाखा चुनें",
+    "endTimeBeforeStartTime": "समाप्ति समय प्रारंभ समय से पहले नहीं हो सकता"
   },
   "auth": {
     "appTitle": "Travel ERP",
@@ -473,8 +478,6 @@
     "city": "शहर",
     "stateRegion": "राज्य / क्षेत्र",
     "setAtSignup": "साइनअप पर सेट किया गया",
-    "baseCurrency": "आधार मुद्रा",
-    "editUnderCurrencyTax": "मुद्रा और कर के अंतर्गत संपादित करें",
     "taxRegistration": "कर पंजीकरण",
     "taxRegistrationHint": "आपका देश इसे जो भी कहता हो — GSTIN, VAT नंबर, EIN, ABN।",
     "registrationLabel": "पंजीकरण लेबल",
@@ -488,16 +491,6 @@
     "time24h": "24-घंटे",
     "time12h": "12-घंटे (AM/PM)",
     "financialYearStarts": "वित्तीय वर्ष प्रारंभ",
-    "currency": "मुद्रा",
-    "baseCurrencyHint": "3-अक्षर ISO कोड, जैसे USD, EUR, AED, INR",
-    "decimalPlaces": "दशमलव स्थान",
-    "taxRates": "कर दरें",
-    "addRate": "दर जोड़ें",
-    "taxRatesHint": "जो भी कर आपके क्षेत्र में लागू होते हैं उन्हें जोड़ें — VAT, GST, सेल्स टैक्स आदि।",
-    "defaultRate": "डिफ़ॉल्ट दर",
-    "name": "नाम",
-    "percent": "प्रतिशत",
-    "noTaxRatesYet": "अभी तक कोई कर दर नहीं है।",
     "invoice": "इनवॉइस",
     "invoiceNumberingHint": "नंबरिंग सीरीज़ और प्रीफिक्स डॉक्यूमेंट नंबरिंग के अंतर्गत हैं — यह इनवॉइस के स्वरूप को नियंत्रित करता है।",
     "pricesTaxInclusive": "कीमतें कर-सहित हैं",
@@ -759,17 +752,25 @@
     "code": "शाखा कोड",
     "name": "शाखा का नाम",
     "legalName": "कानूनी नाम",
+    "contactPerson": "संपर्क व्यक्ति",
+    "manager": "शाखा प्रबंधक",
     "currency": "मुद्रा",
-    "phone": "फ़ोन",
+    "officePhone": "कार्यालय फ़ोन",
     "email": "ईमेल",
     "website": "वेबसाइट",
+    "emergencyPhone": "आपातकालीन फ़ोन",
+    "whatsappNumber": "व्हाट्सएप नंबर",
     "addressLine1": "पता पंक्ति 1",
     "addressLine2": "पता पंक्ति 2",
     "city": "शहर",
     "state": "राज्य",
     "country": "देश",
     "postalCode": "पिन कोड",
+    "latitude": "अक्षांश",
+    "longitude": "देशांतर",
     "timezone": "समय क्षेत्र",
+    "workingFrom": "कार्य प्रारंभ समय",
+    "workingTo": "कार्य समाप्ति समय",
     "remarks": "टिप्पणी",
     "headOffice": "मुख्यालय",
     "headOfficeCannotDelete": "मुख्यालय शाखा को हटाया नहीं जा सकता",
@@ -781,7 +782,11 @@
     "colCountry": "देश",
     "validation": {
       "currencyRequired": "मुद्रा आवश्यक है"
-    }
+    },
+    "sectionGeneral": "सामान्य",
+    "sectionContact": "संपर्क",
+    "sectionLocalization": "स्थानीयकरण",
+    "sectionOther": "अन्य"
   },
   "documentType": {
     "code": "दस्तावेज़ कोड",
@@ -798,6 +803,82 @@
     "colSortOrder": "क्रम",
     "validation": {
       "moduleRequired": "मॉड्यूल आवश्यक है"
+    }
+  },
+  "currencyMaster": {
+    "code": "मुद्रा कोड",
+    "name": "मुद्रा नाम",
+    "symbol": "प्रतीक",
+    "decimalPlaces": "दशमलव स्थान",
+    "colCode": "कोड",
+    "colName": "नाम",
+    "colSymbol": "प्रतीक",
+    "colDecimalPlaces": "दशमलव स्थान",
+    "validation": {
+      "codeLength": "कोड बिल्कुल 3 अक्षरों का होना चाहिए (ISO 4217)"
+    }
+  },
+  "exchangeRate": {
+    "fromCurrency": "स्रोत मुद्रा",
+    "toCurrency": "लक्ष्य मुद्रा",
+    "rate": "दर",
+    "effectiveFrom": "प्रभावी तिथि (से)",
+    "effectiveTo": "प्रभावी तिथि (तक) (वैकल्पिक)",
+    "colFrom": "से",
+    "colTo": "तक",
+    "colRate": "दर",
+    "colEffectiveFrom": "प्रभावी तिथि (से)",
+    "colEffectiveTo": "प्रभावी तिथि (तक)",
+    "validation": {
+      "ratePositive": "दर एक धनात्मक संख्या होनी चाहिए",
+      "effectiveFromRequired": "प्रभावी प्रारंभ तिथि आवश्यक है",
+      "currenciesMustDiffer": "स्रोत और लक्ष्य मुद्रा भिन्न होनी चाहिए",
+      "effectiveToBeforeFrom": "प्रभावी अंतिम तिथि, प्रारंभ तिथि से पहले नहीं हो सकती"
+    }
+  },
+  "currencyRatePolicy": {
+    "rateSource": "दर स्रोत",
+    "markupPercent": "मार्कअप / मार्कडाउन %",
+    "manualRate": "मैनुअल दर",
+    "validation": {
+      "markupPercentRequired": "जब दर स्रोत मार्कअप हो, तो मार्कअप % आवश्यक है",
+      "manualRateRequired": "जब दर स्रोत मैनुअल हो, तो मैनुअल दर आवश्यक है"
+    }
+  },
+  "taxRegistration": {
+    "label": "लेबल",
+    "registrationNumber": "पंजीकरण संख्या",
+    "colLabel": "लेबल",
+    "colNumber": "पंजीकरण संख्या",
+    "validation": {
+      "labelRequired": "लेबल आवश्यक है",
+      "numberRequired": "पंजीकरण संख्या आवश्यक है"
+    }
+  },
+  "localizationProfile": {
+    "sectionGeneral": "सामान्य",
+    "profileName": "प्रोफ़ाइल नाम",
+    "defaultCurrency": "डिफ़ॉल्ट मुद्रा",
+    "financialYearStartMonth": "वित्तीय वर्ष प्रारंभ माह",
+    "numberFormat": "संख्या प्रारूप",
+    "defaultDecimalPlaces": "डिफ़ॉल्ट दशमलव स्थान",
+    "taxCalculationMethod": "कर गणना विधि",
+    "roundOffMethod": "राउंड-ऑफ विधि",
+    "taxComponents": "कर घटक",
+    "addTaxComponent": "कर घटक जोड़ें",
+    "noTaxComponentsYet": "अभी तक कोई कर घटक नहीं जोड़ा गया",
+    "taxName": "कर नाम",
+    "taxPercent": "कर %",
+    "taxType": "कर प्रकार",
+    "sequence": "क्रम",
+    "colName": "प्रोफ़ाइल नाम",
+    "colCurrency": "मुद्रा",
+    "validation": {
+      "timezoneRequired": "समय क्षेत्र आवश्यक है",
+      "registrationLabelRequired": "पंजीकरण लेबल आवश्यक है",
+      "taxNameRequired": "कर नाम आवश्यक है",
+      "taxPercentPositive": "कर % शून्य या अधिक होना चाहिए",
+      "duplicateTaxComponentName": "एक प्रोफ़ाइल में कर घटक के नाम अद्वितीय होने चाहिए"
     }
   },
   "documentNumberSeries": {
