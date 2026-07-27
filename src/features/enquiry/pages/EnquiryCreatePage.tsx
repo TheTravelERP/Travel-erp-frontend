@@ -1,11 +1,4 @@
 // src/features/enquiry/pages/EnquiryCreatePage.tsx
-import {
-  Box,
-  Breadcrumbs,
-  Link,
-  Paper,
-  Typography,
-} from '@mui/material';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -14,7 +7,7 @@ import type { EnquiryFormInput } from "../enquiry.types";
 import { createEnquiry}from '../enquiry.api';
 import { usePermission } from '../../../hooks/usePermission';
 import { useSnackbar } from '../../../components/ui/SnackbarProvider';
-import { Link as RouterLink } from 'react-router-dom';
+import FormPageLayout from '../../../components/forms/FormPageLayout';
 
 export default function EnquiryCreatePage() {
   const navigate = useNavigate();
@@ -23,7 +16,6 @@ export default function EnquiryCreatePage() {
 
   const perms = usePermission('crm.enquiries');
 
-  // 🚫 Permission Guard
   if (!perms.can_create) {
     return <Navigate to="/app/unauthorized" replace />;
   }
@@ -43,28 +35,16 @@ export default function EnquiryCreatePage() {
     }
   }
 
-
   return (
-    <Box sx={{ p: { xs: 1, md: 1 } }}>
-      {/* Header */}
-      <Typography variant="h6" fontWeight={700}>
-        {t('common.create')}
-      </Typography>
-
-      <Breadcrumbs sx={{ mb: 2 }}>
-        <Link component={RouterLink} to="/app/dashboard" underline="hover">
-          {t('menu.dashboard')}
-        </Link>
-        <Link component={RouterLink} to="/app/enquiries" underline="hover">
-          {t('menu.crm.enquiries')}
-        </Link>
-        <Typography color="text.primary">{t('common.create')}</Typography>
-      </Breadcrumbs>
-
-      {/* Form */}
-      <Paper sx={{ p: 3, borderRadius: 2 }}>
-        <EnquiryForm onSubmit={handleCreate} />
-      </Paper>
-    </Box>
+    <FormPageLayout
+      title={t('common.create')}
+      breadcrumbs={[
+        { label: t('menu.dashboard'), href: '/app/dashboard' },
+        { label: t('menu.crm.enquiries'), href: '/app/enquiries' },
+        { label: t('common.create') },
+      ]}
+    >
+      <EnquiryForm onSubmit={handleCreate} />
+    </FormPageLayout>
   );
 }

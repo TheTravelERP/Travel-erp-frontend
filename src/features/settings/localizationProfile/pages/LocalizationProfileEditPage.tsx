@@ -1,8 +1,7 @@
 // src/features/settings/localizationProfile/pages/LocalizationProfileEditPage.tsx
 import { useEffect, useState } from "react";
-import { Box, Breadcrumbs, Link, Paper, Typography } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { Link as RouterLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import LocalizationProfileForm from "../components/LocalizationProfileForm";
@@ -11,6 +10,7 @@ import { getLocalizationProfileByUuid, updateLocalizationProfileByUuid } from ".
 import { usePermission } from "../../../../hooks/usePermission";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { getErrorMessage } from "../../../../utils/errorMessage";
+import FormPageLayout from "../../../../components/forms/FormPageLayout";
 
 export default function LocalizationProfileEditPage() {
   const { uuid } = useParams();
@@ -66,29 +66,22 @@ export default function LocalizationProfileEditPage() {
     }
   }
 
-  if (loading) {
-    return <Typography>{t("common.loading")}</Typography>;
-  }
-
   return (
-    <Box sx={{ p: { xs: 1, md: 1 } }}>
-      <Typography variant="h6" fontWeight={700}>
-        {t("common.edit")}
-      </Typography>
-
-      <Breadcrumbs sx={{ mb: 2 }}>
-        <Link component={RouterLink} to="/app/dashboard" underline="hover">
-          {t("menu.dashboard")}
-        </Link>
-        <Link component={RouterLink} to="/app/settings/localization-profiles" underline="hover">
-          {t("menu.settings.localization_profile")}
-        </Link>
-        <Typography color="text.primary">{t("common.edit")}</Typography>
-      </Breadcrumbs>
-
-      <Paper sx={{ p: 3 }}>
+    <FormPageLayout
+      title={t("common.edit")}
+      breadcrumbs={[
+        { label: t("menu.dashboard"), href: "/app/dashboard" },
+        { label: t("menu.settings.localization_profile"), href: "/app/settings/localization-profiles" },
+        { label: t("common.edit") },
+      ]}
+    >
+      {loading || !defaultValues ? (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
         <LocalizationProfileForm defaultValues={defaultValues} onSubmit={handleUpdate} />
-      </Paper>
-    </Box>
+      )}
+    </FormPageLayout>
   );
 }

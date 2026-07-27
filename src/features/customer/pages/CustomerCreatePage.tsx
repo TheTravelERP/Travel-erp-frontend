@@ -1,11 +1,4 @@
 // src/features/customer/pages/CustomerCreatePage.tsx
-import {
-  Box,
-  Breadcrumbs,
-  Link,
-  Paper,
-  Typography,
-} from '@mui/material';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -14,7 +7,7 @@ import type { CustomerFormValues } from '../components/CustomerForm';
 import { createCustomer } from '../customer.api';
 import { usePermission } from '../../../hooks/usePermission';
 import { useSnackbar } from '../../../components/ui/SnackbarProvider';
-import { Link as RouterLink } from 'react-router-dom';
+import FormPageLayout from '../../../components/forms/FormPageLayout';
 
 export default function CustomerCreatePage() {
   const navigate = useNavigate();
@@ -42,24 +35,15 @@ export default function CustomerCreatePage() {
   }
 
   return (
-    <Box sx={{ p: { xs: 1, md: 1 } }}>
-      <Typography variant="h6" fontWeight={700}>
-        {t('common.create')}
-      </Typography>
-
-      <Breadcrumbs sx={{ mb: 2 }}>
-        <Link component={RouterLink} to="/app/dashboard" underline="hover">
-          {t('menu.dashboard')}
-        </Link>
-        <Link component={RouterLink} to="/app/crm/customers" underline="hover">
-          {t('menu.crm.customers')}
-        </Link>
-        <Typography color="text.primary">{t('common.create')}</Typography>
-      </Breadcrumbs>
-
-      <Paper sx={{ p: 3, borderRadius: 2 }}>
-        <CustomerForm onSubmit={handleCreate} />
-      </Paper>
-    </Box>
+    <FormPageLayout
+      title={t('common.create')}
+      breadcrumbs={[
+        { label: t('menu.dashboard'), href: '/app/dashboard' },
+        { label: t('menu.crm.customers'), href: '/app/crm/customers' },
+        { label: t('common.create') },
+      ]}
+    >
+      <CustomerForm onSubmit={handleCreate} />
+    </FormPageLayout>
   );
 }

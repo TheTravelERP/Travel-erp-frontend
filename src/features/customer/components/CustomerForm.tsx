@@ -1,11 +1,7 @@
 // src/features/customer/components/CustomerForm.tsx
 import {
   Box,
-  Button,
   TextField,
-  Typography,
-  Paper,
-  Divider,
   Grid,
   Stack,
 } from "@mui/material";
@@ -25,6 +21,8 @@ import { useNavigate } from "react-router-dom";
 import { uploadFile } from "../../../services/upload.service";
 import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../utils/mergeFormDefaults";
+import FormSection from "../../../components/forms/FormSection";
+import FormActions from "../../../components/forms/FormActions";
 
 const DOC_SLOTS = ["doc1", "doc2", "doc3", "doc4"] as const;
 
@@ -106,311 +104,250 @@ export default function CustomerForm({
       sx={{ flexGrow: 1 }}
     >
       <Grid container spacing={2}>
-        {/* PERSONAL DETAILS */}
-        <Grid size={{ xs: 12 }}>
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-              {t("settings.personalDetails")}
-            </Typography>
+        <FormSection title={t("settings.personalDetails")}>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Controller
+              name="name"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label={t("common.customerName")}
+                  fullWidth
+                  required
+                  error={!!errors.name}
+                  helperText={errors.name?.message}
+                />
+              )}
+            />
+          </Grid>
 
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 6 }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <MobileNumberField name="mobile" control={control} label={t("common.mobile")} required />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <MobileNumberField
+              name="alternate_mobile"
+              control={control}
+              label={t("customer.alternateMobile")}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Controller
+              name="email"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label={t("common.email")}
+                  fullWidth
+                  error={!!errors.email}
+                  helperText={errors.email?.message}
+                />
+              )}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <Controller
+              name="dob"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label={t("settings.dateOfBirth")}
+                  type="date"
+                  fullWidth
+                  slotProps={{ inputLabel: { shrink: true } }}
+                />
+              )}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <DropdownAutocomplete
+              name="gender"
+              label={t("settings.gender")}
+              control={control}
+              useForm
+              allowAdd={false}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <CountryAutocomplete
+              name="country"
+              control={control}
+              field="label"
+              label={t("customer.country")}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <CountryAutocomplete
+              name="nationality"
+              control={control}
+              field="nationality"
+              label={t("customer.nationality")}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <EntityAutocomplete
+              name="agent_uuid"
+              label={t("customer.agent")}
+              control={control}
+              dropdownName="users"
+              allowAdd={false}
+            />
+          </Grid>
+        </FormSection>
+
+        <FormSection title={t("customer.passportDetails")}>
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <Controller
+              name="passport_no"
+              control={control}
+              render={({ field }) => (
+                <TextField {...field} label={t("customer.passportNumber")} fullWidth />
+              )}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <Controller
+              name="passport_issue_date"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label={t("customer.passportIssueDate")}
+                  type="date"
+                  fullWidth
+                  slotProps={{ inputLabel: { shrink: true } }}
+                />
+              )}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <Controller
+              name="passport_expiry_date"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label={t("customer.passportExpiryDate")}
+                  type="date"
+                  fullWidth
+                  slotProps={{ inputLabel: { shrink: true } }}
+                />
+              )}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <CountryAutocomplete
+              name="passport_issue_country"
+              control={control}
+              field="label"
+              label={t("customer.passportIssueCountry")}
+            />
+          </Grid>
+        </FormSection>
+
+        <FormSection title={t("customer.businessDetails")}>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <Controller
+              name="gstin"
+              control={control}
+              render={({ field }) => (
+                <TextField {...field} label={t("customer.taxId")} fullWidth />
+              )}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12 }}>
+            <Controller
+              name="billing_address"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label={t("customer.billingAddress")}
+                  multiline
+                  rows={2}
+                  fullWidth
+                />
+              )}
+            />
+          </Grid>
+        </FormSection>
+
+        <FormSection title={t("customer.documents")}>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <FileUploadField
+              label={t("customer.picture")}
+              variant="avatar"
+              value={watch("picture_url") || null}
+              onUpload={async (file) => (await uploadFile(file, "customer", "picture")).url}
+              onChange={(url) => setValue("picture_url", url ?? "")}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <FileUploadField
+              label={t("customer.passportFront")}
+              variant="document"
+              value={watch("passport_front_url") || null}
+              onUpload={async (file) => (await uploadFile(file, "customer", "passport_front")).url}
+              onChange={(url) => setValue("passport_front_url", url ?? "")}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <FileUploadField
+              label={t("customer.passportBack")}
+              variant="document"
+              value={watch("passport_back_url") || null}
+              onUpload={async (file) => (await uploadFile(file, "customer", "passport_back")).url}
+              onChange={(url) => setValue("passport_back_url", url ?? "")}
+            />
+          </Grid>
+
+          {DOC_SLOTS.map((slot) => (
+            <Grid key={slot} size={{ xs: 12, sm: 6 }}>
+              <Stack spacing={1}>
                 <Controller
-                  name="name"
+                  name={`${slot}_label`}
                   control={control}
                   render={({ field }) => (
                     <TextField
                       {...field}
-                      label={t("common.customerName")}
+                      size="small"
                       fullWidth
-                      required
-                      error={!!errors.name}
-                      helperText={errors.name?.message}
+                      label={t("settings.documentLabel")}
                     />
                   )}
                 />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <MobileNumberField name="mobile" control={control} label={t("common.mobile")} required />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <MobileNumberField
-                  name="alternate_mobile"
-                  control={control}
-                  label={t("customer.alternateMobile")}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <Controller
-                  name="email"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label={t("common.email")}
-                      fullWidth
-                      error={!!errors.email}
-                      helperText={errors.email?.message}
-                    />
-                  )}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <Controller
-                  name="dob"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label={t("settings.dateOfBirth")}
-                      type="date"
-                      fullWidth
-                      slotProps={{ inputLabel: { shrink: true } }}
-                    />
-                  )}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <DropdownAutocomplete
-                  name="gender"
-                  label={t("settings.gender")}
-                  control={control}
-                  useForm
-                  allowAdd={false}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <CountryAutocomplete
-                  name="country"
-                  control={control}
-                  field="label"
-                  label={t("customer.country")}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <CountryAutocomplete
-                  name="nationality"
-                  control={control}
-                  field="nationality"
-                  label={t("customer.nationality")}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <EntityAutocomplete
-                  name="agent_uuid"
-                  label={t("customer.agent")}
-                  control={control}
-                  dropdownName="users"
-                  allowAdd={false}
-                />
-              </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
-
-        {/* PASSPORT DETAILS */}
-        <Grid size={{ xs: 12 }}>
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-              {t("customer.passportDetails")}
-            </Typography>
-
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <Controller
-                  name="passport_no"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField {...field} label={t("customer.passportNumber")} fullWidth />
-                  )}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <Controller
-                  name="passport_issue_date"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label={t("customer.passportIssueDate")}
-                      type="date"
-                      fullWidth
-                      slotProps={{ inputLabel: { shrink: true } }}
-                    />
-                  )}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <Controller
-                  name="passport_expiry_date"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label={t("customer.passportExpiryDate")}
-                      type="date"
-                      fullWidth
-                      slotProps={{ inputLabel: { shrink: true } }}
-                    />
-                  )}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <CountryAutocomplete
-                  name="passport_issue_country"
-                  control={control}
-                  field="label"
-                  label={t("customer.passportIssueCountry")}
-                />
-              </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
-
-        {/* BUSINESS DETAILS */}
-        <Grid size={{ xs: 12 }}>
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-              {t("customer.businessDetails")}
-            </Typography>
-
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <Controller
-                  name="gstin"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField {...field} label={t("customer.taxId")} fullWidth />
-                  )}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12 }}>
-                <Controller
-                  name="billing_address"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label={t("customer.billingAddress")}
-                      multiline
-                      rows={2}
-                      fullWidth
-                    />
-                  )}
-                />
-              </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
-
-        {/* DOCUMENTS */}
-        <Grid size={{ xs: 12 }}>
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-              {t("customer.documents")}
-            </Typography>
-
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 4 }}>
                 <FileUploadField
-                  label={t("customer.picture")}
-                  variant="avatar"
-                  value={watch("picture_url") || null}
-                  onUpload={async (file) => (await uploadFile(file, "customer", "picture")).url}
-                  onChange={(url) => setValue("picture_url", url ?? "")}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <FileUploadField
-                  label={t("customer.passportFront")}
+                  label={t("settings.documentFile")}
                   variant="document"
-                  value={watch("passport_front_url") || null}
-                  onUpload={async (file) => (await uploadFile(file, "customer", "passport_front")).url}
-                  onChange={(url) => setValue("passport_front_url", url ?? "")}
+                  value={watch(`${slot}_url`) || null}
+                  onUpload={async (file) => (await uploadFile(file, "customer", slot)).url}
+                  onChange={(url) => setValue(`${slot}_url`, url ?? "")}
+                  accept="image/jpeg,image/png,image/webp,application/pdf"
                 />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <FileUploadField
-                  label={t("customer.passportBack")}
-                  variant="document"
-                  value={watch("passport_back_url") || null}
-                  onUpload={async (file) => (await uploadFile(file, "customer", "passport_back")).url}
-                  onChange={(url) => setValue("passport_back_url", url ?? "")}
-                />
-              </Grid>
-
-              {DOC_SLOTS.map((slot) => (
-                <Grid key={slot} size={{ xs: 12, sm: 6 }}>
-                  <Stack spacing={1}>
-                    <Controller
-                      name={`${slot}_label`}
-                      control={control}
-                      render={({ field }) => (
-                        <TextField
-                          {...field}
-                          size="small"
-                          fullWidth
-                          label={t("settings.documentLabel")}
-                        />
-                      )}
-                    />
-                    <FileUploadField
-                      label={t("settings.documentFile")}
-                      variant="document"
-                      value={watch(`${slot}_url`) || null}
-                      onUpload={async (file) => (await uploadFile(file, "customer", slot)).url}
-                      onChange={(url) => setValue(`${slot}_url`, url ?? "")}
-                      accept="image/jpeg,image/png,image/webp,application/pdf"
-                    />
-                  </Stack>
-                </Grid>
-              ))}
+              </Stack>
             </Grid>
-          </Paper>
-        </Grid>
+          ))}
+        </FormSection>
 
-        {/* ACTIONS */}
-        <Grid size={{ xs: 12 }}>
-          <Divider sx={{ my: 2 }} />
-
-          <Box display="flex" justifyContent="space-between">
-            <Button variant="outlined" onClick={() => navigate("/app/crm/customers")}>
-              {t("common.back")}
-            </Button>
-
-            <Box display="flex" gap={2}>
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={() => reset()}
-                size="large"
-              >
-                {t("common.discard")}
-              </Button>
-
-              <Button
-                type="submit"
-                variant="contained"
-                size="large"
-                disabled={isSubmitting || loading}
-              >
-                {isSubmitting || loading ? t("common.saving") : t("common.save")}
-              </Button>
-            </Box>
-          </Box>
-        </Grid>
+        <FormActions
+          onBack={() => navigate("/app/crm/customers")}
+          onDiscard={() => reset()}
+          submitting={isSubmitting || loading}
+        />
       </Grid>
     </Box>
   );

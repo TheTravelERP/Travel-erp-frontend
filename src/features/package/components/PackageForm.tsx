@@ -2,14 +2,10 @@
 
 import {
   Box,
-  Button,
-  Divider,
   FormControlLabel,
   Grid,
-  Paper,
   Switch,
   TextField,
-  Typography,
 } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { useEffect, useMemo } from "react";
@@ -23,6 +19,8 @@ import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../utils/mergeFormDefaults";
 import DropdownAutocomplete from "../../../components/common/DropdownAutocomplete";
 import EntityAutocomplete from "../../../components/common/EntityAutocomplete";
+import FormSection from "../../../components/forms/FormSection";
+import FormActions from "../../../components/forms/FormActions";
 
 interface PackageFormProps {
   defaultValues?: Partial<PackageFormInput>;
@@ -89,13 +87,8 @@ export default function PackageForm({ defaultValues, onSubmit, loading = false }
       )}
       noValidate
     >
-      {/* BASIC INFO */}
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
-          {t("package.basicInfo")}
-        </Typography>
-
-        <Grid container spacing={2}>
+      <Grid container spacing={2}>
+        <FormSection title={t("package.basicInfo")}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <EntityAutocomplete
               name="package_type_uuid"
@@ -194,16 +187,9 @@ export default function PackageForm({ defaultValues, onSubmit, loading = false }
               )}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      {/* ROUTE & DATES */}
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
-          {t("package.routeSection")}
-        </Typography>
-
-        <Grid container spacing={2}>
+        <FormSection title={t("package.routeSection")}>
           <Grid size={{ xs: 12, sm: 4 }}>
             <Controller
               name="departure_city"
@@ -291,16 +277,9 @@ export default function PackageForm({ defaultValues, onSubmit, loading = false }
               )}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      {/* DURATION & CAPACITY */}
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
-          {t("package.durationSection")}
-        </Typography>
-
-        <Grid container spacing={2}>
+        <FormSection title={t("package.durationSection")}>
           <Grid size={{ xs: 6, sm: 3 }}>
             <Controller
               name="duration_days"
@@ -370,16 +349,9 @@ export default function PackageForm({ defaultValues, onSubmit, loading = false }
               )}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      {/* CURRENCY */}
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
-          {t("package.currencySection")}
-        </Typography>
-
-        <Grid container spacing={2}>
+        <FormSection title={t("package.currencySection")}>
           <Grid size={{ xs: 12, sm: 3 }}>
             <Controller
               name="currency_code"
@@ -406,26 +378,14 @@ export default function PackageForm({ defaultValues, onSubmit, loading = false }
               )}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      <Divider sx={{ my: 2 }} />
-
-      <Box display="flex" justifyContent="space-between">
-        <Button variant="outlined" onClick={() => navigate("/app/packages/list")}>
-          {t("common.back")}
-        </Button>
-
-        <Box display="flex" gap={2}>
-          <Button variant="outlined" color="error" onClick={() => reset()} size="large">
-            {t("common.discard")}
-          </Button>
-
-          <Button type="submit" variant="contained" size="large" disabled={isSubmitting || loading}>
-            {isSubmitting || loading ? t("common.saving") : t("common.save")}
-          </Button>
-        </Box>
-      </Box>
+        <FormActions
+          onBack={() => navigate("/app/packages/list")}
+          onDiscard={() => reset()}
+          submitting={isSubmitting || loading}
+        />
+      </Grid>
     </Box>
   );
 }

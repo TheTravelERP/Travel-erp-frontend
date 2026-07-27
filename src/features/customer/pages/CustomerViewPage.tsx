@@ -5,11 +5,9 @@ import { useSearchParams } from "react-router-dom";
 import {
   Avatar,
   Box,
-  Breadcrumbs,
   Button,
   Chip,
   Divider,
-  Link,
   Paper,
   Typography,
 } from "@mui/material";
@@ -18,18 +16,14 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import { useTranslation } from "react-i18next";
 
-import {
-  Link as RouterLink,
-  Navigate,
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 import { getCustomerByUuid } from "../customer.api";
 import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 import { usePermission } from "../../../hooks/usePermission";
 import FilePreviewDialog from "../../../components/common/FilePreviewDialog";
 import { getFileKind, resolveUploadUrl } from "../../../services/upload.service";
+import FormPageLayout from "../../../components/forms/FormPageLayout";
 
 import type { CustomerDetail } from "../customer.types";
 
@@ -124,24 +118,14 @@ export default function CustomerViewPage() {
   }
 
   return (
-    <Box sx={{ p: { xs: 1, md: 1 } }}>
-      <Typography variant="h6" fontWeight={700}>
-        {t("common.view")}
-      </Typography>
-
-      <Breadcrumbs sx={{ mb: 2 }}>
-        <Link component={RouterLink} underline="hover" to="/app/dashboard">
-          {t("menu.dashboard")}
-        </Link>
-
-        <Link component={RouterLink} underline="hover" to="/app/crm/customers">
-          {t("menu.crm.customers")}
-        </Link>
-
-        <Typography>{t("common.view")}</Typography>
-      </Breadcrumbs>
-
-      <Paper sx={{ p: 3 }}>
+    <FormPageLayout
+      title={t("common.view")}
+      breadcrumbs={[
+        { label: t("menu.dashboard"), href: "/app/dashboard" },
+        { label: t("menu.crm.customers"), href: "/app/crm/customers" },
+        { label: t("common.view") },
+      ]}
+    >
         {/* ================= PERSONAL ================= */}
 
         <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
@@ -284,7 +268,6 @@ export default function CustomerViewPage() {
             )}
           </Box>
         </Box>
-      </Paper>
-    </Box>
+    </FormPageLayout>
   );
 }

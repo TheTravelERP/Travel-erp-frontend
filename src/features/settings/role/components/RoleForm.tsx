@@ -2,12 +2,9 @@
 
 import {
   Box,
-  Button,
   Chip,
-  Divider,
   FormControlLabel,
   Grid,
-  Paper,
   Switch,
   TextField,
 } from "@mui/material";
@@ -21,6 +18,8 @@ import { getRoleSchema } from "../role.schema";
 import type { RoleFormInput } from "../role.types";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
+import FormSection from "../../../../components/forms/FormSection";
+import FormActions from "../../../../components/forms/FormActions";
 
 interface RoleFormProps {
   defaultValues?: Partial<RoleFormInput>;
@@ -71,14 +70,14 @@ export default function RoleForm({
       )}
       noValidate
     >
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        {isSystem && (
-          <Box mb={2}>
-            <Chip size="small" label={t("role.system")} />
-          </Box>
-        )}
+      {isSystem && (
+        <Box mb={2}>
+          <Chip size="small" label={t("role.system")} />
+        </Box>
+      )}
 
-        <Grid container spacing={2}>
+      <Grid container spacing={2}>
+        <FormSection title={t("menu.settings.permissions")}>
           <Grid size={{ xs: 12, sm: 4 }}>
             <Controller
               name="role_code"
@@ -136,26 +135,14 @@ export default function RoleForm({
               )}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      <Divider sx={{ my: 2 }} />
-
-      <Box display="flex" justifyContent="space-between">
-        <Button variant="outlined" onClick={() => navigate("/app/settings/roles")}>
-          {t("common.back")}
-        </Button>
-
-        <Box display="flex" gap={2}>
-          <Button variant="outlined" color="error" onClick={() => reset()} size="large">
-            {t("common.discard")}
-          </Button>
-
-          <Button type="submit" variant="contained" size="large" disabled={isSubmitting || loading}>
-            {isSubmitting || loading ? t("common.saving") : t("common.save")}
-          </Button>
-        </Box>
-      </Box>
+        <FormActions
+          onBack={() => navigate("/app/settings/roles")}
+          onDiscard={() => reset()}
+          submitting={isSubmitting || loading}
+        />
+      </Grid>
     </Box>
   );
 }

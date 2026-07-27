@@ -2,12 +2,9 @@
 
 import {
   Box,
-  Button,
-  Divider,
   FormControlLabel,
   Grid,
   MenuItem,
-  Paper,
   Switch,
   TextField,
 } from "@mui/material";
@@ -23,6 +20,8 @@ import EntityAutocomplete from "../../../../components/common/EntityAutocomplete
 import DropdownAutocomplete from "../../../../components/common/DropdownAutocomplete";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
+import FormSection from "../../../../components/forms/FormSection";
+import FormActions from "../../../../components/forms/FormActions";
 
 interface VendorContractFormProps {
   defaultValues?: Partial<VendorContractFormInput>;
@@ -81,8 +80,8 @@ export default function VendorContractForm({
       )}
       noValidate
     >
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Grid container spacing={2}>
+      <Grid container spacing={2}>
+        <FormSection title={t("vendorContract.title")}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <EntityAutocomplete
               name="vendor_uuid"
@@ -245,26 +244,14 @@ export default function VendorContractForm({
               )}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      <Divider sx={{ my: 2 }} />
-
-      <Box display="flex" justifyContent="space-between">
-        <Button variant="outlined" onClick={() => navigate("/app/inventory/contracts")}>
-          {t("common.back")}
-        </Button>
-
-        <Box display="flex" gap={2}>
-          <Button variant="outlined" color="error" onClick={() => reset()} size="large">
-            {t("common.discard")}
-          </Button>
-
-          <Button type="submit" variant="contained" size="large" disabled={isSubmitting || loading}>
-            {isSubmitting || loading ? t("common.saving") : t("common.save")}
-          </Button>
-        </Box>
-      </Box>
+        <FormActions
+          onBack={() => navigate("/app/inventory/contracts")}
+          onDiscard={() => reset()}
+          submitting={isSubmitting || loading}
+        />
+      </Grid>
     </Box>
   );
 }

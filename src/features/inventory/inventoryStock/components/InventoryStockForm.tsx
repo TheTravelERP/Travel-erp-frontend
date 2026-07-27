@@ -1,16 +1,6 @@
 // src/features/inventory/inventoryStock/components/InventoryStockForm.tsx
 
-import {
-  Box,
-  Button,
-  Divider,
-  FormControlLabel,
-  Grid,
-  MenuItem,
-  Paper,
-  Switch,
-  TextField,
-} from "@mui/material";
+import { Box, FormControlLabel, Grid, MenuItem, Switch, TextField } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -23,6 +13,8 @@ import EntityAutocomplete from "../../../../components/common/EntityAutocomplete
 import DropdownAutocomplete from "../../../../components/common/DropdownAutocomplete";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
+import FormSection from "../../../../components/forms/FormSection";
+import FormActions from "../../../../components/forms/FormActions";
 
 interface InventoryStockFormProps {
   defaultValues?: Partial<InventoryStockFormInput>;
@@ -116,8 +108,8 @@ export default function InventoryStockForm({
       )}
       noValidate
     >
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Grid container spacing={2}>
+      <Grid container spacing={2}>
+        <FormSection title={t("common.generalInfo")}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <EntityAutocomplete
               name="contract_uuid"
@@ -368,26 +360,14 @@ export default function InventoryStockForm({
               )}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      <Divider sx={{ my: 2 }} />
-
-      <Box display="flex" justifyContent="space-between">
-        <Button variant="outlined" onClick={() => navigate("/app/inventory/stock")}>
-          {t("common.back")}
-        </Button>
-
-        <Box display="flex" gap={2}>
-          <Button variant="outlined" color="error" onClick={() => reset()} size="large">
-            {t("common.discard")}
-          </Button>
-
-          <Button type="submit" variant="contained" size="large" disabled={isSubmitting || loading}>
-            {isSubmitting || loading ? t("common.saving") : t("common.save")}
-          </Button>
-        </Box>
-      </Box>
+        <FormActions
+          onBack={() => navigate("/app/inventory/stock")}
+          onDiscard={() => reset()}
+          submitting={isSubmitting || loading}
+        />
+      </Grid>
     </Box>
   );
 }

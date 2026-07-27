@@ -2,12 +2,10 @@
 
 import {
   Box,
-  Button,
   TextField,
   Typography,
   InputAdornment,
   Paper,
-  Divider,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { Controller, useForm } from "react-hook-form";
@@ -28,6 +26,7 @@ import MobileNumberField from "../../../components/common/MobileNumberField";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../utils/mergeFormDefaults";
+import FormActions from "../../../components/forms/FormActions";
 
 interface EnquiryFormProps {
   defaultValues?: Partial<EnquiryFormInput>;
@@ -207,36 +206,11 @@ export default function EnquiryForm({
           </Paper>
         </Grid>
 
-        {/* ================= ROW 3: ACTIONS ================= */}
-        <Grid size={{ xs: 12 }}>
-          <Divider sx={{ my: 2 }} />
-
-          <Box display="flex" justifyContent="space-between">
-            <Button variant="outlined" onClick={() => navigate("/app/enquiries")}>
-              {t("common.back")}
-            </Button>
-
-            <Box display="flex" gap={2}>
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={() => reset()}
-                size="large"
-              >
-                {t("common.discard")}
-              </Button>
-
-              <Button
-                type="submit"
-                variant="contained"
-                size="large"
-                disabled={isSubmitting || loading}
-              >
-                {isSubmitting || loading ? t("common.saving") : t("common.save")}
-              </Button>
-            </Box>
-          </Box>
-        </Grid>
+        <FormActions
+          onBack={() => navigate("/app/enquiries")}
+          onDiscard={() => reset()}
+          submitting={isSubmitting || loading}
+        />
       </Grid>
     </Box>
   );

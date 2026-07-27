@@ -4,27 +4,21 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   Box,
-  Breadcrumbs,
   Button,
   Chip,
   Divider,
-  Link,
   Paper,
   Typography,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { useTranslation } from "react-i18next";
 
-import {
-  Link as RouterLink,
-  Navigate,
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 import { getVendorContractByUuid } from "../vendorContract.api";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { usePermission } from "../../../../hooks/usePermission";
+import FormPageLayout from "../../../../components/forms/FormPageLayout";
 
 import type { VendorContractDetail } from "../vendorContract.types";
 
@@ -78,24 +72,14 @@ export default function VendorContractViewPage() {
   }
 
   return (
-    <Box sx={{ p: { xs: 1, md: 1 } }}>
-      <Typography variant="h6" fontWeight={700}>
-        {t("common.view")}
-      </Typography>
-
-      <Breadcrumbs sx={{ mb: 2 }}>
-        <Link component={RouterLink} underline="hover" to="/app/dashboard">
-          {t("menu.dashboard")}
-        </Link>
-
-        <Link component={RouterLink} underline="hover" to="/app/inventory/contracts">
-          {t("menu.inventory.contracts")}
-        </Link>
-
-        <Typography>{t("common.view")}</Typography>
-      </Breadcrumbs>
-
-      <Paper sx={{ p: 3 }}>
+    <FormPageLayout
+      title={t("common.view")}
+      breadcrumbs={[
+        { label: t("menu.dashboard"), href: "/app/dashboard" },
+        { label: t("menu.inventory.contracts"), href: "/app/inventory/contracts" },
+        { label: t("common.view") },
+      ]}
+    >
         <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
           <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
             {t("vendorContract.title")}
@@ -194,7 +178,6 @@ export default function VendorContractViewPage() {
             )}
           </Box>
         </Box>
-      </Paper>
-    </Box>
+    </FormPageLayout>
   );
 }

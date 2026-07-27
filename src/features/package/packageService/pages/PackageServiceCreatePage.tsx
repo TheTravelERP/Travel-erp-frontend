@@ -1,5 +1,4 @@
 // src/features/package/packageService/pages/PackageServiceCreatePage.tsx
-import { Box, Breadcrumbs, Link, Paper, Typography } from "@mui/material";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -9,7 +8,7 @@ import { createPackageService } from "../packageService.api";
 import { usePermission } from "../../../../hooks/usePermission";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { getErrorMessage } from "../../../../utils/errorMessage";
-import { Link as RouterLink } from "react-router-dom";
+import FormPageLayout from "../../../../components/forms/FormPageLayout";
 
 export default function PackageServiceCreatePage() {
   const navigate = useNavigate();
@@ -36,24 +35,15 @@ export default function PackageServiceCreatePage() {
   }
 
   return (
-    <Box sx={{ p: { xs: 1, md: 1 } }}>
-      <Typography variant="h6" fontWeight={700}>
-        {t("common.create")}
-      </Typography>
-
-      <Breadcrumbs sx={{ mb: 2 }}>
-        <Link component={RouterLink} to="/app/dashboard" underline="hover">
-          {t("menu.dashboard")}
-        </Link>
-        <Link component={RouterLink} to="/app/packages/services" underline="hover">
-          {t("menu.packages.services")}
-        </Link>
-        <Typography color="text.primary">{t("common.create")}</Typography>
-      </Breadcrumbs>
-
-      <Paper sx={{ p: 3, borderRadius: 2 }}>
-        <PackageServiceForm onSubmit={handleCreate} />
-      </Paper>
-    </Box>
+    <FormPageLayout
+      title={t("common.create")}
+      breadcrumbs={[
+        { label: t("menu.dashboard"), href: "/app/dashboard" },
+        { label: t("menu.packages.services"), href: "/app/packages/services" },
+        { label: t("common.create") },
+      ]}
+    >
+      <PackageServiceForm onSubmit={handleCreate} />
+    </FormPageLayout>
   );
 }

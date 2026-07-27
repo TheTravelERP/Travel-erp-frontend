@@ -2,11 +2,8 @@
 
 import {
   Box,
-  Button,
-  Divider,
   FormControlLabel,
   Grid,
-  Paper,
   Switch,
   TextField,
 } from "@mui/material";
@@ -20,6 +17,8 @@ import { getDocumentTypeSchema } from "../documentType.schema";
 import type { DocumentTypeFormInput } from "../documentType.types";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
+import FormSection from "../../../../components/forms/FormSection";
+import FormActions from "../../../../components/forms/FormActions";
 
 interface DocumentTypeFormProps {
   defaultValues?: Partial<DocumentTypeFormInput>;
@@ -73,8 +72,8 @@ export default function DocumentTypeForm({
       )}
       noValidate
     >
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Grid container spacing={2}>
+      <Grid container spacing={2}>
+        <FormSection title={t("menu.settings.document_type_master")}>
           <Grid size={{ xs: 12, sm: 4 }}>
             <Controller
               name="document_code"
@@ -180,26 +179,14 @@ export default function DocumentTypeForm({
               )}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      <Divider sx={{ my: 2 }} />
-
-      <Box display="flex" justifyContent="space-between">
-        <Button variant="outlined" onClick={() => navigate("/app/settings/document-type-master")}>
-          {t("common.back")}
-        </Button>
-
-        <Box display="flex" gap={2}>
-          <Button variant="outlined" color="error" onClick={() => reset()} size="large">
-            {t("common.discard")}
-          </Button>
-
-          <Button type="submit" variant="contained" size="large" disabled={isSubmitting || loading}>
-            {isSubmitting || loading ? t("common.saving") : t("common.save")}
-          </Button>
-        </Box>
-      </Box>
+        <FormActions
+          onBack={() => navigate("/app/settings/document-type-master")}
+          onDiscard={() => reset()}
+          submitting={isSubmitting || loading}
+        />
+      </Grid>
     </Box>
   );
 }

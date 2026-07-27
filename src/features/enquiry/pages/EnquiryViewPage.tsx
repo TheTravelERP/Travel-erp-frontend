@@ -4,27 +4,21 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   Box,
-  Breadcrumbs,
   Button,
   Divider,
-  Link,
   Paper,
   Typography,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { useTranslation } from "react-i18next";
 
-import {
-  Link as RouterLink,
-  Navigate,
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 import { getEnquiryByUuid } from "../enquiry.api";
 import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 import { usePermission } from "../../../hooks/usePermission";
 import DropdownColorChip from "../../../components/common/DropdownColorChip";
+import FormPageLayout from "../../../components/forms/FormPageLayout";
 
 import type { EnquiryFormInput } from "../enquiry.types";
 
@@ -79,26 +73,14 @@ export default function EnquiryViewPage() {
   }
 
   return (
-    <Box sx={{ p: { xs: 1, md: 1 } }}>
-      {/* Header */}
-
-      <Typography variant="h6" fontWeight={700}>
-        {t("common.view")}
-      </Typography>
-
-      <Breadcrumbs sx={{ mb: 2 }}>
-        <Link component={RouterLink} underline="hover" to="/app/dashboard">
-          {t("menu.dashboard")}
-        </Link>
-
-        <Link component={RouterLink} underline="hover" to="/app/enquiries">
-          {t('menu.crm.enquiries')}
-        </Link>
-
-        <Typography>{t("common.view")}</Typography>
-      </Breadcrumbs>
-
-      <Paper sx={{ p: 3 }}>
+    <FormPageLayout
+      title={t("common.view")}
+      breadcrumbs={[
+        { label: t("menu.dashboard"), href: "/app/dashboard" },
+        { label: t('menu.crm.enquiries'), href: "/app/enquiries" },
+        { label: t("common.view") },
+      ]}
+    >
         {/* ================= CUSTOMER ================= */}
 
         <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
@@ -224,7 +206,6 @@ export default function EnquiryViewPage() {
             )}
           </Box>
         </Box>
-      </Paper>
-    </Box>
+    </FormPageLayout>
   );
 }

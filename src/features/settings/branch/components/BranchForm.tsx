@@ -2,12 +2,9 @@
 
 import {
   Box,
-  Button,
   Chip,
-  Divider,
   FormControlLabel,
   Grid,
-  Paper,
   Switch,
   TextField,
   Typography,
@@ -24,6 +21,8 @@ import EntityAutocomplete from "../../../../components/common/EntityAutocomplete
 import MobileNumberField from "../../../../components/common/MobileNumberField";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
+import FormSection from "../../../../components/forms/FormSection";
+import FormActions from "../../../../components/forms/FormActions";
 
 interface BranchFormProps {
   defaultValues?: Partial<BranchFormInput>;
@@ -92,6 +91,7 @@ export default function BranchForm({
         showSnackbar({ message: t("validation.fixHighlightedFields"), severity: "error" }),
       )}
       noValidate
+      sx={{ flexGrow: 1 }}
     >
       {isHeadOffice && (
         <Box mb={2}>
@@ -99,12 +99,8 @@ export default function BranchForm({
         </Box>
       )}
 
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-          {t("branch.sectionGeneral")}
-        </Typography>
-
-        <Grid container spacing={2}>
+      <Grid container spacing={2}>
+        <FormSection title={t("branch.sectionGeneral")}>
           <Grid size={{ xs: 12, sm: 4 }}>
             <Controller
               name="branch_code"
@@ -170,15 +166,9 @@ export default function BranchForm({
               </Typography>
             )}
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-          {t("branch.sectionContact")}
-        </Typography>
-
-        <Grid container spacing={2}>
+        <FormSection title={t("branch.sectionContact")}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <Controller
               name="contact_person_name"
@@ -231,15 +221,9 @@ export default function BranchForm({
               render={({ field }) => <TextField {...field} label={t("branch.website")} fullWidth />}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-          {t("common.address")}
-        </Typography>
-
-        <Grid container spacing={2}>
+        <FormSection title={t("common.address")}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <Controller
               name="address_line1"
@@ -359,15 +343,9 @@ export default function BranchForm({
               )}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-          {t("branch.sectionLocalization")}
-        </Typography>
-
-        <Grid container spacing={2}>
+        <FormSection title={t("branch.sectionLocalization")}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <EntityAutocomplete
               name="localization_profile_uuid"
@@ -376,15 +354,9 @@ export default function BranchForm({
               dropdownName="localization_profile"
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-          {t("branch.sectionOther")}
-        </Typography>
-
-        <Grid container spacing={2}>
+        <FormSection title={t("branch.sectionOther")}>
           <Grid size={{ xs: 12 }}>
             <Controller
               name="remarks"
@@ -394,26 +366,14 @@ export default function BranchForm({
               )}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      <Divider sx={{ my: 2 }} />
-
-      <Box display="flex" justifyContent="space-between">
-        <Button variant="outlined" onClick={() => navigate("/app/settings/branch-master")}>
-          {t("common.back")}
-        </Button>
-
-        <Box display="flex" gap={2}>
-          <Button variant="outlined" color="error" onClick={() => reset()} size="large">
-            {t("common.discard")}
-          </Button>
-
-          <Button type="submit" variant="contained" size="large" disabled={isSubmitting || loading}>
-            {isSubmitting || loading ? t("common.saving") : t("common.save")}
-          </Button>
-        </Box>
-      </Box>
+        <FormActions
+          onBack={() => navigate("/app/settings/branch-master")}
+          onDiscard={() => reset()}
+          submitting={isSubmitting || loading}
+        />
+      </Grid>
     </Box>
   );
 }

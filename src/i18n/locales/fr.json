@@ -33,6 +33,7 @@
     "comingSoon": "Bientôt disponible",
     "loading": "Chargement...",
     "saving": "Enregistrement...",
+    "generalInfo": "Informations générales",
     "status": "Statut",
     "active": "Actif",
     "inactive": "Inactif",
@@ -647,6 +648,7 @@
     }
   },
   "vendor": {
+    "title": "Détails du fournisseur",
     "code": "Code fournisseur",
     "name": "Nom du fournisseur",
     "type": "Type de fournisseur",

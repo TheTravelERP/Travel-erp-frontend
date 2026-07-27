@@ -1,8 +1,7 @@
 // src/features/customer/pages/CustomerEditPage.tsx
 import { useEffect, useState } from 'react';
-import { Box, Breadcrumbs, CircularProgress, Link, Paper, Typography } from '@mui/material';
+import { Box, CircularProgress } from '@mui/material';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { Link as RouterLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import CustomerForm from '../components/CustomerForm';
@@ -11,6 +10,7 @@ import { getCustomerByUuid, updateCustomerByUuid } from '../customer.api';
 import type { CustomerDetail } from '../customer.types';
 import { usePermission } from '../../../hooks/usePermission';
 import { useSnackbar } from '../../../components/ui/SnackbarProvider';
+import FormPageLayout from '../../../components/forms/FormPageLayout';
 
 export default function CustomerEditPage() {
   const { uuid } = useParams();
@@ -67,30 +67,21 @@ export default function CustomerEditPage() {
   }
 
   return (
-    <Box sx={{ p: { xs: 1, md: 1 } }}>
-      <Typography variant="h6" fontWeight={700}>
-        {t('common.edit')}
-      </Typography>
-
-      <Breadcrumbs sx={{ mb: 2 }}>
-        <Link component={RouterLink} to="/app/dashboard" underline="hover">
-          {t('menu.dashboard')}
-        </Link>
-        <Link component={RouterLink} to="/app/crm/customers" underline="hover">
-          {t('menu.crm.customers')}
-        </Link>
-        <Typography color="text.primary">{t('common.edit')}</Typography>
-      </Breadcrumbs>
-
-      <Paper sx={{ p: 3, borderRadius: 2 }}>
-        {loading || !customer ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <CustomerForm defaultValues={customer} onSubmit={handleUpdate} />
-        )}
-      </Paper>
-    </Box>
+    <FormPageLayout
+      title={t('common.edit')}
+      breadcrumbs={[
+        { label: t('menu.dashboard'), href: '/app/dashboard' },
+        { label: t('menu.crm.customers'), href: '/app/crm/customers' },
+        { label: t('common.edit') },
+      ]}
+    >
+      {loading || !customer ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <CustomerForm defaultValues={customer} onSubmit={handleUpdate} />
+      )}
+    </FormPageLayout>
   );
 }

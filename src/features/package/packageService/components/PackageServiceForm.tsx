@@ -2,14 +2,11 @@
 
 import {
   Box,
-  Button,
-  Divider,
   FormControlLabel,
   Grid,
   Paper,
   Switch,
   TextField,
-  Typography,
 } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { useEffect, useMemo } from "react";
@@ -23,6 +20,8 @@ import EntityAutocomplete from "../../../../components/common/EntityAutocomplete
 import type { PackageServiceFormInput } from "../packageService.types";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
+import FormSection from "../../../../components/forms/FormSection";
+import FormActions from "../../../../components/forms/FormActions";
 
 interface PackageServiceFormProps {
   defaultValues?: Partial<PackageServiceFormInput>;
@@ -80,89 +79,85 @@ export default function PackageServiceForm({
       )}
       noValidate
     >
-      {/* BASIC INFO */}
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <EntityAutocomplete
-              name="package_uuid"
-              label={t("packageService.package")}
-              control={control}
-              dropdownName="packages"
-              setValue={setValue}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <DropdownAutocomplete
-              name="service_type"
-              label={t("packageService.serviceType")}
-              control={control}
-              dropdownName="service_type"
-              useForm
-              allowAdd
-            />
-          </Grid>
-
-          <Grid size={{ xs: 6, sm: 3 }}>
-            <Controller
-              name="day_no"
-              control={control}
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  type="number"
-                  label={t("packageService.dayNo")}
-                  fullWidth
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
+      <Grid container spacing={2}>
+        <Grid size={{ xs: 12 }}>
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <EntityAutocomplete
+                  name="package_uuid"
+                  label={t("packageService.package")}
+                  control={control}
+                  dropdownName="packages"
+                  setValue={setValue}
                 />
-              )}
-            />
-          </Grid>
+              </Grid>
 
-          <Grid size={{ xs: 6, sm: 3 }}>
-            <Controller
-              name="service_order"
-              control={control}
-              render={({ field }) => (
-                <TextField {...field} type="number" label={t("packageService.serviceOrder")} fullWidth />
-              )}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <Controller
-              name="description"
-              control={control}
-              render={({ field }) => (
-                <TextField {...field} label={t("packageService.description")} fullWidth />
-              )}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 6, sm: 3 }} sx={{ display: "flex", alignItems: "center" }}>
-            <Controller
-              name="is_active"
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={<Switch checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} />}
-                  label={t("common.active")}
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <DropdownAutocomplete
+                  name="service_type"
+                  label={t("packageService.serviceType")}
+                  control={control}
+                  dropdownName="service_type"
+                  useForm
+                  allowAdd
                 />
-              )}
-            />
-          </Grid>
+              </Grid>
+
+              <Grid size={{ xs: 6, sm: 3 }}>
+                <Controller
+                  name="day_no"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      type="number"
+                      label={t("packageService.dayNo")}
+                      fullWidth
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                    />
+                  )}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 6, sm: 3 }}>
+                <Controller
+                  name="service_order"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField {...field} type="number" label={t("packageService.serviceOrder")} fullWidth />
+                  )}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <Controller
+                  name="description"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField {...field} label={t("packageService.description")} fullWidth />
+                  )}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 6, sm: 3 }} sx={{ display: "flex", alignItems: "center" }}>
+                <Controller
+                  name="is_active"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={<Switch checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} />}
+                      label={t("common.active")}
+                    />
+                  )}
+                />
+              </Grid>
+            </Grid>
+          </Paper>
         </Grid>
-      </Paper>
 
-      {/* SCHEDULE */}
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
-          {t("packageService.scheduleSection")}
-        </Typography>
-
-        <Grid container spacing={2}>
+        <FormSection title={t("packageService.scheduleSection")}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <Controller
               name="start_datetime"
@@ -194,16 +189,9 @@ export default function PackageServiceForm({
               )}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      {/* PRICING */}
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
-          {t("packageService.pricingSection")}
-        </Typography>
-
-        <Grid container spacing={2}>
+        <FormSection title={t("packageService.pricingSection")}>
           <Grid size={{ xs: 6, sm: 3 }}>
             <Controller
               name="cost_price"
@@ -230,16 +218,9 @@ export default function PackageServiceForm({
               )}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      {/* INVENTORY REFERENCE */}
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
-          {t("packageService.inventorySection")}
-        </Typography>
-
-        <Grid container spacing={2}>
+        <FormSection title={t("packageService.inventorySection")}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <EntityAutocomplete
               name="inventory_uuid"
@@ -259,26 +240,14 @@ export default function PackageServiceForm({
               )}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      <Divider sx={{ my: 2 }} />
-
-      <Box display="flex" justifyContent="space-between">
-        <Button variant="outlined" onClick={() => navigate("/app/packages/services")}>
-          {t("common.back")}
-        </Button>
-
-        <Box display="flex" gap={2}>
-          <Button variant="outlined" color="error" onClick={() => reset()} size="large">
-            {t("common.discard")}
-          </Button>
-
-          <Button type="submit" variant="contained" size="large" disabled={isSubmitting || loading}>
-            {isSubmitting || loading ? t("common.saving") : t("common.save")}
-          </Button>
-        </Box>
-      </Box>
+        <FormActions
+          onBack={() => navigate("/app/packages/services")}
+          onDiscard={() => reset()}
+          submitting={isSubmitting || loading}
+        />
+      </Grid>
     </Box>
   );
 }

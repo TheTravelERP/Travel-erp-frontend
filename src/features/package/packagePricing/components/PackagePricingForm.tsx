@@ -2,8 +2,6 @@
 
 import {
   Box,
-  Button,
-  Divider,
   FormControlLabel,
   Grid,
   Paper,
@@ -22,6 +20,7 @@ import EntityAutocomplete from "../../../../components/common/EntityAutocomplete
 import type { PackagePricingFormInput } from "../packagePricing.types";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
+import FormActions from "../../../../components/forms/FormActions";
 
 interface PackagePricingFormProps {
   defaultValues?: Partial<PackagePricingFormInput>;
@@ -77,166 +76,158 @@ export default function PackagePricingForm({
       )}
       noValidate
     >
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <EntityAutocomplete
-              name="package_uuid"
-              label={t("packagePricing.package")}
-              control={control}
-              dropdownName="packages"
-              setValue={setValue}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <DropdownAutocomplete
-              name="price_category"
-              label={t("packagePricing.priceCategory")}
-              control={control}
-              dropdownName="price_category"
-              useForm
-              allowAdd
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <DropdownAutocomplete
-              name="occupancy_type"
-              label={t("packagePricing.occupancyType")}
-              control={control}
-              dropdownName="occupancy_type"
-              useForm
-              allowAdd
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <DropdownAutocomplete
-              name="passenger_type"
-              label={t("packagePricing.passengerType")}
-              control={control}
-              dropdownName="passenger_type"
-              useForm
-              allowAdd
-            />
-          </Grid>
-
-          <Grid size={{ xs: 6, sm: 2 }}>
-            <Controller
-              name="currency_code"
-              control={control}
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  label={t("packagePricing.currencyCode")}
-                  fullWidth
-                  required
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
+      <Grid container spacing={2}>
+        <Grid size={{ xs: 12 }}>
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <EntityAutocomplete
+                  name="package_uuid"
+                  label={t("packagePricing.package")}
+                  control={control}
+                  dropdownName="packages"
+                  setValue={setValue}
                 />
-              )}
-            />
-          </Grid>
+              </Grid>
 
-          <Grid size={{ xs: 6, sm: 2 }}>
-            <Controller
-              name="price"
-              control={control}
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  type="number"
-                  label={t("packagePricing.price")}
-                  fullWidth
-                  required
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <DropdownAutocomplete
+                  name="price_category"
+                  label={t("packagePricing.priceCategory")}
+                  control={control}
+                  dropdownName="price_category"
+                  useForm
+                  allowAdd
                 />
-              )}
-            />
-          </Grid>
+              </Grid>
 
-          <Grid size={{ xs: 6, sm: 3 }}>
-            <Controller
-              name="effective_from"
-              control={control}
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  type="date"
-                  label={t("packagePricing.effectiveFrom")}
-                  fullWidth
-                  required
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                  slotProps={{ inputLabel: { shrink: true } }}
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <DropdownAutocomplete
+                  name="occupancy_type"
+                  label={t("packagePricing.occupancyType")}
+                  control={control}
+                  dropdownName="occupancy_type"
+                  useForm
+                  allowAdd
                 />
-              )}
-            />
-          </Grid>
+              </Grid>
 
-          <Grid size={{ xs: 6, sm: 3 }}>
-            <Controller
-              name="effective_to"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  type="date"
-                  label={t("packagePricing.effectiveTo")}
-                  fullWidth
-                  slotProps={{ inputLabel: { shrink: true } }}
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <DropdownAutocomplete
+                  name="passenger_type"
+                  label={t("packagePricing.passengerType")}
+                  control={control}
+                  dropdownName="passenger_type"
+                  useForm
+                  allowAdd
                 />
-              )}
-            />
-          </Grid>
+              </Grid>
 
-          <Grid size={{ xs: 6, sm: 3 }} sx={{ display: "flex", alignItems: "center" }}>
-            <Controller
-              name="is_default"
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={<Switch checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} />}
-                  label={t("packagePricing.isDefault")}
+              <Grid size={{ xs: 6, sm: 2 }}>
+                <Controller
+                  name="currency_code"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      label={t("packagePricing.currencyCode")}
+                      fullWidth
+                      required
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                    />
+                  )}
                 />
-              )}
-            />
-          </Grid>
+              </Grid>
 
-          <Grid size={{ xs: 6, sm: 3 }} sx={{ display: "flex", alignItems: "center" }}>
-            <Controller
-              name="is_active"
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={<Switch checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} />}
-                  label={t("common.active")}
+              <Grid size={{ xs: 6, sm: 2 }}>
+                <Controller
+                  name="price"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      type="number"
+                      label={t("packagePricing.price")}
+                      fullWidth
+                      required
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                    />
+                  )}
                 />
-              )}
-            />
-          </Grid>
+              </Grid>
+
+              <Grid size={{ xs: 6, sm: 3 }}>
+                <Controller
+                  name="effective_from"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      type="date"
+                      label={t("packagePricing.effectiveFrom")}
+                      fullWidth
+                      required
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                      slotProps={{ inputLabel: { shrink: true } }}
+                    />
+                  )}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 6, sm: 3 }}>
+                <Controller
+                  name="effective_to"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      type="date"
+                      label={t("packagePricing.effectiveTo")}
+                      fullWidth
+                      slotProps={{ inputLabel: { shrink: true } }}
+                    />
+                  )}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 6, sm: 3 }} sx={{ display: "flex", alignItems: "center" }}>
+                <Controller
+                  name="is_default"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={<Switch checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} />}
+                      label={t("packagePricing.isDefault")}
+                    />
+                  )}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 6, sm: 3 }} sx={{ display: "flex", alignItems: "center" }}>
+                <Controller
+                  name="is_active"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={<Switch checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} />}
+                      label={t("common.active")}
+                    />
+                  )}
+                />
+              </Grid>
+            </Grid>
+          </Paper>
         </Grid>
-      </Paper>
 
-      <Divider sx={{ my: 2 }} />
-
-      <Box display="flex" justifyContent="space-between">
-        <Button variant="outlined" onClick={() => navigate("/app/packages/pricing")}>
-          {t("common.back")}
-        </Button>
-
-        <Box display="flex" gap={2}>
-          <Button variant="outlined" color="error" onClick={() => reset()} size="large">
-            {t("common.discard")}
-          </Button>
-
-          <Button type="submit" variant="contained" size="large" disabled={isSubmitting || loading}>
-            {isSubmitting || loading ? t("common.saving") : t("common.save")}
-          </Button>
-        </Box>
-      </Box>
+        <FormActions
+          onBack={() => navigate("/app/packages/pricing")}
+          onDiscard={() => reset()}
+          submitting={isSubmitting || loading}
+        />
+      </Grid>
     </Box>
   );
 }

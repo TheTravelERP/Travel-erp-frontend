@@ -94,7 +94,7 @@ export default function InvoiceBrandingSettingsPage() {
       </Typography>
 
       <Paper sx={{ p: 3, mb: 3, maxWidth: 880 }}>
-        <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+        <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
           {t('settings.invoice')}
         </Typography>
         <Typography variant="body2" color="text.secondary" mb={2}>
@@ -158,7 +158,7 @@ export default function InvoiceBrandingSettingsPage() {
       </Paper>
 
       <Paper sx={{ p: 3, maxWidth: 880 }}>
-        <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+        <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
           {t('settings.branding')}
         </Typography>
         <Typography variant="body2" color="text.secondary" mb={2}>

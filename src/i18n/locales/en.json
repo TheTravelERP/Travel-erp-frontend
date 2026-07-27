@@ -33,6 +33,7 @@
     "comingSoon": "Coming soon",
     "loading": "Loading...",
     "saving": "Saving...",
+    "generalInfo": "General Information",
     "status": "Status",
     "active": "Active",
     "inactive": "Inactive",
@@ -647,6 +648,7 @@
     }
   },
   "vendor": {
+    "title": "Vendor Details",
     "code": "Vendor Code",
     "name": "Vendor Name",
     "type": "Vendor Type",

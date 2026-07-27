@@ -1,5 +1,5 @@
 // src/features/settings/users/components/UserForm.tsx
-import { Box, Button, TextField, Typography, Paper, Divider, MenuItem, Grid } from '@mui/material';
+import { Box, TextField, MenuItem, Grid } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
 import { useEffect, useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,6 +17,8 @@ import { useSnackbar } from '../../../../components/ui/SnackbarProvider';
 import { mergeFormDefaults } from '../../../../utils/mergeFormDefaults';
 import { getBranches } from '../../branch/branch.api';
 import type { BranchListItem } from '../../branch/branch.types';
+import FormSection from '../../../../components/forms/FormSection';
+import FormActions from '../../../../components/forms/FormActions';
 
 const USER_TYPES = ['Admin', 'Employee', 'Agent'];
 const STATUSES = ['Active', 'Inactive', 'Suspended'];
@@ -119,320 +121,269 @@ export default function UserForm({ mode, defaultValues, onSubmit, loading = fals
       sx={{ flexGrow: 1 }}
     >
       <Grid container spacing={2}>
-        {/* ACCOUNT */}
-        <Grid size={{ xs: 12 }}>
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-              {t('settings.account')}
-            </Typography>
-
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <Controller
-                  name="name"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label={t('settings.fullName')}
-                      fullWidth
-                      error={!!errors.name}
-                      helperText={errors.name?.message}
-                    />
-                  )}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 6 }}>
+        <FormSection title={t('settings.account')}>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Controller
+              name="name"
+              control={control}
+              render={({ field }) => (
                 <TextField
-                  label={t('common.email')}
+                  {...field}
+                  label={t('settings.fullName')}
                   fullWidth
-                  disabled={mode === 'edit'}
-                  value={mode === 'edit' ? defaultValues?.email ?? '' : watch('email')}
-                  onChange={(e) => mode === 'create' && setValue('email', e.target.value)}
-                  error={mode === 'create' && !!(errors as any).email}
-                  helperText={mode === 'create' ? (errors as any).email?.message : undefined}
+                  error={!!errors.name}
+                  helperText={errors.name?.message}
                 />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <MobileNumberField name="mobile" control={control} label={t('common.mobile')} />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: mode === 'create' ? 3 : 6 }}>
-                <Controller
-                  name="user_type"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField {...field} select label={t('settings.role')} fullWidth>
-                      {USER_TYPES.map((type) => (
-                        <MenuItem key={type} value={type}>
-                          {t(`settings.userType.${type}`, { defaultValue: type })}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  )}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <EntityAutocomplete
-                  name="role_uuid"
-                  label={t('role.title')}
-                  control={control}
-                  dropdownName="roles"
-                  allowAdd={false}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <EntityAutocomplete
-                  name="default_branch_uuid"
-                  label={t('branch.title')}
-                  control={control}
-                  dropdownName="branch"
-                  disabled={branchesLoading || branches.length === 1}
-                  allowAdd={false}
-                />
-              </Grid>
-
-              {mode === 'create' && (
-                <Grid size={{ xs: 12, sm: 3 }}>
-                  <Controller
-                    name="password"
-                    control={control}
-                    render={({ field }) => (
-                      <PasswordField
-                        {...field}
-                        label={t('settings.initialPassword')}
-                        fullWidth
-                        autoComplete="new-password"
-                        error={!!(errors as any).password}
-                        helperText={(errors as any).password?.message}
-                      />
-                    )}
-                  />
-                </Grid>
               )}
+            />
+          </Grid>
 
-              {mode === 'edit' && (
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <Controller
-                    name="status"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField {...field} select label={t('common.status')} fullWidth value={field.value ?? 'Active'}>
-                        {STATUSES.map((status) => (
-                          <MenuItem key={status} value={status}>
-                            {t(`settings.userStatus.${status}`, { defaultValue: status })}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                    )}
-                  />
-                </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField
+              label={t('common.email')}
+              fullWidth
+              disabled={mode === 'edit'}
+              value={mode === 'edit' ? defaultValues?.email ?? '' : watch('email')}
+              onChange={(e) => mode === 'create' && setValue('email', e.target.value)}
+              error={mode === 'create' && !!(errors as any).email}
+              helperText={mode === 'create' ? (errors as any).email?.message : undefined}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <MobileNumberField name="mobile" control={control} label={t('common.mobile')} />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: mode === 'create' ? 3 : 6 }}>
+            <Controller
+              name="user_type"
+              control={control}
+              render={({ field }) => (
+                <TextField {...field} select label={t('settings.role')} fullWidth>
+                  {USER_TYPES.map((type) => (
+                    <MenuItem key={type} value={type}>
+                      {t(`settings.userType.${type}`, { defaultValue: type })}
+                    </MenuItem>
+                  ))}
+                </TextField>
               )}
+            />
+          </Grid>
 
-              <Grid size={{ xs: 12 }}>
-                <FileUploadField
-                  label={t('settings.profilePicture')}
-                  variant="avatar"
-                  value={pictureUrl || null}
-                  onUpload={async (file) => {
-                    const { url } = await uploadFile(file, 'user', 'picture');
-                    return url;
-                  }}
-                  onChange={(url) => setValue('picture_url', url ?? '')}
-                  accept="image/jpeg,image/png,image/webp"
-                />
-              </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <EntityAutocomplete
+              name="role_uuid"
+              label={t('role.title')}
+              control={control}
+              dropdownName="roles"
+              allowAdd={false}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <EntityAutocomplete
+              name="default_branch_uuid"
+              label={t('branch.title')}
+              control={control}
+              dropdownName="branch"
+              disabled={branchesLoading || branches.length === 1}
+              allowAdd={false}
+            />
+          </Grid>
+
+          {mode === 'create' && (
+            <Grid size={{ xs: 12, sm: 3 }}>
+              <Controller
+                name="password"
+                control={control}
+                render={({ field }) => (
+                  <PasswordField
+                    {...field}
+                    label={t('settings.initialPassword')}
+                    fullWidth
+                    autoComplete="new-password"
+                    error={!!(errors as any).password}
+                    helperText={(errors as any).password?.message}
+                  />
+                )}
+              />
             </Grid>
-          </Paper>
-        </Grid>
+          )}
 
-        {/* PERSONAL DETAILS */}
-        <Grid size={{ xs: 12 }}>
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-              {t('settings.personalDetails')}
-            </Typography>
-
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <Controller
-                  name="dob"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label={t('settings.dateOfBirth')}
-                      type="date"
-                      fullWidth
-                      slotProps={{ inputLabel: { shrink: true } }}
-                    />
-                  )}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <DropdownAutocomplete name="gender" label={t('settings.gender')} control={control} useForm allowAdd={false} />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <DropdownAutocomplete
-                  name="marital_status"
-                  label={t('settings.maritalStatus')}
-                  control={control}
-                  useForm
-                  allowAdd={false}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <Controller
-                  name="anniversary_date"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label={t('settings.anniversaryDate')}
-                      type="date"
-                      fullWidth
-                      slotProps={{ inputLabel: { shrink: true } }}
-                    />
-                  )}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <DropdownAutocomplete
-                  name="blood_group"
-                  label={t('settings.bloodGroup')}
-                  control={control}
-                  useForm
-                  allowAdd={false}
-                />
-              </Grid>
+          {mode === 'edit' && (
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <Controller
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <TextField {...field} select label={t('common.status')} fullWidth value={field.value ?? 'Active'}>
+                    {STATUSES.map((status) => (
+                      <MenuItem key={status} value={status}>
+                        {t(`settings.userStatus.${status}`, { defaultValue: status })}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
             </Grid>
-          </Paper>
-        </Grid>
+          )}
 
-        {/* EMPLOYMENT */}
-        <Grid size={{ xs: 12 }}>
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-              {t('settings.employment')}
-            </Typography>
+          <Grid size={{ xs: 12 }}>
+            <FileUploadField
+              label={t('settings.profilePicture')}
+              variant="avatar"
+              value={pictureUrl || null}
+              onUpload={async (file) => {
+                const { url } = await uploadFile(file, 'user', 'picture');
+                return url;
+              }}
+              onChange={(url) => setValue('picture_url', url ?? '')}
+              accept="image/jpeg,image/png,image/webp"
+            />
+          </Grid>
+        </FormSection>
 
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <DropdownAutocomplete
-                  name="designation"
-                  label={t('settings.designation')}
-                  control={control}
-                  useForm
-                  allowAdd
+        <FormSection title={t('settings.personalDetails')}>
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <Controller
+              name="dob"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label={t('settings.dateOfBirth')}
+                  type="date"
+                  fullWidth
+                  slotProps={{ inputLabel: { shrink: true } }}
                 />
-              </Grid>
+              )}
+            />
+          </Grid>
 
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <Controller
-                  name="date_of_joining"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label={t('settings.dateOfJoining')}
-                      type="date"
-                      fullWidth
-                      slotProps={{ inputLabel: { shrink: true } }}
-                    />
-                  )}
-                />
-              </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <DropdownAutocomplete name="gender" label={t('settings.gender')} control={control} useForm allowAdd={false} />
+          </Grid>
 
-        {/* EMERGENCY CONTACT */}
-        <Grid size={{ xs: 12 }}>
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-              {t('settings.emergencyContact')}
-            </Typography>
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <DropdownAutocomplete
+              name="marital_status"
+              label={t('settings.maritalStatus')}
+              control={control}
+              useForm
+              allowAdd={false}
+            />
+          </Grid>
 
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <Controller
-                  name="emergency_contact_name"
-                  control={control}
-                  render={({ field }) => <TextField {...field} label={t('settings.contactName')} fullWidth />}
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <Controller
+              name="anniversary_date"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label={t('settings.anniversaryDate')}
+                  type="date"
+                  fullWidth
+                  slotProps={{ inputLabel: { shrink: true } }}
                 />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <MobileNumberField
-                  name="emergency_contact_number"
-                  control={control}
-                  label={t('settings.contactNumber')}
-                />
-              </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
+              )}
+            />
+          </Grid>
 
-        {/* IDENTIFICATION */}
-        <Grid size={{ xs: 12 }}>
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-              {t('settings.identification')}
-            </Typography>
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <DropdownAutocomplete
+              name="blood_group"
+              label={t('settings.bloodGroup')}
+              control={control}
+              useForm
+              allowAdd={false}
+            />
+          </Grid>
+        </FormSection>
 
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <DropdownAutocomplete
-                  name="identification_type"
-                  label={t('settings.idType')}
-                  control={control}
-                  useForm
-                  allowAdd={false}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <Controller
-                  name="identification_number"
-                  control={control}
-                  render={({ field }) => <TextField {...field} label={t('settings.idNumber')} fullWidth />}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <FileUploadField
-                  label={t('settings.idDocument')}
-                  variant="document"
-                  value={identificationFileUrl || null}
-                  onUpload={async (file) => {
-                    const { url } = await uploadFile(file, 'user', 'identification');
-                    return url;
-                  }}
-                  onChange={(url) => setValue('identification_file_url', url ?? '')}
-                  accept="image/jpeg,image/png,image/webp,application/pdf"
-                />
-              </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
+        <FormSection title={t('settings.employment')}>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <DropdownAutocomplete
+              name="designation"
+              label={t('settings.designation')}
+              control={control}
+              useForm
+              allowAdd
+            />
+          </Grid>
 
-        {/* ACTIONS */}
-        <Grid size={{ xs: 12 }}>
-          <Divider sx={{ my: 2 }} />
-          <Box display="flex" justifyContent="space-between">
-            <Button variant="outlined" onClick={() => navigate('/app/settings/users')}>
-              {t('common.back')}
-            </Button>
-            <Button type="submit" variant="contained" size="large" disabled={isSubmitting || loading}>
-              {isSubmitting || loading ? t('common.saving') : t('settings.saveUser')}
-            </Button>
-          </Box>
-        </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Controller
+              name="date_of_joining"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label={t('settings.dateOfJoining')}
+                  type="date"
+                  fullWidth
+                  slotProps={{ inputLabel: { shrink: true } }}
+                />
+              )}
+            />
+          </Grid>
+        </FormSection>
+
+        <FormSection title={t('settings.emergencyContact')}>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Controller
+              name="emergency_contact_name"
+              control={control}
+              render={({ field }) => <TextField {...field} label={t('settings.contactName')} fullWidth />}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <MobileNumberField
+              name="emergency_contact_number"
+              control={control}
+              label={t('settings.contactNumber')}
+            />
+          </Grid>
+        </FormSection>
+
+        <FormSection title={t('settings.identification')}>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <DropdownAutocomplete
+              name="identification_type"
+              label={t('settings.idType')}
+              control={control}
+              useForm
+              allowAdd={false}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <Controller
+              name="identification_number"
+              control={control}
+              render={({ field }) => <TextField {...field} label={t('settings.idNumber')} fullWidth />}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <FileUploadField
+              label={t('settings.idDocument')}
+              variant="document"
+              value={identificationFileUrl || null}
+              onUpload={async (file) => {
+                const { url } = await uploadFile(file, 'user', 'identification');
+                return url;
+              }}
+              onChange={(url) => setValue('identification_file_url', url ?? '')}
+              accept="image/jpeg,image/png,image/webp,application/pdf"
+            />
+          </Grid>
+        </FormSection>
+
+        <FormActions
+          onBack={() => navigate('/app/settings/users')}
+          onDiscard={() => reset()}
+          submitting={isSubmitting || loading}
+          saveLabel={t('settings.saveUser')}
+        />
       </Grid>
     </Box>
   );

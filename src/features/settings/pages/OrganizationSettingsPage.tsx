@@ -113,7 +113,7 @@ export default function OrganizationSettingsPage() {
       </Typography>
 
       <Paper sx={{ p: 3, maxWidth: 880 }}>
-        <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+        <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
           {t('settings.companyProfile')}
         </Typography>
         <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -153,7 +153,7 @@ export default function OrganizationSettingsPage() {
 
         <Divider sx={{ mb: 3 }} />
 
-        <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+        <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
           {t('settings.branding')}
         </Typography>
         <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -188,7 +188,7 @@ export default function OrganizationSettingsPage() {
 
         <Divider sx={{ mb: 3 }} />
 
-        <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+        <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
           {t('settings.documents')}
         </Typography>
         <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -217,7 +217,7 @@ export default function OrganizationSettingsPage() {
 
         <Divider sx={{ mb: 3 }} />
 
-        <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+        <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
           {t('settings.taxRegistration')}
         </Typography>
         <Typography variant="body2" color="text.secondary" mb={2}>
@@ -244,7 +244,7 @@ export default function OrganizationSettingsPage() {
 
         <Divider sx={{ mb: 3 }} />
 
-        <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+        <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
           {t('settings.locale')}
         </Typography>
         <Grid container spacing={2} sx={{ mb: 3 }}>

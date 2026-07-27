@@ -1,7 +1,7 @@
 // src/features/settings/users/pages/UserEditPage.tsx
 import { useEffect, useState } from 'react';
-import { Box, Breadcrumbs, CircularProgress, Link, Paper, Typography } from '@mui/material';
-import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom';
+import { Box, CircularProgress } from '@mui/material';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import UserForm from '../components/UserForm';
@@ -9,6 +9,7 @@ import UserPermissionOverrides from '../components/UserPermissionOverrides';
 import { getUserById, updateUser } from '../users.api';
 import type { UserDetail } from '../users.types';
 import { useSnackbar } from '../../../../components/ui/SnackbarProvider';
+import FormPageLayout from '../../../../components/forms/FormPageLayout';
 
 export default function UserEditPage() {
   const { uuid } = useParams();
@@ -56,22 +57,15 @@ export default function UserEditPage() {
   }
 
   return (
-    <Box sx={{ p: { xs: 1, md: 1 } }}>
-      <Typography variant="h6" fontWeight={700}>
-        {t('common.edit')}
-      </Typography>
-
-      <Breadcrumbs sx={{ mb: 2 }}>
-        <Link component={RouterLink} to="/app/dashboard" underline="hover">
-          {t('menu.dashboard')}
-        </Link>
-        <Link component={RouterLink} to="/app/settings/users" underline="hover">
-          {t('menu.settings.users')}
-        </Link>
-        <Typography color="text.primary">{t('common.edit')}</Typography>
-      </Breadcrumbs>
-
-      <Paper sx={{ p: 3, borderRadius: 2 }}>
+    <>
+      <FormPageLayout
+        title={t('common.edit')}
+        breadcrumbs={[
+          { label: t('menu.dashboard'), href: '/app/dashboard' },
+          { label: t('menu.settings.users'), href: '/app/settings/users' },
+          { label: t('common.edit') },
+        ]}
+      >
         {loading || !user ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
             <CircularProgress />
@@ -104,13 +98,13 @@ export default function UserEditPage() {
             onSubmit={handleUpdate}
           />
         )}
-      </Paper>
+      </FormPageLayout>
 
       {!loading && user && (
-        <Box sx={{ mt: 3 }}>
+        <Box sx={{ px: { xs: 1, md: 1 }, mt: 3 }}>
           <UserPermissionOverrides userUuid={user.uuid} />
         </Box>
       )}
-    </Box>
+    </>
   );
 }

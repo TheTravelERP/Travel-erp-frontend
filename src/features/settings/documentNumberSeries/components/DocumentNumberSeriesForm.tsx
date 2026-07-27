@@ -2,12 +2,9 @@
 
 import {
   Box,
-  Button,
-  Divider,
   FormControlLabel,
   Grid,
   MenuItem,
-  Paper,
   Switch,
   TextField,
   Typography,
@@ -23,6 +20,8 @@ import type { DocumentNumberSeriesFormInput } from "../documentNumberSeries.type
 import EntityAutocomplete from "../../../../components/common/EntityAutocomplete";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
+import FormSection from "../../../../components/forms/FormSection";
+import FormActions from "../../../../components/forms/FormActions";
 
 const RESET_POLICIES = ["Never", "Daily", "Weekly", "Monthly", "Yearly", "Financial Year"] as const;
 
@@ -86,16 +85,16 @@ export default function DocumentNumberSeriesForm({
       )}
       noValidate
     >
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        {isLocked && (
-          <Box mb={2}>
-            <Typography variant="body2" color="warning.main">
-              {t("documentNumberSeries.lockedFieldsHint")}
-            </Typography>
-          </Box>
-        )}
+      {isLocked && (
+        <Box mb={2}>
+          <Typography variant="body2" color="warning.main">
+            {t("documentNumberSeries.lockedFieldsHint")}
+          </Typography>
+        </Box>
+      )}
 
-        <Grid container spacing={2}>
+      <Grid container spacing={2}>
+        <FormSection title={t("menu.settings.doc_numbering")}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <EntityAutocomplete
               name="branch_uuid"
@@ -296,26 +295,14 @@ export default function DocumentNumberSeriesForm({
               )}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      <Divider sx={{ my: 2 }} />
-
-      <Box display="flex" justifyContent="space-between">
-        <Button variant="outlined" onClick={() => navigate("/app/settings/doc-numbering")}>
-          {t("common.back")}
-        </Button>
-
-        <Box display="flex" gap={2}>
-          <Button variant="outlined" color="error" onClick={() => reset()} size="large">
-            {t("common.discard")}
-          </Button>
-
-          <Button type="submit" variant="contained" size="large" disabled={isSubmitting || loading}>
-            {isSubmitting || loading ? t("common.saving") : t("common.save")}
-          </Button>
-        </Box>
-      </Box>
+        <FormActions
+          onBack={() => navigate("/app/settings/doc-numbering")}
+          onDiscard={() => reset()}
+          submitting={isSubmitting || loading}
+        />
+      </Grid>
     </Box>
   );
 }

@@ -3,11 +3,9 @@
 import {
   Box,
   Button,
-  Divider,
   FormControlLabel,
   Grid,
   IconButton,
-  Paper,
   Stack,
   Switch,
   TextField,
@@ -27,6 +25,8 @@ import EntityAutocomplete from "../../../../components/common/EntityAutocomplete
 import DropdownAutocomplete from "../../../../components/common/DropdownAutocomplete";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
+import FormSection from "../../../../components/forms/FormSection";
+import FormActions from "../../../../components/forms/FormActions";
 
 interface LocalizationProfileFormProps {
   defaultValues?: Partial<LocalizationProfileFormInput>;
@@ -92,12 +92,8 @@ export default function LocalizationProfileForm({
       )}
       noValidate
     >
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-          {t("localizationProfile.sectionGeneral")}
-        </Typography>
-
-        <Grid container spacing={2}>
+      <Grid container spacing={2}>
+        <FormSection title={t("localizationProfile.sectionGeneral")}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <Controller
               name="profile_name"
@@ -257,122 +253,115 @@ export default function LocalizationProfileForm({
               )}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-          <Typography variant="subtitle1" fontWeight={600}>
-            {t("localizationProfile.taxComponents")}
-          </Typography>
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<AddIcon />}
-            onClick={() => append({ tax_name: "", tax_percent: "", tax_type: "", sequence: fields.length })}
-          >
-            {t("localizationProfile.addTaxComponent")}
-          </Button>
-        </Stack>
-
-        {taxComponentsError && (
-          <Typography color="error" variant="body2" sx={{ mb: 1 }}>
-            {taxComponentsError}
-          </Typography>
-        )}
-
-        {fields.length === 0 && (
-          <Typography variant="body2" color="text.secondary">
-            {t("localizationProfile.noTaxComponentsYet")}
-          </Typography>
-        )}
-
-        <Stack spacing={2}>
-          {fields.map((field, index) => (
-            <Grid container spacing={2} key={field.id} alignItems="center">
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <Controller
-                  name={`tax_components.${index}.tax_name`}
-                  control={control}
-                  render={({ field: f, fieldState }) => (
-                    <TextField
-                      {...f}
-                      label={t("localizationProfile.taxName")}
-                      fullWidth
-                      required
-                      error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
-                    />
-                  )}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 2 }}>
-                <Controller
-                  name={`tax_components.${index}.tax_percent`}
-                  control={control}
-                  render={({ field: f, fieldState }) => (
-                    <TextField
-                      {...f}
-                      type="number"
-                      label={t("localizationProfile.taxPercent")}
-                      fullWidth
-                      required
-                      inputProps={{ step: "0.001", min: 0 }}
-                      error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
-                    />
-                  )}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <DropdownAutocomplete
-                  name={`tax_components.${index}.tax_type`}
-                  dropdownName="tax_type"
-                  label={t("localizationProfile.taxType")}
-                  control={control}
-                  useForm
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 2 }}>
-                <Controller
-                  name={`tax_components.${index}.sequence`}
-                  control={control}
-                  render={({ field: f }) => (
-                    <TextField {...f} type="number" label={t("localizationProfile.sequence")} fullWidth />
-                  )}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, sm: 2 }}>
-                <IconButton color="error" onClick={() => remove(index)}>
-                  <DeleteIcon />
-                </IconButton>
-              </Grid>
+        <FormSection
+          title={t("localizationProfile.taxComponents")}
+          titleAdornment={
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={() => append({ tax_name: "", tax_percent: "", tax_type: "", sequence: fields.length })}
+              sx={{ ml: 2 }}
+            >
+              {t("localizationProfile.addTaxComponent")}
+            </Button>
+          }
+        >
+          {taxComponentsError && (
+            <Grid size={{ xs: 12 }}>
+              <Typography color="error" variant="body2">
+                {taxComponentsError}
+              </Typography>
             </Grid>
-          ))}
-        </Stack>
-      </Paper>
+          )}
 
-      <Divider sx={{ my: 2 }} />
+          {fields.length === 0 && (
+            <Grid size={{ xs: 12 }}>
+              <Typography variant="body2" color="text.secondary">
+                {t("localizationProfile.noTaxComponentsYet")}
+              </Typography>
+            </Grid>
+          )}
 
-      <Box display="flex" justifyContent="space-between">
-        <Button variant="outlined" onClick={() => navigate("/app/settings/localization-profiles")}>
-          {t("common.back")}
-        </Button>
+          <Grid size={{ xs: 12 }}>
+            <Stack spacing={2}>
+              {fields.map((field, index) => (
+                <Grid container spacing={2} key={field.id} alignItems="center">
+                  <Grid size={{ xs: 12, sm: 3 }}>
+                    <Controller
+                      name={`tax_components.${index}.tax_name`}
+                      control={control}
+                      render={({ field: f, fieldState }) => (
+                        <TextField
+                          {...f}
+                          label={t("localizationProfile.taxName")}
+                          fullWidth
+                          required
+                          error={!!fieldState.error}
+                          helperText={fieldState.error?.message}
+                        />
+                      )}
+                    />
+                  </Grid>
 
-        <Box display="flex" gap={2}>
-          <Button variant="outlined" color="error" onClick={() => reset()} size="large">
-            {t("common.discard")}
-          </Button>
+                  <Grid size={{ xs: 12, sm: 2 }}>
+                    <Controller
+                      name={`tax_components.${index}.tax_percent`}
+                      control={control}
+                      render={({ field: f, fieldState }) => (
+                        <TextField
+                          {...f}
+                          type="number"
+                          label={t("localizationProfile.taxPercent")}
+                          fullWidth
+                          required
+                          inputProps={{ step: "0.001", min: 0 }}
+                          error={!!fieldState.error}
+                          helperText={fieldState.error?.message}
+                        />
+                      )}
+                    />
+                  </Grid>
 
-          <Button type="submit" variant="contained" size="large" disabled={isSubmitting || loading}>
-            {isSubmitting || loading ? t("common.saving") : t("common.save")}
-          </Button>
-        </Box>
-      </Box>
+                  <Grid size={{ xs: 12, sm: 3 }}>
+                    <DropdownAutocomplete
+                      name={`tax_components.${index}.tax_type`}
+                      dropdownName="tax_type"
+                      label={t("localizationProfile.taxType")}
+                      control={control}
+                      useForm
+                    />
+                  </Grid>
+
+                  <Grid size={{ xs: 12, sm: 2 }}>
+                    <Controller
+                      name={`tax_components.${index}.sequence`}
+                      control={control}
+                      render={({ field: f }) => (
+                        <TextField {...f} type="number" label={t("localizationProfile.sequence")} fullWidth />
+                      )}
+                    />
+                  </Grid>
+
+                  <Grid size={{ xs: 12, sm: 2 }}>
+                    <IconButton color="error" onClick={() => remove(index)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              ))}
+            </Stack>
+          </Grid>
+        </FormSection>
+
+        <FormActions
+          onBack={() => navigate("/app/settings/localization-profiles")}
+          onDiscard={() => reset()}
+          submitting={isSubmitting || loading}
+        />
+      </Grid>
     </Box>
   );
 }

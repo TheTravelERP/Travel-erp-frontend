@@ -1,15 +1,6 @@
 // src/features/inventory/ziyarat/components/ZiyaratForm.tsx
 
-import {
-  Box,
-  Button,
-  Divider,
-  FormControlLabel,
-  Grid,
-  Paper,
-  Switch,
-  TextField,
-} from "@mui/material";
+import { Box, FormControlLabel, Grid, Switch, TextField } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,6 +11,8 @@ import { getZiyaratSchema } from "../ziyarat.schema";
 import type { ZiyaratFormInput } from "../ziyarat.types";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
+import FormSection from "../../../../components/forms/FormSection";
+import FormActions from "../../../../components/forms/FormActions";
 
 interface ZiyaratFormProps {
   defaultValues?: Partial<ZiyaratFormInput>;
@@ -70,8 +63,8 @@ export default function ZiyaratForm({ defaultValues, onSubmit, loading = false }
       )}
       noValidate
     >
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Grid container spacing={2}>
+      <Grid container spacing={2}>
+        <FormSection title={t("common.generalInfo")}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <Controller
               name="name"
@@ -182,26 +175,14 @@ export default function ZiyaratForm({ defaultValues, onSubmit, loading = false }
               )}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      <Divider sx={{ my: 2 }} />
-
-      <Box display="flex" justifyContent="space-between">
-        <Button variant="outlined" onClick={() => navigate("/app/inventory/ziyarat")}>
-          {t("common.back")}
-        </Button>
-
-        <Box display="flex" gap={2}>
-          <Button variant="outlined" color="error" onClick={() => reset()} size="large">
-            {t("common.discard")}
-          </Button>
-
-          <Button type="submit" variant="contained" size="large" disabled={isSubmitting || loading}>
-            {isSubmitting || loading ? t("common.saving") : t("common.save")}
-          </Button>
-        </Box>
-      </Box>
+        <FormActions
+          onBack={() => navigate("/app/inventory/ziyarat")}
+          onDiscard={() => reset()}
+          submitting={isSubmitting || loading}
+        />
+      </Grid>
     </Box>
   );
 }

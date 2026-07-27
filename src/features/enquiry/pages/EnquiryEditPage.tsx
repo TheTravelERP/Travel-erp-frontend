@@ -1,16 +1,9 @@
 // src/features/enquiry/pages/EnquiryEditPage.tsx
 
 import { useEffect, useState } from "react";
-import {
-  Box,
-  Breadcrumbs,
-  Link,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { Link as RouterLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import EnquiryForm from "../components/EnquiryForm";
@@ -24,6 +17,7 @@ import {
 
 import { usePermission } from "../../../hooks/usePermission";
 import { useSnackbar } from "../../../components/ui/SnackbarProvider";
+import FormPageLayout from "../../../components/forms/FormPageLayout";
 
 export default function EnquiryEditPage() {
   const { uuid } = useParams();
@@ -98,42 +92,22 @@ export default function EnquiryEditPage() {
     }
   }
 
-  if (loading) {
-    return <Typography>{t("common.loading")}</Typography>;
-  }
-
   return (
-    <Box sx={{ p: { xs: 1, md: 1 } }}>
-      <Typography variant="h6" fontWeight={700}>
-        {t("common.edit")}
-      </Typography>
-
-      <Breadcrumbs sx={{ mb: 2 }}>
-        <Link
-          component={RouterLink}
-          to="/app/dashboard"
-          underline="hover"
-        >
-          {t("menu.dashboard")}
-        </Link>
-
-        <Link
-          component={RouterLink}
-          to="/app/enquiries"
-          underline="hover"
-        >
-          {t('menu.crm.enquiries')}
-        </Link>
-
-        <Typography>{t("common.edit")}</Typography>
-      </Breadcrumbs>
-
-      <Paper sx={{ p: 3 }}>
-        <EnquiryForm
-          defaultValues={defaultValues}
-          onSubmit={handleUpdate}
-        />
-      </Paper>
-    </Box>
+    <FormPageLayout
+      title={t("common.edit")}
+      breadcrumbs={[
+        { label: t("menu.dashboard"), href: "/app/dashboard" },
+        { label: t("menu.crm.enquiries"), href: "/app/enquiries" },
+        { label: t("common.edit") },
+      ]}
+    >
+      {loading || !defaultValues ? (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <EnquiryForm defaultValues={defaultValues} onSubmit={handleUpdate} />
+      )}
+    </FormPageLayout>
   );
 }

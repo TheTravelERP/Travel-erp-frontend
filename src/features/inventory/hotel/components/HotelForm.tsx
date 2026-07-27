@@ -1,16 +1,6 @@
 // src/features/inventory/hotel/components/HotelForm.tsx
 
-import {
-  Box,
-  Button,
-  Divider,
-  FormControlLabel,
-  Grid,
-  Paper,
-  Switch,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, FormControlLabel, Grid, Switch, TextField } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -22,6 +12,8 @@ import type { HotelFormInput } from "../hotel.types";
 import MobileNumberField from "../../../../components/common/MobileNumberField";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
+import FormSection from "../../../../components/forms/FormSection";
+import FormActions from "../../../../components/forms/FormActions";
 
 interface HotelFormProps {
   defaultValues?: Partial<HotelFormInput>;
@@ -82,13 +74,8 @@ export default function HotelForm({ defaultValues, onSubmit, loading = false }: 
       )}
       noValidate
     >
-      {/* BASIC INFO */}
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
-          {t("hotel.basicInfo")}
-        </Typography>
-
-        <Grid container spacing={2}>
+      <Grid container spacing={2}>
+        <FormSection title={t("hotel.basicInfo")}>
           <Grid size={{ xs: 12, sm: 3 }}>
             <Controller
               name="hotel_code"
@@ -201,16 +188,9 @@ export default function HotelForm({ defaultValues, onSubmit, loading = false }: 
               )}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      {/* LOCATION */}
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
-          {t("hotel.locationSection")}
-        </Typography>
-
-        <Grid container spacing={2}>
+        <FormSection title={t("hotel.locationSection")}>
           <Grid size={{ xs: 12, sm: 4 }}>
             <Controller
               name="city"
@@ -278,16 +258,9 @@ export default function HotelForm({ defaultValues, onSubmit, loading = false }: 
               )}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      {/* CONTACT */}
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
-          {t("hotel.contactSection")}
-        </Typography>
-
-        <Grid container spacing={2}>
+        <FormSection title={t("hotel.contactSection")}>
           <Grid size={{ xs: 12, sm: 4 }}>
             <MobileNumberField name="phone" control={control} label={t("hotel.phone")} />
           </Grid>
@@ -317,26 +290,14 @@ export default function HotelForm({ defaultValues, onSubmit, loading = false }: 
               )}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      <Divider sx={{ my: 2 }} />
-
-      <Box display="flex" justifyContent="space-between">
-        <Button variant="outlined" onClick={() => navigate("/app/inventory/hotels")}>
-          {t("common.back")}
-        </Button>
-
-        <Box display="flex" gap={2}>
-          <Button variant="outlined" color="error" onClick={() => reset()} size="large">
-            {t("common.discard")}
-          </Button>
-
-          <Button type="submit" variant="contained" size="large" disabled={isSubmitting || loading}>
-            {isSubmitting || loading ? t("common.saving") : t("common.save")}
-          </Button>
-        </Box>
-      </Box>
+        <FormActions
+          onBack={() => navigate("/app/inventory/hotels")}
+          onDiscard={() => reset()}
+          submitting={isSubmitting || loading}
+        />
+      </Grid>
     </Box>
   );
 }

@@ -2,11 +2,8 @@
 
 import {
   Box,
-  Button,
-  Divider,
   FormControlLabel,
   Grid,
-  Paper,
   Switch,
   TextField,
 } from "@mui/material";
@@ -22,6 +19,8 @@ import CountryAutocomplete from "../../../../components/common/CountryAutocomple
 import EntityAutocomplete from "../../../../components/common/EntityAutocomplete";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
+import FormSection from "../../../../components/forms/FormSection";
+import FormActions from "../../../../components/forms/FormActions";
 
 interface TaxRegistrationFormProps {
   defaultValues?: Partial<TaxRegistrationFormInput>;
@@ -72,8 +71,8 @@ export default function TaxRegistrationForm({
       )}
       noValidate
     >
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Grid container spacing={2}>
+      <Grid container spacing={2}>
+        <FormSection title={t("menu.settings.tax_registration")}>
           <Grid size={{ xs: 12, sm: 4 }}>
             <EntityAutocomplete
               name="localization_profile_uuid"
@@ -140,26 +139,14 @@ export default function TaxRegistrationForm({
               )}
             />
           </Grid>
-        </Grid>
-      </Paper>
+        </FormSection>
 
-      <Divider sx={{ my: 2 }} />
-
-      <Box display="flex" justifyContent="space-between">
-        <Button variant="outlined" onClick={() => navigate("/app/settings/tax-registration")}>
-          {t("common.back")}
-        </Button>
-
-        <Box display="flex" gap={2}>
-          <Button variant="outlined" color="error" onClick={() => reset()} size="large">
-            {t("common.discard")}
-          </Button>
-
-          <Button type="submit" variant="contained" size="large" disabled={isSubmitting || loading}>
-            {isSubmitting || loading ? t("common.saving") : t("common.save")}
-          </Button>
-        </Box>
-      </Box>
+        <FormActions
+          onBack={() => navigate("/app/settings/tax-registration")}
+          onDiscard={() => reset()}
+          submitting={isSubmitting || loading}
+        />
+      </Grid>
     </Box>
   );
 }
