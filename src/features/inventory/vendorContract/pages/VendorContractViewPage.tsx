@@ -19,6 +19,8 @@ import { getVendorContractByUuid } from "../vendorContract.api";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { usePermission } from "../../../../hooks/usePermission";
 import FormPageLayout from "../../../../components/forms/FormPageLayout";
+import { useLocalizationProfile } from "../../../../hooks/useLocalizationProfile";
+import { formatDate } from "../../../../utils/formatters/localization";
 
 import type { VendorContractDetail } from "../vendorContract.types";
 
@@ -31,6 +33,7 @@ export default function VendorContractViewPage() {
 
   const { showSnackbar } = useSnackbar();
   const { t } = useTranslation();
+  const localizationProfile = useLocalizationProfile();
 
   const perms = usePermission("inventory.contracts");
 
@@ -126,12 +129,12 @@ export default function VendorContractViewPage() {
 
             <Grid size={{ xs: 12, md: 4 }}>
               <Typography variant="caption">{t("vendorContract.validFrom")}</Typography>
-              <Typography mt={0.5}>{contract.valid_from || "-"}</Typography>
+              <Typography mt={0.5}>{contract.valid_from ? formatDate(contract.valid_from, localizationProfile) : "-"}</Typography>
             </Grid>
 
             <Grid size={{ xs: 12, md: 4 }}>
               <Typography variant="caption">{t("vendorContract.validTo")}</Typography>
-              <Typography mt={0.5}>{contract.valid_to || "-"}</Typography>
+              <Typography mt={0.5}>{contract.valid_to ? formatDate(contract.valid_to, localizationProfile) : "-"}</Typography>
             </Grid>
 
             <Grid size={{ xs: 12, md: 4 }}>

@@ -24,6 +24,8 @@ import { usePermission } from "../../../hooks/usePermission";
 import FilePreviewDialog from "../../../components/common/FilePreviewDialog";
 import { getFileKind, resolveUploadUrl } from "../../../services/upload.service";
 import FormPageLayout from "../../../components/forms/FormPageLayout";
+import { useLocalizationProfile } from "../../../hooks/useLocalizationProfile";
+import { formatDate } from "../../../utils/formatters/localization";
 
 import type { CustomerDetail } from "../customer.types";
 
@@ -77,6 +79,7 @@ export default function CustomerViewPage() {
 
   const { showSnackbar } = useSnackbar();
   const { t } = useTranslation();
+  const localizationProfile = useLocalizationProfile();
 
   const perms = usePermission("crm.customers");
 
@@ -151,7 +154,7 @@ export default function CustomerViewPage() {
 
             <Grid size={{ xs: 12, md: 4 }}>
               <Typography variant="caption">{t("settings.dateOfBirth")}</Typography>
-              <Typography mt={0.5}>{customer.dob || "-"}</Typography>
+              <Typography mt={0.5}>{customer.dob ? formatDate(customer.dob, localizationProfile) : "-"}</Typography>
             </Grid>
 
             <Grid size={{ xs: 12, md: 4 }}>
@@ -181,12 +184,12 @@ export default function CustomerViewPage() {
 
             <Grid size={{ xs: 12, md: 3 }}>
               <Typography variant="caption">{t("customer.passportIssueDate")}</Typography>
-              <Typography mt={0.5}>{customer.passport_issue_date || "-"}</Typography>
+              <Typography mt={0.5}>{customer.passport_issue_date ? formatDate(customer.passport_issue_date, localizationProfile) : "-"}</Typography>
             </Grid>
 
             <Grid size={{ xs: 12, md: 3 }}>
               <Typography variant="caption">{t("customer.passportExpiryDate")}</Typography>
-              <Typography mt={0.5}>{customer.passport_expiry_date || "-"}</Typography>
+              <Typography mt={0.5}>{customer.passport_expiry_date ? formatDate(customer.passport_expiry_date, localizationProfile) : "-"}</Typography>
             </Grid>
 
             <Grid size={{ xs: 12, md: 3 }}>

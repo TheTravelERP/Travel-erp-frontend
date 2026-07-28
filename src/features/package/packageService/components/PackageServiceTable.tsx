@@ -34,6 +34,8 @@ import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import type { PackageServiceListItem } from "../packageService.types";
 import ConfirmDialog from "../../../../components/common/ConfirmDialog";
 import SortableTableCell from "../../../../components/common/SortableTableCell";
+import { useLocalizationProfile } from "../../../../hooks/useLocalizationProfile";
+import { createFormatters } from "../../../../utils/formatters/localization";
 import {
   bulkDeletePackageServices,
   bulkRestorePackageServices,
@@ -101,6 +103,8 @@ export default function PackageServiceTable({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const columns = useMemo(() => getColumns(t), [t]);
+  const localizationProfile = useLocalizationProfile();
+  const { formatNumber } = useMemo(() => createFormatters(localizationProfile), [localizationProfile]);
   const [actionUuid, setActionUuid] = useState<string | null>(null);
   const { showSnackbar } = useSnackbar();
   const [actionLoading, setActionLoading] = useState(false);
@@ -226,7 +230,7 @@ export default function PackageServiceTable({
   );
 
   const formatPrice = (value?: number) =>
-    value === undefined || value === null ? "-" : Number(value).toLocaleString();
+    value === undefined || value === null ? "-" : formatNumber(value);
 
   /* ---------- MOBILE ---------- */
   if (isMobile) {

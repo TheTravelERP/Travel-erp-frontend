@@ -34,6 +34,8 @@ import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import type { PackageTypeListItem } from "../packageType.types";
 import ConfirmDialog from "../../../../components/common/ConfirmDialog";
 import SortableTableCell from "../../../../components/common/SortableTableCell";
+import { useLocalizationProfile } from "../../../../hooks/useLocalizationProfile";
+import { createFormatters } from "../../../../utils/formatters/localization";
 import {
   bulkDeletePackageTypes,
   bulkRestorePackageTypes,
@@ -99,6 +101,8 @@ export default function PackageTypeTable({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const columns = useMemo(() => getColumns(t), [t]);
+  const localizationProfile = useLocalizationProfile();
+  const { formatDate } = useMemo(() => createFormatters(localizationProfile), [localizationProfile]);
   const [actionUuid, setActionUuid] = useState<string | null>(null);
   const { showSnackbar } = useSnackbar();
   const [actionLoading, setActionLoading] = useState(false);
@@ -381,7 +385,7 @@ export default function PackageTypeTable({
                   <TableCell>{row.category}</TableCell>
                   <TableCell align="center">{row.sort_order}</TableCell>
                   <TableCell>{renderActiveChip(row.is_active)}</TableCell>
-                  <TableCell>{new Date(row.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell>{formatDate(row.created_at)}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                     <Stack direction="row" spacing={0.5} justifyContent="flex-end">
                       {!isTrash && (

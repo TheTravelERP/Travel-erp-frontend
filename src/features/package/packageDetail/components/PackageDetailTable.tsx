@@ -34,6 +34,8 @@ import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import type { PackageDetailListItem } from "../packageDetail.types";
 import ConfirmDialog from "../../../../components/common/ConfirmDialog";
 import SortableTableCell from "../../../../components/common/SortableTableCell";
+import { useLocalizationProfile } from "../../../../hooks/useLocalizationProfile";
+import { createFormatters } from "../../../../utils/formatters/localization";
 import {
   bulkDeletePackageDetails,
   bulkRestorePackageDetails,
@@ -96,6 +98,8 @@ export default function PackageDetailTable({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const columns = useMemo(() => getColumns(t), [t]);
+  const localizationProfile = useLocalizationProfile();
+  const { formatDate } = useMemo(() => createFormatters(localizationProfile), [localizationProfile]);
   const [actionUuid, setActionUuid] = useState<string | null>(null);
   const { showSnackbar } = useSnackbar();
   const [actionLoading, setActionLoading] = useState(false);
@@ -245,7 +249,7 @@ export default function PackageDetailTable({
                 <Divider sx={{ my: 1 }} />
 
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
-                  <Typography variant="caption">{new Date(row.created_at).toLocaleDateString()}</Typography>
+                  <Typography variant="caption">{formatDate(row.created_at)}</Typography>
                   <Stack direction="row" spacing={0.5}>
                     {!isTrash && (
                       <>
@@ -373,7 +377,7 @@ export default function PackageDetailTable({
                   </TableCell>
                   <TableCell>{row.title}</TableCell>
                   <TableCell>{renderActiveChip(row.is_active)}</TableCell>
-                  <TableCell>{new Date(row.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell>{formatDate(row.created_at)}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                     <Stack direction="row" spacing={0.5} justifyContent="flex-end">
                       {!isTrash && (

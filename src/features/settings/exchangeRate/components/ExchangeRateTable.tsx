@@ -33,6 +33,8 @@ import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import type { ExchangeRateListItem } from "../exchangeRate.types";
 import ConfirmDialog from "../../../../components/common/ConfirmDialog";
 import SortableTableCell from "../../../../components/common/SortableTableCell";
+import { useLocalizationProfile } from "../../../../hooks/useLocalizationProfile";
+import { createFormatters } from "../../../../utils/formatters/localization";
 import {
   bulkDeleteExchangeRates,
   bulkRestoreExchangeRates,
@@ -94,6 +96,11 @@ export default function ExchangeRateTable({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const columns = useMemo(() => getColumns(t), [t]);
+  const localizationProfile = useLocalizationProfile();
+  const { formatDate, formatNumber } = useMemo(() => createFormatters(localizationProfile), [localizationProfile]);
+  // Exchange rates need more precision than the org's default currency decimal
+  // places (e.g. 2) — backend stores rate as Numeric(18,8); show 6 decimals.
+  const RATE_DECIMAL_PLACES = 6;
   const [actionUuid, setActionUuid] = useState<string | null>(null);
   const { showSnackbar } = useSnackbar();
   const [actionLoading, setActionLoading] = useState(false);
@@ -234,7 +241,7 @@ export default function ExchangeRateTable({
                 </Stack>
 
                 <Typography variant="caption">
-                  {row.rate} &bull; {row.effective_from} - {row.effective_to || t("common.ongoing", { defaultValue: "Ongoing" })}
+                  {formatNumber(row.rate, RATE_DECIMAL_PLACES)} &bull; {formatDate(row.effective_from)} - {row.effective_to ? formatDate(row.effective_to) : t("common.ongoing", { defaultValue: "Ongoing" })}
                 </Typography>
 
                 <Divider sx={{ my: 1 }} />
@@ -366,9 +373,9 @@ export default function ExchangeRateTable({
                   </TableCell>
                   <TableCell>{row.from_currency_code}</TableCell>
                   <TableCell>{row.to_currency_code}</TableCell>
-                  <TableCell>{row.rate}</TableCell>
-                  <TableCell>{row.effective_from}</TableCell>
-                  <TableCell>{row.effective_to || "—"}</TableCell>
+                  <TableCell>{formatNumber(row.rate, RATE_DECIMAL_PLACES)}</TableCell>
+                  <TableCell>{formatDate(row.effective_from)}</TableCell>
+                  <TableCell>{row.effective_to ? formatDate(row.effective_to) : "—"}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                     <Stack direction="row" spacing={0.5} justifyContent="flex-end">
                       {!isTrash && (

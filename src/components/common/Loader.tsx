@@ -60,7 +60,9 @@ export default function Loader({ message }: LoaderProps) {
             sx={{
               position: "absolute",
               inset: 0,
-              border: "2px dashed #A5D6A7",
+              borderStyle: "dashed",
+              borderWidth: 2,
+              borderColor: "primary.light",
               borderRadius: "50%",
             }}
           />
@@ -79,7 +81,7 @@ export default function Loader({ message }: LoaderProps) {
                 left: "50%",
                 top: -18,
                 transform: "translateX(-50%) rotate(90deg)",
-                color: "#43A047",
+                color: "primary.main",
                 fontSize: {
                   xs: 32,
                   sm: 36,

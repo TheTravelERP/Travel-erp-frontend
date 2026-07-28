@@ -34,6 +34,8 @@ import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import type { CurrencyRatePolicyListItem } from "../currencyRatePolicy.types";
 import ConfirmDialog from "../../../../components/common/ConfirmDialog";
 import SortableTableCell from "../../../../components/common/SortableTableCell";
+import { useLocalizationProfile } from "../../../../hooks/useLocalizationProfile";
+import { createFormatters } from "../../../../utils/formatters/localization";
 import {
   bulkDeleteCurrencyRatePolicies,
   bulkRestoreCurrencyRatePolicies,
@@ -94,6 +96,8 @@ export default function CurrencyRatePolicyTable({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const columns = useMemo(() => getColumns(t), [t]);
+  const localizationProfile = useLocalizationProfile();
+  const { formatDate } = useMemo(() => createFormatters(localizationProfile), [localizationProfile]);
   const [actionUuid, setActionUuid] = useState<string | null>(null);
   const { showSnackbar } = useSnackbar();
   const [actionLoading, setActionLoading] = useState(false);
@@ -235,7 +239,7 @@ export default function CurrencyRatePolicyTable({
                 </Stack>
 
                 <Typography variant="caption">
-                  {t("exchangeRate.effectiveFrom")}: {row.effective_from}
+                  {t("exchangeRate.effectiveFrom")}: {formatDate(row.effective_from)}
                 </Typography>
 
                 <Divider sx={{ my: 1 }} />
@@ -368,7 +372,7 @@ export default function CurrencyRatePolicyTable({
                   <TableCell>{row.from_currency_code}</TableCell>
                   <TableCell>{row.to_currency_code}</TableCell>
                   <TableCell><Chip size="small" label={row.rate_source} /></TableCell>
-                  <TableCell>{row.effective_from}</TableCell>
+                  <TableCell>{formatDate(row.effective_from)}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                     <Stack direction="row" spacing={0.5} justifyContent="flex-end">
                       {!isTrash && (

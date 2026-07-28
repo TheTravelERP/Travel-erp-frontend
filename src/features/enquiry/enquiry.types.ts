@@ -37,6 +37,9 @@ export interface EnquiryDetail extends EnquiryFormInput {
   uuid: string;
   enquiry_no: string;
   version_no: number;
+  /** Read-only — powers the Follow-up module's Enquiry context card. */
+  agent_name?: string | null;
+  followup_date?: string | null;
 }
 
 /* ==========================================================

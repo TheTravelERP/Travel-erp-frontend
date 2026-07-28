@@ -38,6 +38,8 @@ import type { DocumentNumberSeriesListItem, CloneDocumentNumberSeriesInput } fro
 import ConfirmDialog from "../../../../components/common/ConfirmDialog";
 import SortableTableCell from "../../../../components/common/SortableTableCell";
 import CloneSeriesDialog from "./CloneSeriesDialog";
+import { useLocalizationProfile } from "../../../../hooks/useLocalizationProfile";
+import { createFormatters } from "../../../../utils/formatters/localization";
 import {
   deleteDocumentNumberSeriesByUuid,
   getDocumentNumberSeriesByUuid,
@@ -101,6 +103,8 @@ export default function DocumentNumberSeriesTable({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const columns = useMemo(() => getColumns(t), [t]);
+  const localizationProfile = useLocalizationProfile();
+  const { formatDate, formatDateTime } = useMemo(() => createFormatters(localizationProfile), [localizationProfile]);
   const { showSnackbar } = useSnackbar();
 
   const [deleteUuid, setDeleteUuid] = useState<string | null>(null);
@@ -327,9 +331,9 @@ export default function DocumentNumberSeriesTable({
                   <TableCell>
                     {row.is_default && <Chip size="small" color="primary" label={t("documentNumberSeries.default")} />}
                   </TableCell>
-                  <TableCell>{row.effective_from || "-"}</TableCell>
-                  <TableCell>{row.effective_to || "-"}</TableCell>
-                  <TableCell>{row.last_generated_at ? new Date(row.last_generated_at).toLocaleString() : "-"}</TableCell>
+                  <TableCell>{row.effective_from ? formatDate(row.effective_from) : "-"}</TableCell>
+                  <TableCell>{row.effective_to ? formatDate(row.effective_to) : "-"}</TableCell>
+                  <TableCell>{row.last_generated_at ? formatDateTime(row.last_generated_at) : "-"}</TableCell>
                   <TableCell>
                     <Chip
                       size="small"

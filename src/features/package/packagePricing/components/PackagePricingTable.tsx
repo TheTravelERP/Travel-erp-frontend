@@ -34,6 +34,8 @@ import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import type { PackagePricingListItem } from "../packagePricing.types";
 import ConfirmDialog from "../../../../components/common/ConfirmDialog";
 import SortableTableCell from "../../../../components/common/SortableTableCell";
+import { useLocalizationProfile } from "../../../../hooks/useLocalizationProfile";
+import { createFormatters } from "../../../../utils/formatters/localization";
 import {
   bulkDeletePackagePricings,
   bulkRestorePackagePricings,
@@ -102,6 +104,8 @@ export default function PackagePricingTable({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const columns = useMemo(() => getColumns(t), [t]);
+  const localizationProfile = useLocalizationProfile();
+  const { formatDate, formatNumber } = useMemo(() => createFormatters(localizationProfile), [localizationProfile]);
   const [actionUuid, setActionUuid] = useState<string | null>(null);
   const { showSnackbar } = useSnackbar();
   const [actionLoading, setActionLoading] = useState(false);
@@ -227,7 +231,7 @@ export default function PackagePricingTable({
   );
 
   const formatPrice = (row: PackagePricingListItem) =>
-    `${row.currency_code} ${Number(row.price).toLocaleString()}`;
+    `${row.currency_code} ${formatNumber(row.price)}`;
 
   /* ---------- MOBILE ---------- */
   if (isMobile) {
@@ -394,7 +398,7 @@ export default function PackagePricingTable({
                   <TableCell>{row.passenger_type}</TableCell>
                   <TableCell>{row.price_category}</TableCell>
                   <TableCell align="right">{formatPrice(row)}</TableCell>
-                  <TableCell>{new Date(row.effective_from).toLocaleDateString()}</TableCell>
+                  <TableCell>{formatDate(row.effective_from)}</TableCell>
                   <TableCell align="center">{row.is_default ? "✓" : ""}</TableCell>
                   <TableCell>{renderActiveChip(row.is_active)}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>

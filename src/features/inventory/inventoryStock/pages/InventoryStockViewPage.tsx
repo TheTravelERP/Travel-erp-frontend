@@ -12,6 +12,8 @@ import { getInventoryStockByUuid } from "../inventoryStock.api";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { usePermission } from "../../../../hooks/usePermission";
 import FormPageLayout from "../../../../components/forms/FormPageLayout";
+import { useLocalizationProfile } from "../../../../hooks/useLocalizationProfile";
+import { formatDate } from "../../../../utils/formatters/localization";
 
 import type { InventoryStockDetail } from "../inventoryStock.types";
 
@@ -37,6 +39,7 @@ export default function InventoryStockViewPage() {
 
   const { showSnackbar } = useSnackbar();
   const { t } = useTranslation();
+  const localizationProfile = useLocalizationProfile();
 
   const perms = usePermission("inventory.stock");
 
@@ -136,12 +139,12 @@ export default function InventoryStockViewPage() {
 
             <Grid size={{ xs: 12, md: 3 }}>
               <Typography variant="caption">{t("inventoryStock.startDate")}</Typography>
-              <Typography mt={0.5}>{item.start_date || "-"}</Typography>
+              <Typography mt={0.5}>{item.start_date ? formatDate(item.start_date, localizationProfile) : "-"}</Typography>
             </Grid>
 
             <Grid size={{ xs: 12, md: 3 }}>
               <Typography variant="caption">{t("inventoryStock.endDate")}</Typography>
-              <Typography mt={0.5}>{item.end_date || "-"}</Typography>
+              <Typography mt={0.5}>{item.end_date ? formatDate(item.end_date, localizationProfile) : "-"}</Typography>
             </Grid>
 
             <Grid size={{ xs: 12, md: 3 }}>

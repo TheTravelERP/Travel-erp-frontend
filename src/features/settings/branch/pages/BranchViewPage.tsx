@@ -19,6 +19,8 @@ import { getBranchByUuid } from "../branch.api";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { usePermission } from "../../../../hooks/usePermission";
 import FormPageLayout from "../../../../components/forms/FormPageLayout";
+import { useLocalizationProfile } from "../../../../hooks/useLocalizationProfile";
+import { formatTime } from "../../../../utils/formatters/localization";
 
 import type { BranchDetail } from "../branch.types";
 
@@ -31,6 +33,7 @@ export default function BranchViewPage() {
 
   const { showSnackbar } = useSnackbar();
   const { t } = useTranslation();
+  const localizationProfile = useLocalizationProfile();
 
   const perms = usePermission("settings.branch_master");
 
@@ -216,12 +219,12 @@ export default function BranchViewPage() {
 
             <Grid size={{ xs: 12, md: 4 }}>
               <Typography variant="caption">{t("branch.workingFrom")}</Typography>
-              <Typography mt={0.5}>{branch.working_from || "-"}</Typography>
+              <Typography mt={0.5}>{branch.working_from ? formatTime(branch.working_from, localizationProfile) : "-"}</Typography>
             </Grid>
 
             <Grid size={{ xs: 12, md: 4 }}>
               <Typography variant="caption">{t("branch.workingTo")}</Typography>
-              <Typography mt={0.5}>{branch.working_to || "-"}</Typography>
+              <Typography mt={0.5}>{branch.working_to ? formatTime(branch.working_to, localizationProfile) : "-"}</Typography>
             </Grid>
 
             <Grid size={{ xs: 12, md: 4 }}>

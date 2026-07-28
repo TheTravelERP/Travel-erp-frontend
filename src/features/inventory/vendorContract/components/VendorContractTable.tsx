@@ -35,6 +35,8 @@ import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import type { VendorContractListItem } from "../vendorContract.types";
 import ConfirmDialog from "../../../../components/common/ConfirmDialog";
 import SortableTableCell from "../../../../components/common/SortableTableCell";
+import { useLocalizationProfile } from "../../../../hooks/useLocalizationProfile";
+import { createFormatters } from "../../../../utils/formatters/localization";
 import {
   bulkDeleteVendorContracts,
   bulkRestoreVendorContracts,
@@ -98,6 +100,8 @@ export default function VendorContractTable({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const columns = useMemo(() => getColumns(t), [t]);
+  const localizationProfile = useLocalizationProfile();
+  const { formatDate } = useMemo(() => createFormatters(localizationProfile), [localizationProfile]);
   const [actionUuid, setActionUuid] = useState<string | null>(null);
   const { showSnackbar } = useSnackbar();
   const [actionLoading, setActionLoading] = useState(false);
@@ -396,8 +400,8 @@ export default function VendorContractTable({
                   <TableCell>{row.contract_name}</TableCell>
                   <TableCell>{row.vendor_name}</TableCell>
                   <TableCell>{row.contract_type}</TableCell>
-                  <TableCell>{row.valid_from}</TableCell>
-                  <TableCell>{row.valid_to}</TableCell>
+                  <TableCell>{formatDate(row.valid_from)}</TableCell>
+                  <TableCell>{formatDate(row.valid_to)}</TableCell>
                   <TableCell>{renderStatusChip(row.status)}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                     {rowActions(row)}

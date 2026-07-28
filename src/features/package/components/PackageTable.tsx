@@ -33,6 +33,8 @@ import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import type { PackageListItem } from "../package.types";
 import ConfirmDialog from "../../../components/common/ConfirmDialog";
 import DropdownColorChip from "../../../components/common/DropdownColorChip";
+import { useLocalizationProfile } from "../../../hooks/useLocalizationProfile";
+import { createFormatters } from "../../../utils/formatters/localization";
 import SortableTableCell from "../../../components/common/SortableTableCell";
 import {
   bulkDeletePackages,
@@ -103,6 +105,8 @@ export default function PackageTable({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const columns = useMemo(() => getColumns(t), [t]);
+  const localizationProfile = useLocalizationProfile();
+  const { formatDate } = useMemo(() => createFormatters(localizationProfile), [localizationProfile]);
   const [actionUuid, setActionUuid] = useState<string | null>(null);
   const { showSnackbar } = useSnackbar();
   const [actionLoading, setActionLoading] = useState(false);
@@ -242,7 +246,7 @@ export default function PackageTable({
                 </Stack>
 
                 <Typography variant="caption">
-                  {row.code} &bull; {row.departure_city} &bull; {row.departure_date}
+                  {row.code} &bull; {row.departure_city} &bull; {row.departure_date ? formatDate(row.departure_date) : "—"}
                 </Typography>
 
                 <Divider sx={{ my: 1 }} />
@@ -379,7 +383,7 @@ export default function PackageTable({
                   <TableCell>{row.code}</TableCell>
                   <TableCell>{row.name}</TableCell>
                   <TableCell>{row.departure_city || "—"}</TableCell>
-                  <TableCell>{row.departure_date ? new Date(row.departure_date).toLocaleDateString() : "—"}</TableCell>
+                  <TableCell>{row.departure_date ? formatDate(row.departure_date) : "—"}</TableCell>
                   <TableCell align="center">
                     {row.booked_seats}/{row.total_seats}
                   </TableCell>

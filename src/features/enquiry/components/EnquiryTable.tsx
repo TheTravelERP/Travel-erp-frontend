@@ -31,11 +31,22 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import InboxIcon from "@mui/icons-material/Inbox";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
+import EventRepeatIcon from "@mui/icons-material/EventRepeat";
+import RequestQuoteIcon from "@mui/icons-material/RequestQuote";
+import DescriptionIcon from "@mui/icons-material/Description";
+import ForumIcon from "@mui/icons-material/Forum";
+import ChecklistIcon from "@mui/icons-material/Checklist";
+import BookOnlineIcon from "@mui/icons-material/BookOnline";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CancelIcon from "@mui/icons-material/Cancel";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import type { EnquiryListItem } from "../enquiry.types";
-import { formatDate } from "../../../utils/formatters/date";
+import { useLocalizationProfile } from "../../../hooks/useLocalizationProfile";
+import { createFormatters } from "../../../utils/formatters/localization";
 import ConfirmDialog from "../../../components/common/ConfirmDialog";
 import DropdownColorChip from "../../../components/common/DropdownColorChip";
 import SortableTableCell from "../../../components/common/SortableTableCell";
+import RowActionsMenu, { type RowActionGroup } from "../../../components/common/RowActionsMenu";
 import {
   bulkDeleteEnquiries,
   bulkRestoreEnquiries,
@@ -43,6 +54,7 @@ import {
   restoreEnquiryByUuid,
 } from "../enquiry.api";
 import { useSnackbar } from "../../../components/ui/SnackbarProvider";
+import { usePermission } from "../../../hooks/usePermission";
 
 /* ================= TYPES ================= */
 
@@ -158,9 +170,102 @@ export default function EnquiryTable({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const columns = useMemo(() => getColumns(t), [t]);
+  const localizationProfile = useLocalizationProfile();
+  const { formatDate } = useMemo(() => createFormatters(localizationProfile), [localizationProfile]);
   const [actionUuid, setActionUuid] = useState<string | null>(null);
   const { showSnackbar } = useSnackbar();
   const [actionLoading, setActionLoading] = useState(false);
+
+  const followupPerms = usePermission("crm.followups");
+  const quotationPerms = usePermission("crm.quotations");
+  const taskPerms = usePermission("tasks.my");
+
+  function getRowActionGroups(row: EnquiryListItem): RowActionGroup[] {
+    return [
+      [
+        {
+          key: "view",
+          label: t("common.view"),
+          icon: <VisibilityIcon fontSize="small" />,
+          onClick: () => navigate(`/app/enquiries/${row.uuid}`),
+        },
+        {
+          key: "edit",
+          label: t("common.edit"),
+          icon: <EditIcon fontSize="small" />,
+          onClick: () => navigate(`/app/enquiries/${row.uuid}/edit`),
+        },
+      ],
+      [
+        {
+          key: "followups",
+          label: t("enquiry.actionFollowups"),
+          icon: <EventRepeatIcon fontSize="small" />,
+          show: followupPerms.can_view,
+          onClick: () => navigate(`/app/crm/followups?enquiry_uuid=${row.uuid}`),
+        },
+        {
+          key: "quotations",
+          label: t("menu.crm.quotations"),
+          icon: <RequestQuoteIcon fontSize="small" />,
+          show: quotationPerms.can_view,
+          onClick: () => navigate("/app/crm/quotations"),
+        },
+        {
+          key: "documents",
+          label: t("enquiry.actionDocuments"),
+          icon: <DescriptionIcon fontSize="small" />,
+          disabled: true,
+          disabledReason: t("common.comingSoon"),
+        },
+        {
+          key: "communication",
+          label: t("enquiry.actionCommunication"),
+          icon: <ForumIcon fontSize="small" />,
+          disabled: true,
+          disabledReason: t("common.comingSoon"),
+        },
+        {
+          key: "tasks",
+          label: t("enquiry.actionTasks"),
+          icon: <ChecklistIcon fontSize="small" />,
+          show: taskPerms.can_view,
+          onClick: () => navigate("/app/tasks/my"),
+        },
+      ],
+      [
+        {
+          key: "convert-to-booking",
+          label: t("enquiry.actionConvertToBooking"),
+          icon: <BookOnlineIcon fontSize="small" />,
+          disabled: true,
+          disabledReason: t("common.comingSoon"),
+        },
+        {
+          key: "clone",
+          label: t("enquiry.actionClone"),
+          icon: <ContentCopyIcon fontSize="small" />,
+          disabled: true,
+          disabledReason: t("common.comingSoon"),
+        },
+        {
+          key: "mark-lost",
+          label: t("enquiry.actionMarkLost"),
+          icon: <CancelIcon fontSize="small" />,
+          color: "error",
+          disabled: true,
+          disabledReason: t("common.comingSoon"),
+        },
+        {
+          key: "reopen",
+          label: t("enquiry.actionReopen"),
+          icon: <RestartAltIcon fontSize="small" />,
+          disabled: true,
+          disabledReason: t("common.comingSoon"),
+        },
+      ],
+    ];
+  }
 
   /* ---------- BULK SELECTION ---------- */
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -442,61 +547,34 @@ export default function EnquiryTable({
                     {renderStatusChip(row.conversion_status)}
                   </TableCell>
                   <TableCell>
-                    {new Date(row.created_at).toLocaleDateString()}
+                    {formatDate(row.created_at)}
                   </TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
-                    <Stack
-                      direction="row"
-                      spacing={0.5}
-                      justifyContent="flex-end"
-                    >
-                      {/* View - always visible */}
+                    {isTrash ? (
                       <IconButton
                         size="small"
-                        onClick={() =>
-                          navigate(
-                            isTrash
-                              ? `/app/enquiries/${row.uuid}?is_deleted=true`
-                              : `/app/enquiries/${row.uuid}`,
-                          )
-                        }
+                        color="success"
+                        onClick={() => setActionUuid(row.uuid)}
                       >
-                        <VisibilityIcon fontSize="small" />
+                        <RestoreFromTrashIcon fontSize="small" />
                       </IconButton>
-
-                      {/* Active Enquiries */}
-                      {!isTrash && (
-                        <>
-                          <IconButton
-                            size="small"
-                            onClick={() =>
-                              navigate(`/app/enquiries/${row.uuid}/edit`)
-                            }
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => setActionUuid(row.uuid)}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </>
-                      )}
-
-                      {/* Trash */}
-                      {isTrash && (
-                        <IconButton
-                          size="small"
-                          color="success"
-                          onClick={() => setActionUuid(row.uuid)}
-                        >
-                          <RestoreFromTrashIcon fontSize="small" />
-                        </IconButton>
-                      )}
-                    </Stack>
+                    ) : (
+                      <RowActionsMenu
+                        ariaLabel={t("common.actions")}
+                        groups={[
+                          ...getRowActionGroups(row),
+                          [
+                            {
+                              key: "delete",
+                              label: t("common.delete"),
+                              icon: <DeleteIcon fontSize="small" />,
+                              color: "error",
+                              onClick: () => setActionUuid(row.uuid),
+                            },
+                          ],
+                        ]}
+                      />
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

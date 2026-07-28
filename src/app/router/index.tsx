@@ -10,6 +10,7 @@ import PermissionRoute from './PermissionRoute';
 import UnauthorizedPage from '../../pages/errors/UnauthorizedPage';
 import ForgotPasswordPage from '../../auth/pages/ForgotPasswordPage';
 import EnquiryRoutes from '../../features/enquiry/enquiry.routes';
+import FollowupRoutes from '../../features/crm/followup/followup.routes';
 import CustomerRoutes from '../../features/customer/customer.routes';
 import PackageTypeRoutes from '../../features/package/packageType/packageType.routes';
 import PackageDetailRoutes from '../../features/package/packageDetail/packageDetail.routes';
@@ -36,6 +37,11 @@ import CurrencyRatePolicyRoutes from '../../features/settings/currencyRatePolicy
 import TaxRegistrationRoutes from '../../features/settings/taxRegistration/taxRegistration.routes';
 import LocalizationProfileRoutes from '../../features/settings/localizationProfile/localizationProfile.routes';
 import DocumentNumberSeriesRoutes from '../../features/settings/documentNumberSeries/documentNumberSeries.routes';
+import AuditLogRoutes from '../../features/settings/auditLog/auditLog.routes';
+import CommunicationProviderRoutes from '../../features/settings/communicationProviders/communicationProvider.routes';
+import NotificationTemplateRoutes from '../../features/settings/notificationTemplates/notificationTemplate.routes';
+import EventAutomationRoutes from '../../features/settings/eventAutomation/eventAutomation.routes';
+import NotificationLogRoutes from '../../features/reports/notificationLogs/notificationLog.routes';
 import ComingSoonPage from '../../components/common/ComingSoonPage';
 
 // Menu items with no built page yet — each renders a translated "Coming
@@ -43,7 +49,6 @@ import ComingSoonPage from '../../components/common/ComingSoonPage';
 // Keep this in sync with app/seeds/system/menu_data.py on the backend.
 const COMING_SOON_ROUTES: { menuId: string; path: string }[] = [
   { menuId: 'crm.quotations', path: '/app/crm/quotations' },
-  { menuId: 'crm.followups', path: '/app/crm/followups' },
   { menuId: 'packages.departures', path: '/app/packages/departures' },
   { menuId: 'packages.bookings', path: '/app/bookings/list' },
   { menuId: 'packages.itinerary', path: '/app/bookings/services' },
@@ -102,9 +107,6 @@ const COMING_SOON_ROUTES: { menuId: string; path: string }[] = [
   { menuId: 'reports.custom_builder', path: '/app/reports/custom' },
   { menuId: 'settings.dropdown', path: '/app/settings/dropdown' },
   { menuId: 'settings.subscription', path: '/app/settings/subscription' },
-  { menuId: 'settings.notifications', path: '/app/settings/notifications' },
-  { menuId: 'settings.integrations', path: '/app/settings/integrations' },
-  { menuId: 'settings.audit_log', path: '/app/settings/audit-log' },
 ];
 
 export default function AppRouter() {
@@ -134,6 +136,7 @@ export default function AppRouter() {
         <Route path="/dashboard" element={<Navigate to="/app/dashboard" replace />} />
 
         <Route path="/app/enquiries/*" element={<EnquiryRoutes />} />
+        <Route path="/app/crm/followups/*" element={<FollowupRoutes />} />
         <Route path="/app/crm/customers/*" element={<CustomerRoutes />} />
         <Route path="/app/packages/types/*" element={<PackageTypeRoutes />} />
         <Route path="/app/packages/details/*" element={<PackageDetailRoutes />} />
@@ -175,6 +178,11 @@ export default function AppRouter() {
         <Route path="/app/settings/tax-registration/*" element={<TaxRegistrationRoutes />} />
         <Route path="/app/settings/localization-profiles/*" element={<LocalizationProfileRoutes />} />
         <Route path="/app/settings/doc-numbering/*" element={<DocumentNumberSeriesRoutes />} />
+        <Route path="/app/settings/audit-log/*" element={<AuditLogRoutes />} />
+        <Route path="/app/settings/communication-settings/*" element={<CommunicationProviderRoutes />} />
+        <Route path="/app/settings/notifications/*" element={<NotificationTemplateRoutes />} />
+        <Route path="/app/settings/event-automation/*" element={<EventAutomationRoutes />} />
+        <Route path="/app/reports/notification-logs/*" element={<NotificationLogRoutes />} />
 
         {/* Not-yet-built modules */}
         {COMING_SOON_ROUTES.map(({ menuId, path }) => (

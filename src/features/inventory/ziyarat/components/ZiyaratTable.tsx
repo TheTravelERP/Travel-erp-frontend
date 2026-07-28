@@ -34,6 +34,8 @@ import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import type { ZiyaratListItem } from "../ziyarat.types";
 import ConfirmDialog from "../../../../components/common/ConfirmDialog";
 import SortableTableCell from "../../../../components/common/SortableTableCell";
+import { useLocalizationProfile } from "../../../../hooks/useLocalizationProfile";
+import { createFormatters } from "../../../../utils/formatters/localization";
 import {
   bulkDeleteZiyarats,
   bulkRestoreZiyarats,
@@ -95,6 +97,8 @@ export default function ZiyaratTable({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const columns = useMemo(() => getColumns(t), [t]);
+  const localizationProfile = useLocalizationProfile();
+  const { formatNumber } = useMemo(() => createFormatters(localizationProfile), [localizationProfile]);
   const [actionUuid, setActionUuid] = useState<string | null>(null);
   const { showSnackbar } = useSnackbar();
   const [actionLoading, setActionLoading] = useState(false);
@@ -245,7 +249,7 @@ export default function ZiyaratTable({
 
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
                   <Typography variant="body2" fontWeight={600}>
-                    {row.default_cost !== undefined ? Number(row.default_cost).toLocaleString() : "-"}
+                    {row.default_cost !== undefined ? formatNumber(row.default_cost) : "-"}
                   </Typography>
                   <Stack direction="row" spacing={0.5}>
                     {!isTrash && (
@@ -375,7 +379,7 @@ export default function ZiyaratTable({
                   <TableCell>{row.city}</TableCell>
                   <TableCell align="center">{row.duration_hours ?? "-"}</TableCell>
                   <TableCell align="right">
-                    {row.default_cost !== undefined ? Number(row.default_cost).toLocaleString() : "-"}
+                    {row.default_cost !== undefined ? formatNumber(row.default_cost) : "-"}
                   </TableCell>
                   <TableCell>{renderActiveChip(row.is_active)}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>

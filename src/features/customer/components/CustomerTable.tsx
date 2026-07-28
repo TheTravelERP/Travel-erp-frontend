@@ -32,7 +32,8 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import InboxIcon from "@mui/icons-material/Inbox";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import type { CustomerListItem } from "../customer.types";
-import { formatDate } from "../../../utils/formatters/date";
+import { useLocalizationProfile } from "../../../hooks/useLocalizationProfile";
+import { createFormatters } from "../../../utils/formatters/localization";
 import ConfirmDialog from "../../../components/common/ConfirmDialog";
 import SortableTableCell from "../../../components/common/SortableTableCell";
 import {
@@ -102,6 +103,8 @@ export default function CustomerTable({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const columns = useMemo(() => getColumns(t), [t]);
+  const localizationProfile = useLocalizationProfile();
+  const { formatDate } = useMemo(() => createFormatters(localizationProfile), [localizationProfile]);
   const [actionUuid, setActionUuid] = useState<string | null>(null);
   const { showSnackbar } = useSnackbar();
   const [actionLoading, setActionLoading] = useState(false);
@@ -366,7 +369,7 @@ export default function CustomerTable({
                   <TableCell>{row.country || "-"}</TableCell>
                   <TableCell>{row.agent_name || "-"}</TableCell>
                   <TableCell>{row.passport_no || "-"}</TableCell>
-                  <TableCell>{new Date(row.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell>{formatDate(row.created_at)}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                     <Stack
                       direction="row"
