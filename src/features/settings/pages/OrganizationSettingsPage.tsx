@@ -34,6 +34,7 @@ const DOC_SLOTS = ['doc1', 'doc2', 'doc3', 'doc4'] as const;
 
 const EDITABLE_FIELDS = [
   'name', 'legal_name', 'logo_url', 'header_image_url', 'footer_image_url',
+  'favicon_url', 'digital_signature_url', 'company_stamp_url',
   'doc1_label', 'doc1_url', 'doc2_label', 'doc2_url',
   'doc3_label', 'doc3_url', 'doc4_label', 'doc4_url',
   'website', 'email', 'mobile',
@@ -182,6 +183,33 @@ export default function OrganizationSettingsPage() {
               value={form.footer_image_url}
               onUpload={async (file) => (await uploadFile(file, 'organization', 'footer_image')).url}
               onChange={(url) => setField('footer_image_url', url ?? '')}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <FileUploadField
+              label={t('settings.faviconUrl')}
+              variant="avatar"
+              value={form.favicon_url}
+              onUpload={async (file) => (await uploadFile(file, 'organization', 'favicon')).url}
+              onChange={(url) => setField('favicon_url', url ?? '')}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <FileUploadField
+              label={t('settings.digitalSignature')}
+              variant="document"
+              value={form.digital_signature_url}
+              onUpload={async (file) => (await uploadFile(file, 'organization', 'signature')).url}
+              onChange={(url) => setField('digital_signature_url', url ?? '')}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <FileUploadField
+              label={t('settings.companyStamp')}
+              variant="document"
+              value={form.company_stamp_url}
+              onUpload={async (file) => (await uploadFile(file, 'organization', 'stamp')).url}
+              onChange={(url) => setField('company_stamp_url', url ?? '')}
             />
           </Grid>
         </Grid>

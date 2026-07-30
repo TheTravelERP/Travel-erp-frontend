@@ -13,6 +13,14 @@ export interface QuickDateRangeFilterProps {
   fromLabel?: string;
   toLabel?: string;
   gridSize?: { xs?: number; md?: number };
+  /** All three internal fields render at this size — keeps the preset
+   * select and the two date fields consistent with each other, and with
+   * whatever size the caller's other filter inputs use. Defaults to
+   * "medium" to match the established convention (DropdownAutocomplete and
+   * plain filter TextFields never set `size`); pass "small" only on pages
+   * that deliberately use a compact filter bar throughout (e.g. the
+   * Notification Center inbox). */
+  size?: "small" | "medium";
 }
 
 export default function QuickDateRangeFilter({
@@ -22,6 +30,7 @@ export default function QuickDateRangeFilter({
   fromLabel,
   toLabel,
   gridSize = { xs: 12, md: 2 },
+  size = "medium",
 }: QuickDateRangeFilterProps) {
   const { t } = useTranslation();
   const fyStartMonth = useFinancialYearStartMonth();
@@ -56,7 +65,7 @@ export default function QuickDateRangeFilter({
         <TextField
           select
           fullWidth
-          size="small"
+          size={size}
           label={t("common.dateRange")}
           value={preset}
           onChange={(e) => handlePresetChange(e.target.value as DateRangePresetValue)}
@@ -74,6 +83,7 @@ export default function QuickDateRangeFilter({
           label={fromLabel ?? t("common.fromDate")}
           type="date"
           fullWidth
+          size={size}
           value={fromDate ?? ""}
           slotProps={{ inputLabel: { shrink: true } }}
           error={!!rangeError}
@@ -86,6 +96,7 @@ export default function QuickDateRangeFilter({
           label={toLabel ?? t("common.toDate")}
           type="date"
           fullWidth
+          size={size}
           value={toDate ?? ""}
           slotProps={{ inputLabel: { shrink: true } }}
           error={!!rangeError}

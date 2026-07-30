@@ -11,6 +11,7 @@ import UnauthorizedPage from '../../pages/errors/UnauthorizedPage';
 import ForgotPasswordPage from '../../auth/pages/ForgotPasswordPage';
 import EnquiryRoutes from '../../features/enquiry/enquiry.routes';
 import FollowupRoutes from '../../features/crm/followup/followup.routes';
+import QuotationRoutes from '../../features/crm/quotation/quotation.routes';
 import CustomerRoutes from '../../features/customer/customer.routes';
 import PackageTypeRoutes from '../../features/package/packageType/packageType.routes';
 import PackageDetailRoutes from '../../features/package/packageDetail/packageDetail.routes';
@@ -29,7 +30,8 @@ import NotificationPreferencesPage from '../../features/notificationPreferences/
 import OrganizationSettingsPage from '../../features/settings/pages/OrganizationSettingsPage';
 import UsersRoutes from '../../features/settings/users/users.routes';
 import RoleRoutes from '../../features/settings/role/role.routes';
-import InvoiceBrandingSettingsPage from '../../features/settings/pages/InvoiceBrandingSettingsPage';
+import DocumentTemplateSettingsPage from '../../features/settings/documentTemplates/pages/DocumentTemplateSettingsPage';
+import DocumentTemplateConfigRoutes from '../../features/settings/documentTemplates/documentTemplateConfig.routes';
 import BranchRoutes from '../../features/settings/branch/branch.routes';
 import DocumentTypeRoutes from '../../features/settings/documentType/documentType.routes';
 import CurrencyMasterRoutes from '../../features/settings/currencyMaster/currencyMaster.routes';
@@ -52,7 +54,6 @@ import ComingSoonPage from '../../components/common/ComingSoonPage';
 // soon" placeholder behind the same permission gate a real page would use.
 // Keep this in sync with app/seeds/system/menu_data.py on the backend.
 const COMING_SOON_ROUTES: { menuId: string; path: string }[] = [
-  { menuId: 'crm.quotations', path: '/app/crm/quotations' },
   { menuId: 'packages.departures', path: '/app/packages/departures' },
   { menuId: 'packages.bookings', path: '/app/bookings/list' },
   { menuId: 'packages.itinerary', path: '/app/bookings/services' },
@@ -141,6 +142,7 @@ export default function AppRouter() {
 
         <Route path="/app/enquiries/*" element={<EnquiryRoutes />} />
         <Route path="/app/crm/followups/*" element={<FollowupRoutes />} />
+        <Route path="/app/crm/quotations/*" element={<QuotationRoutes />} />
         <Route path="/app/crm/customers/*" element={<CustomerRoutes />} />
         <Route path="/app/packages/types/*" element={<PackageTypeRoutes />} />
         <Route path="/app/packages/details/*" element={<PackageDetailRoutes />} />
@@ -168,13 +170,14 @@ export default function AppRouter() {
         <Route path="/app/settings/users/*" element={<UsersRoutes />} />
         <Route path="/app/settings/roles/*" element={<RoleRoutes />} />
         <Route
-          path="/app/settings/invoice-branding"
+          path="/app/settings/document-templates"
           element={
-            <PermissionRoute menuId="settings.invoice_branding">
-              <InvoiceBrandingSettingsPage />
+            <PermissionRoute menuId="settings.document_templates">
+              <DocumentTemplateSettingsPage />
             </PermissionRoute>
           }
         />
+        <Route path="/app/settings/document-templates/config/*" element={<DocumentTemplateConfigRoutes />} />
         <Route path="/app/settings/branch-master/*" element={<BranchRoutes />} />
         <Route path="/app/settings/document-type-master/*" element={<DocumentTypeRoutes />} />
         <Route path="/app/settings/currency-master/*" element={<CurrencyMasterRoutes />} />

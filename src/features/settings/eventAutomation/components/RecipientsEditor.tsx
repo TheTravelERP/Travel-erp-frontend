@@ -74,7 +74,6 @@ export default function RecipientsEditor({ value, onChange }: Props) {
       <Stack direction="row" spacing={1} alignItems="center">
         <TextField
           select
-          size="small"
           label={t("eventAutomation.addSpecific")}
           value={pendingType}
           onChange={(e) => setPendingType(e.target.value as RecipientType)}
@@ -87,7 +86,6 @@ export default function RecipientsEditor({ value, onChange }: Props) {
           ))}
         </TextField>
         <TextField
-          size="small"
           label={t("eventAutomation.value")}
           value={pendingValue}
           onChange={(e) => setPendingValue(e.target.value)}

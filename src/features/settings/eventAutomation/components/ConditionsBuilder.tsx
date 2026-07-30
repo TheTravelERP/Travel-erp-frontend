@@ -41,7 +41,6 @@ export default function ConditionsBuilder({ value, onChange }: Props) {
         <Grid container spacing={1} key={i} sx={{ mb: 1 }} alignItems="center">
           <Grid size={{ xs: 12, sm: 4 }}>
             <TextField
-              size="small"
               fullWidth
               label={t("eventAutomation.field")}
               placeholder="priority"
@@ -52,7 +51,6 @@ export default function ConditionsBuilder({ value, onChange }: Props) {
           <Grid size={{ xs: 6, sm: 3 }}>
             <TextField
               select
-              size="small"
               fullWidth
               label={t("eventAutomation.operator")}
               value={condition.operator}
@@ -67,7 +65,6 @@ export default function ConditionsBuilder({ value, onChange }: Props) {
           </Grid>
           <Grid size={{ xs: 6, sm: 4 }}>
             <TextField
-              size="small"
               fullWidth
               label={t("eventAutomation.value")}
               placeholder="High"

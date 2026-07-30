@@ -124,7 +124,6 @@ export default function NotificationLogListPage() {
             <TextField
               select
               fullWidth
-              size="small"
               label={t("notificationTemplate.module")}
               value={moduleFilter}
               onChange={(e) => updateURL({ module_group: e.target.value || undefined, page: 1 })}
@@ -141,7 +140,6 @@ export default function NotificationLogListPage() {
             <TextField
               select
               fullWidth
-              size="small"
               label={t("notificationTemplate.channel")}
               value={channelFilter}
               onChange={(e) => updateURL({ channel: e.target.value || undefined, page: 1 })}
@@ -157,7 +155,6 @@ export default function NotificationLogListPage() {
             <TextField
               select
               fullWidth
-              size="small"
               label={t("notificationLog.colProvider")}
               value={providerFilter}
               onChange={(e) => updateURL({ provider_name: e.target.value || undefined, page: 1 })}
@@ -175,7 +172,6 @@ export default function NotificationLogListPage() {
             <TextField
               select
               fullWidth
-              size="small"
               label={t("notificationLog.colStatus")}
               value={statusFilter}
               onChange={(e) => updateURL({ status: e.target.value || undefined, page: 1 })}
@@ -192,7 +188,6 @@ export default function NotificationLogListPage() {
           <Grid size={{ xs: 6, sm: 3, md: 3 }}>
             <TextField
               fullWidth
-              size="small"
               type="date"
               label={t("common.fromDate")}
               InputLabelProps={{ shrink: true }}
@@ -205,7 +200,6 @@ export default function NotificationLogListPage() {
           <Grid size={{ xs: 6, sm: 3, md: 3 }}>
             <TextField
               fullWidth
-              size="small"
               type="date"
               label={t("common.toDate")}
               InputLabelProps={{ shrink: true }}
@@ -214,20 +208,19 @@ export default function NotificationLogListPage() {
               onBlur={() => updateURL({ to_date: draftToDate || undefined, page: 1 })}
             />
           </Grid>
-
-          <Grid size={{ xs: 12, md: 6 }}>
-            <SearchInput
-              placeholder={t("notificationLog.searchPlaceholder")}
-              value={draftSearch}
-              onChange={(e) => setDraftSearch(e.target.value)}
-              onSearch={() => updateURL({ search: draftSearch || undefined, page: 1 })}
-              onClear={() => {
-                setDraftSearch("");
-                updateURL({ search: undefined, page: 1 });
-              }}
-            />
-          </Grid>
         </Grid>
+
+        <SearchInput
+          placeholder={t("notificationLog.searchPlaceholder")}
+          value={draftSearch}
+          onChange={(e) => setDraftSearch(e.target.value)}
+          onSearch={() => updateURL({ search: draftSearch || undefined, page: 1 })}
+          onClear={() => {
+            setDraftSearch("");
+            updateURL({ search: undefined, page: 1 });
+          }}
+          sx={{ mb: 2 }}
+        />
 
         <NotificationLogTable
           rows={rows}

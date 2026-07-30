@@ -205,6 +205,7 @@ export default function NotificationCenterPage() {
             toDate={toDate}
             onChange={(v) => updateURL({ from_date: v.from_date, to_date: v.to_date, page: 1 })}
             gridSize={{ xs: 12, md: 3 }}
+            size="small"
           />
         </Grid>
 

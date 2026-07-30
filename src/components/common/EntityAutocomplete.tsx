@@ -30,6 +30,11 @@ interface EntityAutocompleteProps {
   onAddNew?: () => void;
   allowAdd?: boolean;
 
+  // Restrict the dropdown to a subset of options (e.g. only the document
+  // types that are actually printable) without touching the backend
+  // dropdown_config — evaluated against the raw {label, value} option.
+  filterOption?: (option: { label: string; value: string }) => boolean;
+
   // Generic autofill mapping (React Hook Form mode only)
   setValue?: any;
   autoFillMap?: Record<string, string>;
@@ -51,11 +56,14 @@ export default function EntityAutocomplete({
   useForm = true,
   value,
   onChange,
+  filterOption,
 }: EntityAutocompleteProps) {
-  const { options, loading, setSearch, loadMore, ensureOptionLoaded } = useEntityDropdown({
+  const { options: rawOptions, loading, setSearch, loadMore, ensureOptionLoaded } = useEntityDropdown({
     dropdownName,
     pageSize,
   });
+
+  const options = filterOption ? rawOptions.filter(filterOption) : rawOptions;
 
   const renderAutocomplete = (
     currentValue: string | null | undefined,

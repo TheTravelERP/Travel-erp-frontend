@@ -120,7 +120,7 @@ export default function ChangePasswordPage() {
               variant="contained"
               fullWidth
               disabled={isSubmitting}
-              sx={{ minHeight: 56 }}
+              
             >
               {isSubmitting ? t('common.saving') : t('profile.changePassword')}
             </Button>

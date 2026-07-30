@@ -375,9 +375,7 @@ export default function ForgotPasswordPage() {
               variant="contained"
               fullWidth
               disabled={resetLoading}
-              sx={{
-                minHeight: 56,
-              }}
+              
             >
               {resetLoading ? t("auth.resetting") : t("auth.resetPassword")}
             </Button>

@@ -100,6 +100,7 @@ export default function NotificationAnalyticsPage() {
             toDate={toDate}
             onChange={(v) => updateURL(v)}
             gridSize={{ xs: 12, md: 3 }}
+            size="small"
           />
           <Grid size={{ xs: 12, md: 3 }}>
             <TextField

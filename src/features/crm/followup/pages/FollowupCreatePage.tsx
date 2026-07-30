@@ -22,9 +22,15 @@ export default function FollowupCreatePage() {
   // the standalone list page's "Add Follow-up" (with an enquiry already
   // filtered) or the Enquiry Workspace's Follow-ups tab.
   const lockedEnquiryUuid = searchParams.get("enquiry_uuid") || undefined;
-  const backTo = lockedEnquiryUuid
-    ? `/app/crm/followups?enquiry_uuid=${lockedEnquiryUuid}`
-    : "/app/crm/followups";
+  // When opened from a Quotation's "Add Follow-up" action, also stamp the
+  // follow-up with quotation_uuid so it shows up on that quotation's own
+  // communication history, and send the user back there on save.
+  const quotationUuid = searchParams.get("quotation_uuid") || undefined;
+  const backTo = quotationUuid
+    ? `/app/crm/quotations/${quotationUuid}`
+    : lockedEnquiryUuid
+      ? `/app/crm/followups?enquiry_uuid=${lockedEnquiryUuid}`
+      : "/app/crm/followups";
 
   if (!perms.can_create) {
     return <Navigate to="/app/unauthorized" replace />;
@@ -32,7 +38,7 @@ export default function FollowupCreatePage() {
 
   async function handleCreate(data: FollowupFormInput) {
     try {
-      await createFollowup(data);
+      await createFollowup(quotationUuid ? { ...data, quotation_uuid: quotationUuid } : data);
       showSnackbar({ message: t("common.createdSuccess"), severity: "success" });
       navigate(backTo);
     } catch (err: any) {

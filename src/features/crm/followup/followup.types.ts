@@ -2,6 +2,7 @@
 
 export interface FollowupFormInput {
   enquiry_uuid: string;
+  quotation_uuid?: string;
   assigned_user_uuid: string;
   followup_type: string;
   followup_datetime: string;

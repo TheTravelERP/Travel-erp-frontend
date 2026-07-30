@@ -32,6 +32,9 @@ export interface OrganizationProfile {
   doc3_url: string | null;
   doc4_label: string | null;
   doc4_url: string | null;
+  favicon_url: string | null;
+  digital_signature_url: string | null;
+  company_stamp_url: string | null;
   website: string | null;
   email: string | null;
   mobile: string | null;
@@ -77,6 +80,9 @@ export type OrganizationProfileUpdate = Partial<
     | 'doc3_url'
     | 'doc4_label'
     | 'doc4_url'
+    | 'favicon_url'
+    | 'digital_signature_url'
+    | 'company_stamp_url'
     | 'website'
     | 'email'
     | 'mobile'

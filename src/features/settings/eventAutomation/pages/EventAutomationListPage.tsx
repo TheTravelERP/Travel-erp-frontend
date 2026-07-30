@@ -1,7 +1,7 @@
 // src/features/settings/eventAutomation/pages/EventAutomationListPage.tsx
 
 import { useEffect, useState } from "react";
-import { Box, Paper, MenuItem, TextField, Stack } from "@mui/material";
+import { Box, Paper, MenuItem, TextField } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
 import ListPageToolbar from "../../../../components/common/ListPageToolbar";
@@ -88,31 +88,29 @@ export default function EventAutomationListPage() {
       />
 
       <Paper sx={{ p: 2 }}>
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mb: 2 }}>
-          <SearchInput
-            placeholder={t("common.search")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onSearch={() => {}}
-            onClear={() => setSearch("")}
-            sx={{ flex: 1 }}
-          />
-          <TextField
-            select
-            size="small"
-            sx={{ minWidth: 180 }}
-            label={t("notificationTemplate.module")}
-            value={moduleFilter}
-            onChange={(e) => setModuleFilter(e.target.value)}
-          >
-            <MenuItem value="">{t("common.all")}</MenuItem>
-            {moduleGroups.map((m) => (
-              <MenuItem key={m} value={m}>
-                {m}
-              </MenuItem>
-            ))}
-          </TextField>
-        </Stack>
+        <TextField
+          select
+          sx={{ minWidth: 220, mb: 2 }}
+          label={t("notificationTemplate.module")}
+          value={moduleFilter}
+          onChange={(e) => setModuleFilter(e.target.value)}
+        >
+          <MenuItem value="">{t("common.all")}</MenuItem>
+          {moduleGroups.map((m) => (
+            <MenuItem key={m} value={m}>
+              {m}
+            </MenuItem>
+          ))}
+        </TextField>
+
+        <SearchInput
+          placeholder={t("common.search")}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onSearch={() => {}}
+          onClear={() => setSearch("")}
+          sx={{ mb: 2 }}
+        />
 
         <EventAutomationTable
           rows={loading ? [] : filteredRows}
