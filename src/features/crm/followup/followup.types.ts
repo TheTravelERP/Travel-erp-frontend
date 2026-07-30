@@ -75,3 +75,25 @@ export interface FollowupBulkActionResult {
   message: string;
   count: number;
 }
+
+// ---------- Reminder Workspace quick actions ----------
+
+export type ReminderBucket = "overdue" | "today" | "tomorrow" | "upcoming" | "completed";
+
+export interface FollowupHistoryItem {
+  uuid: string;
+  entity_type: string;
+  entity_id: number;
+  entity_uuid: string;
+  action: string;
+  actor_user_id?: number;
+  actor_name?: string;
+  actor_email?: string;
+  changed_columns?: string[];
+  created_at: string;
+}
+
+export interface FollowupHistoryResponse {
+  data: FollowupHistoryItem[];
+  pagination: Pagination;
+}

@@ -25,6 +25,7 @@ import InventoryStockRoutes from '../../features/inventory/inventoryStock/invent
 import ZiyaratRoutes from '../../features/inventory/ziyarat/ziyarat.routes';
 import SettingsPage from '../../features/settings';
 import ChangePasswordPage from '../../features/profile/pages/ChangePasswordPage';
+import NotificationPreferencesPage from '../../features/notificationPreferences/pages/NotificationPreferencesPage';
 import OrganizationSettingsPage from '../../features/settings/pages/OrganizationSettingsPage';
 import UsersRoutes from '../../features/settings/users/users.routes';
 import RoleRoutes from '../../features/settings/role/role.routes';
@@ -42,6 +43,9 @@ import CommunicationProviderRoutes from '../../features/settings/communicationPr
 import NotificationTemplateRoutes from '../../features/settings/notificationTemplates/notificationTemplate.routes';
 import EventAutomationRoutes from '../../features/settings/eventAutomation/eventAutomation.routes';
 import NotificationLogRoutes from '../../features/reports/notificationLogs/notificationLog.routes';
+import NotificationAnalyticsPage from '../../features/reports/notificationAnalytics/pages/NotificationAnalyticsPage';
+import ProviderHealthPage from '../../features/reports/providerHealth/pages/ProviderHealthPage';
+import NotificationCenterRoutes from '../../features/notifications/notificationCenter.routes';
 import ComingSoonPage from '../../components/common/ComingSoonPage';
 
 // Menu items with no built page yet — each renders a translated "Coming
@@ -151,6 +155,7 @@ export default function AppRouter() {
         <Route path="/app/inventory/ziyarat/*" element={<ZiyaratRoutes />} />
         <Route path="/app/settings/theme-color" element={<SettingsPage />} />
         <Route path="/app/profile/change-password" element={<ChangePasswordPage />} />
+        <Route path="/app/profile/notification-preferences" element={<NotificationPreferencesPage />} />
 
         <Route
           path="/app/settings/organization"
@@ -183,6 +188,23 @@ export default function AppRouter() {
         <Route path="/app/settings/notifications/*" element={<NotificationTemplateRoutes />} />
         <Route path="/app/settings/event-automation/*" element={<EventAutomationRoutes />} />
         <Route path="/app/reports/notification-logs/*" element={<NotificationLogRoutes />} />
+        <Route
+          path="/app/reports/notification-analytics"
+          element={
+            <PermissionRoute menuId="reports.notification_analytics" action="can_view">
+              <NotificationAnalyticsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="/app/reports/provider-health"
+          element={
+            <PermissionRoute menuId="reports.provider_health" action="can_view">
+              <ProviderHealthPage />
+            </PermissionRoute>
+          }
+        />
+        <Route path="/app/notifications/*" element={<NotificationCenterRoutes />} />
 
         {/* Not-yet-built modules */}
         {COMING_SOON_ROUTES.map(({ menuId, path }) => (

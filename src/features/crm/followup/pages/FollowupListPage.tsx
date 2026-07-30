@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import AddIcon from "@mui/icons-material/Add";
 import ListAltIcon from "@mui/icons-material/ListAlt";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import DownloadIcon from "@mui/icons-material/Download";
 import UploadIcon from "@mui/icons-material/Upload";
@@ -207,6 +208,13 @@ export default function FollowupListPage() {
               }
         }
         secondaryActions={[
+          {
+            key: "workspace",
+            label: t("followup.reminderWorkspace"),
+            icon: <DashboardIcon />,
+            show: !isTrash,
+            onClick: () => navigate("/app/crm/followups/workspace"),
+          },
           {
             key: "filters",
             label: t("common.filters"),

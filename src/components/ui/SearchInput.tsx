@@ -24,6 +24,7 @@ export function SearchInput({
   return (
     <TextField
       fullWidth
+      size="small"
       {...props}
       value={value}
       onKeyDown={(e) => {

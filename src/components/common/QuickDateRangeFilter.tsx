@@ -56,6 +56,7 @@ export default function QuickDateRangeFilter({
         <TextField
           select
           fullWidth
+          size="small"
           label={t("common.dateRange")}
           value={preset}
           onChange={(e) => handlePresetChange(e.target.value as DateRangePresetValue)}

@@ -15,11 +15,11 @@ import {
 } from "@mui/material";
 
 import { useNavigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { alpha } from "@mui/material/styles";
 
 import { useMenu } from "../context/MenuContext";
+import { useActiveMenuPath } from "./useActiveMenuPath";
 import Icon from "@mui/material/Icon";
 
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
@@ -85,9 +85,6 @@ export default function Sidebar({ open, drawerWidth = 280 }: any) {
 
   const { menu, loading } = useMenu();
 
-  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
-  const [manualToggle, setManualToggle] = useState(false);
-
   const filterViewable = (items: any[]) =>
     items
       .map((item) => ({
@@ -100,29 +97,39 @@ export default function Sidebar({ open, drawerWidth = 280 }: any) {
       // no visible children left.
       .filter((item) => item.permissions?.can_view !== false || (item.children && item.children.length > 0));
 
-  const menuItems = filterViewable(menu);
+  const menuItems = useMemo(() => filterViewable(menu), [menu]);
 
-  const toggleSubmenu = (id: string) => {
-    setManualToggle(true);
-    setOpenSubmenu((prev) => (prev === id ? null : id));
-  };
+  // Single source of truth for "what's active": derived purely from the
+  // URL, at any nesting depth. Drives both highlighting and auto-expand.
+  const { activeLeafId, activeAncestorIds } = useActiveMenuPath(
+    menuItems,
+    pathname,
+  );
 
+  const [openIds, setOpenIds] = useState<Set<string>>(new Set());
+  const [manualToggle, setManualToggle] = useState(false);
+
+  // Auto-expand every ancestor of the active route, unless the user has
+  // manually opened/closed a submenu since the last navigation.
   useEffect(() => {
-    menuItems.forEach((item) => {
-      if (item.children) {
-        const hasActiveChild = item.children.some(
-          (child: any) => child.path && pathname.startsWith(child.path),
-        );
-        if (hasActiveChild && !manualToggle) {
-          setOpenSubmenu(item.id);
-        }
-      }
-    });
-  }, [pathname, menuItems, manualToggle]);
+    if (!manualToggle) {
+      setOpenIds(new Set(activeAncestorIds));
+    }
+  }, [pathname, activeAncestorIds, manualToggle]);
 
   useEffect(() => {
     setManualToggle(false);
   }, [pathname]);
+
+  const toggleSubmenu = (id: string) => {
+    setManualToggle(true);
+    setOpenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   if (loading) {
     return (
@@ -133,44 +140,42 @@ export default function Sidebar({ open, drawerWidth = 280 }: any) {
     );
   }
 
-  const renderItem = (item: any, isSubItem = false) => {
+  const renderItem = (item: any, depth = 0) => {
     const hasChildren = item.children?.length > 0;
-    const isCurrentOpen = openSubmenu === item.id;
-    const isActive = item.path ? pathname === item.path : false;
+    const isCurrentOpen = openIds.has(item.id);
+    const isSubItem = depth > 0;
 
-    const isParentActive =
-      hasChildren &&
-      item.children.some(
-        (child: any) => child.path && pathname.startsWith(child.path),
-      );
-
+    // Active state comes entirely from the URL (via useActiveMenuPath),
+    // not from click handlers, so it survives refresh, back/forward, and
+    // direct URL access automatically.
+    const isSelected = activeLeafId === item.id;
+    const isAncestorActive = activeAncestorIds.has(item.id);
     const itemColor =
-      isActive || isParentActive
+      isSelected || isAncestorActive
         ? theme.palette.primary.main
         : theme.palette.text.primary;
-
-    const itemBg = isActive
-      ? alpha(theme.palette.primary.main, 0.1)
-      : "transparent";
 
     const ButtonComponent = isSubItem ? SubMenuItemButton : MenuItemButton;
 
     return (
       <Box key={item.id}>
         <ButtonComponent
+          selected={isSelected}
           onClick={() =>
             hasChildren ? toggleSubmenu(item.id) : navigate(item.path)
           }
           sx={{
+            ...(depth > 1 ? { pl: 4 + (depth - 1) * 2 } : null),
             color: itemColor,
-            backgroundColor: itemBg,
+            "& .MuiListItemIcon-root": {
+              color: itemColor,
+            },
           }}
         >
           {item.icon && (
             <ListItemIcon
               sx={{
                 minWidth: isSubItem ? 34 : 40,
-                color: itemColor,
               }}
             >
               <Icon
@@ -197,7 +202,7 @@ export default function Sidebar({ open, drawerWidth = 280 }: any) {
         {hasChildren && (
           <Collapse in={isCurrentOpen}>
             <List disablePadding>
-              {item.children.map((sub: any) => renderItem(sub, true))}
+              {item.children.map((sub: any) => renderItem(sub, depth + 1))}
             </List>
           </Collapse>
         )}

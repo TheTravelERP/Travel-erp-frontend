@@ -19,6 +19,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import FolderSharedIcon from '@mui/icons-material/FolderShared';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import SecurityIcon from '@mui/icons-material/Security';
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
@@ -93,6 +94,7 @@ const MENU_OPTIONS = [
   { labelKey: 'profile.projects', icon: FolderSharedIcon, path: '/projects', badge: 3 },
   { labelKey: 'profile.subscription', icon: AttachMoneyIcon, path: '/subscription' },
   { labelKey: 'profile.changePassword', icon: SecurityIcon, path: '/app/profile/change-password' },
+  { labelKey: 'profile.notificationPreferences', icon: NotificationsNoneIcon, path: '/app/profile/notification-preferences' },
   { labelKey: 'profile.themeColor', icon: SettingsIcon, path: '/app/settings/theme-color' },
 ];
 

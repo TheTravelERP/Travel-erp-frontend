@@ -15,6 +15,7 @@ import FormPageLayout from "../../../../components/forms/FormPageLayout";
 import DropdownColorChip from "../../../../components/common/DropdownColorChip";
 import { useLocalizationProfile } from "../../../../hooks/useLocalizationProfile";
 import { formatDateTime } from "../../../../utils/formatters/localization";
+import ReminderHistoryTimeline from "../components/ReminderHistoryTimeline";
 
 import type { FollowupDetail } from "../followup.types";
 
@@ -147,6 +148,15 @@ export default function FollowupViewPage() {
           </Grid>
         </Grid>
       </Paper>
+
+      {!isTrash && (
+        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+          <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
+            {t("followup.history")}
+          </Typography>
+          <ReminderHistoryTimeline uuid={uuid!} />
+        </Paper>
+      )}
 
       <Divider sx={{ my: 3 }} />
 

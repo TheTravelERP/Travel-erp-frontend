@@ -26,6 +26,7 @@ import { getFileKind, resolveUploadUrl } from "../../../services/upload.service"
 import FormPageLayout from "../../../components/forms/FormPageLayout";
 import { useLocalizationProfile } from "../../../hooks/useLocalizationProfile";
 import { formatDate } from "../../../utils/formatters/localization";
+import CommunicationHistory from "../../../components/common/CommunicationHistory";
 
 import type { CustomerDetail } from "../customer.types";
 
@@ -245,6 +246,17 @@ export default function CustomerViewPage() {
             </Grid>
           </Grid>
         </Paper>
+
+        {/* ================= COMMUNICATION HISTORY ================= */}
+
+        {!isTrash && (
+          <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+            <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
+              {t("communicationHistory.title")}
+            </Typography>
+            <CommunicationHistory entityType="customer" entityUuid={uuid!} />
+          </Paper>
+        )}
 
         {/* ================= FOOTER ================= */}
 

@@ -19,6 +19,7 @@ import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 import { usePermission } from "../../../hooks/usePermission";
 import DropdownColorChip from "../../../components/common/DropdownColorChip";
 import FormPageLayout from "../../../components/forms/FormPageLayout";
+import CommunicationHistory from "../../../components/common/CommunicationHistory";
 
 import type { EnquiryFormInput } from "../enquiry.types";
 
@@ -176,6 +177,17 @@ export default function EnquiryViewPage() {
             </Grid>
           </Grid>
         </Paper>
+
+        {/* ================= COMMUNICATION HISTORY ================= */}
+
+        {!isTrash && (
+          <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+            <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
+              {t("communicationHistory.title")}
+            </Typography>
+            <CommunicationHistory entityType="enquiry" entityUuid={uuid!} />
+          </Paper>
+        )}
 
         {/* ================= FOOTER ================= */}
 

@@ -7,6 +7,7 @@ import FollowupListPage from "./pages/FollowupListPage";
 import FollowupCreatePage from "./pages/FollowupCreatePage";
 import FollowupEditPage from "./pages/FollowupEditPage";
 import FollowupViewPage from "./pages/FollowupViewPage";
+import ReminderWorkspacePage from "./pages/ReminderWorkspacePage";
 
 export default function FollowupRoutes() {
   return (
@@ -25,6 +26,15 @@ export default function FollowupRoutes() {
         element={
           <PermissionRoute menuId="crm.followups" action="can_create">
             <FollowupCreatePage />
+          </PermissionRoute>
+        }
+      />
+
+      <Route
+        path="workspace"
+        element={
+          <PermissionRoute menuId="crm.followups" action="can_view">
+            <ReminderWorkspacePage />
           </PermissionRoute>
         }
       />

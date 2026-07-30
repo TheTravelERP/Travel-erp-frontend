@@ -7,12 +7,13 @@ import {
   styled,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
-import Badge from '@mui/material/Badge';
+import SearchIcon from '@mui/icons-material/Search';
 import { useState } from 'react';
 
 import ProfilePopover from './ProfilePopover';
 import UserAvatar from '../components/common/UserAvatar';
+import NotificationBell from '../features/notifications/components/NotificationBell';
+import GlobalSearchDialog from '../components/common/GlobalSearchDialog';
 import Logo2 from '../assets/Logo2.png';
 import { useAuthContext } from '../auth/context/AuthContext';
 
@@ -63,7 +64,7 @@ export default function Header({
   drawerWidth,
 }: HeaderProps) {
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
-  const notificationCount = 5;
+  const [searchOpen, setSearchOpen] = useState(false);
   const { session } = useAuthContext();
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -87,12 +88,13 @@ export default function Header({
 
           <Box sx={{ flexGrow: 1 }} />
 
-          {/* Notifications */}
-          <IconButton color="inherit">
-            <Badge badgeContent={notificationCount} color="error" max={99}>
-              <NotificationsNoneIcon />
-            </Badge>
+          {/* Global Search */}
+          <IconButton color="inherit" onClick={() => setSearchOpen(true)}>
+            <SearchIcon />
           </IconButton>
+
+          {/* Notifications */}
+          <NotificationBell />
 
           {/* Profile */}
           <IconButton onClick={handleProfileMenuOpen}>
@@ -106,6 +108,8 @@ export default function Header({
         open={Boolean(anchorElUser)}
         onClose={handleMenuClose}
       />
+
+      <GlobalSearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 }
