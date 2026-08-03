@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import {
   Box,
+  Breadcrumbs,
   Button,
   Chip,
   CircularProgress,
@@ -10,6 +11,7 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
+  Link,
   Paper,
   Stack,
   Table,
@@ -21,7 +23,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -43,6 +45,9 @@ import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { getErrorMessage } from "../../../../utils/errorMessage";
 import { useLocalizationProfile } from "../../../../hooks/useLocalizationProfile";
 import { createFormatters } from "../../../../utils/formatters/localization";
+import { getFollowups } from "../../followup/followup.api";
+import type { FollowupListItem } from "../../followup/followup.types";
+import DropdownColorChip from "../../../../components/common/DropdownColorChip";
 
 const STATUS_COLOR: Record<string, "default" | "primary" | "success" | "error" | "warning"> = {
   Draft: "default", Sent: "primary", Revised: "warning",
@@ -56,13 +61,16 @@ export default function QuotationViewPage() {
   const { showSnackbar } = useSnackbar();
   const perms = usePermission("crm.quotations");
   const localizationProfile = useLocalizationProfile();
-  const { formatDate } = createFormatters(localizationProfile);
+  const { formatDate, formatDateTime } = createFormatters(localizationProfile);
 
   const [quotation, setQuotation] = useState<QuotationDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [lostReason, setLostReason] = useState("");
+
+  const [followups, setFollowups] = useState<FollowupListItem[]>([]);
+  const [followupsLoading, setFollowupsLoading] = useState(false);
 
   const load = async () => {
     if (!uuid) return;
@@ -77,8 +85,28 @@ export default function QuotationViewPage() {
     }
   };
 
+  const loadFollowups = async () => {
+    if (!uuid) return;
+    setFollowupsLoading(true);
+    try {
+      const res = await getFollowups({
+        quotation_uuid: uuid,
+        page_size: 50,
+        sort_by: "followup_datetime",
+        sort_order: "desc",
+      });
+      setFollowups(res.data);
+    } catch {
+      // Non-critical panel — a failed fetch just leaves it empty rather
+      // than blocking the rest of the quotation page.
+    } finally {
+      setFollowupsLoading(false);
+    }
+  };
+
   useEffect(() => {
     load();
+    loadFollowups();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uuid]);
 
@@ -129,11 +157,13 @@ export default function QuotationViewPage() {
     if (!uuid) return;
     setActionLoading(true);
     try {
-      await convertQuotationToBooking(uuid);
+      const booking = await convertQuotationToBooking(uuid);
+      showSnackbar({ message: t("quotation.convertedSuccess"), severity: "success" });
+      navigate(`/app/bookings/list/${booking.uuid}`);
     } catch (err: any) {
       showSnackbar({
         message: getErrorMessage(err, t("quotation.convertNotAvailable")),
-        severity: err?.response?.status === 501 ? "info" : "error",
+        severity: "error",
       });
     } finally {
       setActionLoading(false);
@@ -149,9 +179,15 @@ export default function QuotationViewPage() {
       <Typography variant="h5" fontWeight={600} gutterBottom>
         {quotation.quotation_no} {quotation.revision_no > 1 && `(Rev ${quotation.revision_no})`}
       </Typography>
-      <Typography variant="body2" color="text.secondary" mb={2}>
-        {t("menu.dashboard")} &bull; {t("menu.crm.quotations")} &bull; {quotation.quotation_no}
-      </Typography>
+      <Breadcrumbs sx={{ mb: 2 }}>
+        <Link component={RouterLink} to="/app/dashboard" underline="hover">
+          {t("menu.dashboard")}
+        </Link>
+        <Link component={RouterLink} to="/app/crm/quotations" underline="hover">
+          {t("menu.crm.quotations")}
+        </Link>
+        <Typography color="text.primary">{quotation.quotation_no}</Typography>
+      </Breadcrumbs>
 
       <QuotationVersionSwitcher currentUuid={quotation.uuid} />
 
@@ -240,6 +276,43 @@ export default function QuotationViewPage() {
                 </Button>
               )}
             </Stack>
+          </Paper>
+
+          <Paper sx={{ p: 2, mb: 2 }}>
+            <Typography variant="h6" color="primary" mb={1}>{t("quotation.followups")}</Typography>
+            {followupsLoading ? (
+              <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}><CircularProgress size={24} /></Box>
+            ) : followups.length === 0 ? (
+              <Typography variant="body2" color="text.secondary">{t("quotation.noFollowupsYet")}</Typography>
+            ) : (
+              <Stack spacing={1.5} divider={<Box sx={{ borderBottom: "1px solid", borderColor: "divider" }} />}>
+                {followups.map((f) => (
+                  <Box
+                    key={f.uuid}
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => navigate(`/app/crm/followups/${f.uuid}`)}
+                  >
+                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start" flexWrap="wrap" gap={1}>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Typography variant="body2" fontWeight={600}>{f.followup_type}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {formatDateTime(f.followup_datetime)}
+                        </Typography>
+                      </Stack>
+                      <DropdownColorChip dropdownName="followup_status" value={f.status} />
+                    </Stack>
+                    <Typography variant="body2" color="text.secondary" noWrap title={f.discussion_notes}>
+                      {f.discussion_notes}
+                    </Typography>
+                    {f.next_followup_datetime && (
+                      <Typography variant="caption" color="text.secondary">
+                        {t("followup.contextNextFollowup")}: {formatDateTime(f.next_followup_datetime)}
+                      </Typography>
+                    )}
+                  </Box>
+                ))}
+              </Stack>
+            )}
           </Paper>
 
           <Paper sx={{ p: 2, mb: 2 }}>

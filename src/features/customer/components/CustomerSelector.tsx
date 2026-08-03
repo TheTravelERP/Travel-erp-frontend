@@ -37,9 +37,9 @@ export default function CustomerSelector({
   const { t } = useTranslation();
 
   // Editing an enquiry already linked to a customer should open on "Existing", not default to "New".
-  const initialCustUuid = useWatch({ control, name: 'cust_uuid' });
+  const custUuidWatched = useWatch({ control, name: 'cust_uuid' });
   const [mode, setMode] = useState<'new' | 'existing'>(() =>
-    initialCustUuid ? 'existing' : 'new'
+    custUuidWatched ? 'existing' : 'new'
   );
 
   // The active mode itself is part of the submitted form data (see enquiry.schema.ts) —
@@ -48,6 +48,24 @@ export default function CustomerSelector({
     setValue('customer_mode', mode);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // A populated cust_uuid always means the enquiry is genuinely linked to a
+  // real Customer — keep the toggle in sync with that for the *lifetime* of
+  // the form, not just at mount. Without this, cust_uuid getting (re)populated
+  // after mount (e.g. linking a customer from the Quotation screen, then
+  // coming back to this Enquiry) leaves `mode` stuck on its stale initial
+  // 'new', so an untouched Save would null the real link right back out (see
+  // submitActiveModes in EnquiryForm.tsx). Deliberately one-directional: an
+  // empty cust_uuid never forces mode back to 'new', since that's ambiguous
+  // with "Existing selected, nothing picked yet" and would fight the user's
+  // own toggle clicks.
+  useEffect(() => {
+    if (custUuidWatched && mode !== 'existing') {
+      setMode('existing');
+      setValue('customer_mode', 'existing');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [custUuidWatched]);
 
   /* ---------------- HANDLERS ---------------- */
   const handleModeChange = (

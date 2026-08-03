@@ -1,11 +1,5 @@
 // src/features/crm/quotation/quotation.types.ts
 
-export const SERVICE_TYPES = [
-  "Package", "Hotel", "Flight", "Visa", "Transport", "Insurance", "Ziyarat",
-  "Guide", "Activity", "Cruise", "Misc", "Manual Charge", "Discount",
-] as const;
-export type ServiceType = (typeof SERVICE_TYPES)[number];
-
 export interface QuotationServiceLineInput {
   uuid?: string;
   service_type: string;
@@ -38,7 +32,20 @@ export interface QuotationServiceLineDetail extends QuotationServiceLineInput {
 }
 
 export interface QuotationFormInput {
-  enquiry_uuid: string;
+  // Optional — when omitted, the backend auto-creates a minimal Enquiry
+  // from the customer_*/cust_uuid + business_type + pax fields below (Direct
+  // Quotation). When provided, those customer_* fields are ignored.
+  enquiry_uuid?: string;
+  cust_uuid?: string | null;
+  customer_mode?: 'new' | 'existing';
+  customer_name?: string;
+  customer_mobile?: string;
+  customer_email?: string;
+
+  // Pre-filled from the enquiry's business_type when an enquiry is picked,
+  // editable; required directly from the user otherwise.
+  business_type: string;
+
   pkg_uuid?: string | null;
   quotation_date?: string;
   valid_until?: string;
@@ -92,6 +99,7 @@ export interface QuotationListItem {
   quotation_group_uuid?: string | null;
   is_current_version: boolean;
   status: string;
+  business_type: string;
   enquiry_uuid?: string | null;
   enquiry_no?: string | null;
   cust_uuid?: string | null;
@@ -123,8 +131,14 @@ export interface GetQuotationsParams {
   from_date?: string;
   to_date?: string;
   is_active?: boolean;
+  is_deleted?: boolean;
   sort_by?: string;
   sort_order?: "asc" | "desc";
+}
+
+export interface QuotationBulkActionResult {
+  message: string;
+  count: number;
 }
 
 export interface Pagination {

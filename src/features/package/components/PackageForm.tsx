@@ -19,6 +19,7 @@ import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../utils/mergeFormDefaults";
 import DropdownAutocomplete from "../../../components/common/DropdownAutocomplete";
 import EntityAutocomplete from "../../../components/common/EntityAutocomplete";
+import BranchMultiSelect from "../../../components/common/BranchMultiSelect";
 import FormSection from "../../../components/forms/FormSection";
 import FormActions from "../../../components/forms/FormActions";
 
@@ -54,6 +55,7 @@ const emptyValues = {
   exchange_rate: 1,
   featured: false,
   is_active: true,
+  allowed_branch_uuids: [],
 };
 
 export default function PackageForm({ defaultValues, onSubmit, loading = false }: PackageFormProps) {
@@ -376,6 +378,16 @@ export default function PackageForm({ defaultValues, onSubmit, loading = false }
               render={({ field }) => (
                 <TextField {...field} type="number" label={t("package.exchangeRate")} fullWidth />
               )}
+            />
+          </Grid>
+        </FormSection>
+
+        <FormSection title={t("package.allowedBranchesSection")}>
+          <Grid size={{ xs: 12 }}>
+            <BranchMultiSelect
+              name="allowed_branch_uuids"
+              label={t("package.allowedBranches")}
+              control={control}
             />
           </Grid>
         </FormSection>

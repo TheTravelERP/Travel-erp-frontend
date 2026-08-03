@@ -28,6 +28,7 @@ import {
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import InboxIcon from "@mui/icons-material/Inbox";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import type { PackageListItem } from "../package.types";
@@ -256,6 +257,18 @@ export default function PackageTable({
                     {row.booked_seats}/{row.total_seats} seats
                   </Typography>
                   <Stack direction="row" spacing={0.5}>
+                    <IconButton
+                      size="small"
+                      onClick={() =>
+                        navigate(
+                          isTrash
+                            ? `/app/packages/list/${row.uuid}?is_deleted=true`
+                            : `/app/packages/list/${row.uuid}`,
+                        )
+                      }
+                    >
+                      <VisibilityIcon fontSize="small" />
+                    </IconButton>
                     {!isTrash && (
                       <>
                         <IconButton size="small" onClick={() => navigate(`/app/packages/list/${row.uuid}/edit`)}>
@@ -390,6 +403,18 @@ export default function PackageTable({
                   <TableCell>{renderStatusChip(row.status)}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                     <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          navigate(
+                            isTrash
+                              ? `/app/packages/list/${row.uuid}?is_deleted=true`
+                              : `/app/packages/list/${row.uuid}`,
+                          )
+                        }
+                      >
+                        <VisibilityIcon fontSize="small" />
+                      </IconButton>
                       {!isTrash && (
                         <>
                           <IconButton size="small" onClick={() => navigate(`/app/packages/list/${row.uuid}/edit`)}>

@@ -29,6 +29,7 @@ import {
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import InboxIcon from "@mui/icons-material/Inbox";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import type { ZiyaratListItem } from "../ziyarat.types";
@@ -252,6 +253,18 @@ export default function ZiyaratTable({
                     {row.default_cost !== undefined ? formatNumber(row.default_cost) : "-"}
                   </Typography>
                   <Stack direction="row" spacing={0.5}>
+                    <IconButton
+                      size="small"
+                      onClick={() =>
+                        navigate(
+                          isTrash
+                            ? `/app/inventory/ziyarat/${row.uuid}?is_deleted=true`
+                            : `/app/inventory/ziyarat/${row.uuid}`,
+                        )
+                      }
+                    >
+                      <VisibilityIcon fontSize="small" />
+                    </IconButton>
                     {!isTrash && (
                       <>
                         <IconButton size="small" onClick={() => navigate(`/app/inventory/ziyarat/${row.uuid}/edit`)}>
@@ -384,6 +397,18 @@ export default function ZiyaratTable({
                   <TableCell>{renderActiveChip(row.is_active)}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                     <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          navigate(
+                            isTrash
+                              ? `/app/inventory/ziyarat/${row.uuid}?is_deleted=true`
+                              : `/app/inventory/ziyarat/${row.uuid}`,
+                          )
+                        }
+                      >
+                        <VisibilityIcon fontSize="small" />
+                      </IconButton>
                       {!isTrash && (
                         <>
                           <IconButton size="small" onClick={() => navigate(`/app/inventory/ziyarat/${row.uuid}/edit`)}>

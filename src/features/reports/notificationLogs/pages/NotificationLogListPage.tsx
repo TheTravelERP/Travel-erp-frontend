@@ -103,7 +103,7 @@ export default function NotificationLogListPage() {
           { label: t("menu.dashboard"), href: "/app/dashboard" },
           { label: t("menu.reports.notification_logs") },
         ]}
-        secondaryActions={[
+        overflowActions={[
           {
             key: "export",
             label: t("common.export"),

@@ -8,7 +8,7 @@ import {
   Paper,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,6 +41,7 @@ const emptyValues = {
   customer_mobile: "",
   customer_alternate_mobile: "",
   customer_email: "",
+  business_type: "",
   pkg_uuid: null,
   package_mode: "custom" as const,
   package_name: "",
@@ -50,6 +51,27 @@ const emptyValues = {
   conversion_status: "Pending",
   description: "",
 };
+
+// customer_mode/package_mode are UI-only toggle state — the API response
+// never carries them (only cust_uuid/pkg_uuid do), so mergeFormDefaults()
+// always falls back to emptyValues' 'new'/'custom' for these two fields,
+// regardless of whether a real link exists. Left alone, that fallback wins
+// on every reset() — including the one below firing on mount, right after
+// CustomerSelector/PackageSelector's own mount effect has (as a child, so
+// it runs first) already set the correct derived mode — silently
+// re-clobbering it back to 'new'/'custom' while the toggle UI still shows
+// "Existing"/"Inventory" from its own untouched local state. That's exactly
+// the shape of the "toggle looks right, Save still nulls the link" bug:
+// always derive these two fields from cust_uuid/pkg_uuid at the one place
+// merged defaults are computed, instead of leaving them to fall back or
+// relying on a child component to fix them up after the fact.
+function withDerivedModes(values: EnquiryFormInput): EnquiryFormInput {
+  return {
+    ...values,
+    customer_mode: values.cust_uuid ? "existing" : "new",
+    package_mode: values.pkg_uuid ? "existing" : "custom",
+  };
+}
 
 export default function EnquiryForm({
   defaultValues,
@@ -69,16 +91,22 @@ export default function EnquiryForm({
     formState: { isSubmitting },
   } = useForm<EnquiryFormInput>({
     resolver: zodResolver(enquirySchema),
-    defaultValues: mergeFormDefaults(emptyValues, defaultValues),
+    defaultValues: withDerivedModes(mergeFormDefaults(emptyValues, defaultValues)),
   });
 
   const navigate = useNavigate();
 
   useEffect(() => {
     if (defaultValues) {
-      reset(mergeFormDefaults(emptyValues, defaultValues));
+      reset(withDerivedModes(mergeFormDefaults(emptyValues, defaultValues)));
     }
   }, [defaultValues, reset]);
+
+  // Package is only relevant when business_type === 'Package' — the
+  // PackageSelector (and its custom/existing toggle) never renders for any
+  // other business type, per the CRM/Booking architecture decision.
+  const businessType = useWatch({ control, name: "business_type" });
+  const isPackageBusiness = businessType === "Package";
 
   // Only the currently active side of each New/Existing-style toggle is ever submitted —
   // if "New"/"Custom" is active, a stale linked uuid left over from earlier toggling must
@@ -95,6 +123,10 @@ export default function EnquiryForm({
     if (package_mode === "custom") {
       payload.pkg_uuid = null;
     }
+    if (payload.business_type !== "Package") {
+      payload.pkg_uuid = null;
+      payload.package_name = "";
+    }
     return onSubmit(payload as EnquiryFormInput);
   };
 
@@ -103,20 +135,48 @@ export default function EnquiryForm({
     <Box
       component="form"
       onSubmit={handleSubmit(submitActiveModes, () =>
-        showSnackbar({ message: t("validation.fixHighlightedFields"), severity: "error" }),
+        showSnackbar({
+          message: t("validation.fixHighlightedFields"),
+          severity: "error",
+        }),
       )}
       noValidate
       sx={{ flexGrow: 1 }}
     >
       <Grid container spacing={2}>
-        <Grid size={{ xs: 12, md: 8 }}>
-          <CustomerSelector control={control} setValue={setValue} />
-        </Grid>
-
+        {/* First row */}
         <Grid size={{ xs: 12, md: 4 }}>
-          <PackageSelector control={control} setValue={setValue} />
+          <DropdownAutocomplete
+            name="business_type"
+            label={t("enquiry.businessType")}
+            control={control}
+            useForm
+            allowAdd={false}
+            pagination
+          />
         </Grid>
 
+        {/* Empty space to complete the first row */}
+        <Grid size={{ md: 8 }} />
+
+         {/* Second row */}
+        <Grid size={{ xs: 12, md: isPackageBusiness ? 8 : 12 }}>
+          <CustomerSelector
+            control={control}
+            setValue={setValue}
+          />
+        </Grid>
+
+        {isPackageBusiness && (
+          <Grid size={{ xs: 12, md: 4 }}>
+            <PackageSelector
+              control={control}
+              setValue={setValue}
+            />
+          </Grid>
+        )}
+
+       
         {/* ENQUIRY DETAILS */}
         <Grid size={{ xs: 12, md: 12 }}>
           <Paper variant="outlined" sx={{ p: 2 }}>
@@ -125,7 +185,7 @@ export default function EnquiryForm({
             </Typography>
 
             <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 2 }}>
+              <Grid size={{ xs: 12, sm: 3 }}>
                 <Controller
                   name="pax_count"
                   control={control}
@@ -144,7 +204,9 @@ export default function EnquiryForm({
                           return;
                         }
                         const num = Number(raw);
-                        field.onChange(Number.isFinite(num) ? Math.min(num, 9999) : raw);
+                        field.onChange(
+                          Number.isFinite(num) ? Math.min(num, 9999) : raw,
+                        );
                       }}
                       InputProps={{
                         startAdornment: (

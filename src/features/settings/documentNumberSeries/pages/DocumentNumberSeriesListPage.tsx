@@ -151,6 +151,8 @@ export default function DocumentNumberSeriesListPage() {
             variant: showFilters ? "contained" : "outlined",
             onClick: () => setShowFilters((v) => !v),
           },
+        ]}
+        overflowActions={[
           {
             key: "export",
             label: t("common.export"),

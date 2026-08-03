@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Box, Button, Divider, Paper, Typography } from "@mui/material";
+import { Box, Button, Chip, Divider, Paper, Stack, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
+import RequestQuoteIcon from "@mui/icons-material/RequestQuote";
 import { useTranslation } from "react-i18next";
 
 import { Navigate, useNavigate, useParams } from "react-router-dom";
@@ -87,7 +88,18 @@ export default function FollowupViewPage() {
         <Grid container spacing={3}>
           <Grid size={{ xs: 12, md: 4 }}>
             <Typography variant="caption">{t("followup.enquiry")}</Typography>
-            <Typography mt={0.5}>{followup.enquiry_no}</Typography>
+            <Stack direction="row" spacing={1} alignItems="center" mt={0.5}>
+              <Typography>{followup.enquiry_no}</Typography>
+              {followup.quotation_uuid && (
+                <Chip
+                  size="small"
+                  icon={<RequestQuoteIcon fontSize="small" />}
+                  label={t("followup.fromQuotation", { quotationNo: followup.quotation_no })}
+                  onClick={() => navigate(`/app/crm/quotations/${followup.quotation_uuid}`)}
+                  clickable
+                />
+              )}
+            </Stack>
           </Grid>
 
           <Grid size={{ xs: 12, md: 4 }}>

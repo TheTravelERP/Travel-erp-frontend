@@ -25,6 +25,7 @@ export default function DropdownAutocomplete({
 
   useForm = false,   // ⭐ controls Controller usage
   allowAdd = false,  // ⭐ controls "Add New"
+  disabled = false,
 
   pagination = false,
   pageSize = 20,
@@ -106,6 +107,7 @@ export default function DropdownAutocomplete({
         value={selectedValue}
         options={options}
         loading={loading}
+        disabled={disabled}
         autoHighlight={false}
 
         /* ---------- ADD NEW LOGIC ---------- */

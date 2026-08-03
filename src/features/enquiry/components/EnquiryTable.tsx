@@ -24,6 +24,11 @@ import {
   Paper,
   IconButton,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -40,6 +45,7 @@ import BookOnlineIcon from "@mui/icons-material/BookOnline";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CancelIcon from "@mui/icons-material/Cancel";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import type { EnquiryListItem } from "../enquiry.types";
 import { useLocalizationProfile } from "../../../hooks/useLocalizationProfile";
 import { createFormatters } from "../../../utils/formatters/localization";
@@ -47,14 +53,21 @@ import ConfirmDialog from "../../../components/common/ConfirmDialog";
 import DropdownColorChip from "../../../components/common/DropdownColorChip";
 import SortableTableCell from "../../../components/common/SortableTableCell";
 import RowActionsMenu, { type RowActionGroup } from "../../../components/common/RowActionsMenu";
+import EntityAutocomplete from "../../../components/common/EntityAutocomplete";
 import {
   bulkDeleteEnquiries,
   bulkRestoreEnquiries,
   deleteEnquiryByUuid,
   restoreEnquiryByUuid,
+  cloneEnquiry,
+  markEnquiryLost,
+  reopenEnquiry,
+  assignEnquiryAgent,
+  assignEnquiryBranch,
 } from "../enquiry.api";
 import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 import { usePermission } from "../../../hooks/usePermission";
+import { getErrorMessage } from "../../../utils/errorMessage";
 
 /* ================= TYPES ================= */
 
@@ -179,6 +192,87 @@ export default function EnquiryTable({
   const followupPerms = usePermission("crm.followups");
   const quotationPerms = usePermission("crm.quotations");
   const taskPerms = usePermission("tasks.my");
+  const bookingPerms = usePermission("packages.bookings");
+  const enquiryPerms = usePermission("crm.enquiries");
+
+  const [cloneUuid, setCloneUuid] = useState<string | null>(null);
+  const [cloneLoading, setCloneLoading] = useState(false);
+
+  const [reopenUuid, setReopenUuid] = useState<string | null>(null);
+  const [reopenLoading, setReopenLoading] = useState(false);
+
+  const [markLostUuid, setMarkLostUuid] = useState<string | null>(null);
+  const [lostReason, setLostReason] = useState("");
+  const [markLostLoading, setMarkLostLoading] = useState(false);
+
+  const [assignUuid, setAssignUuid] = useState<string | null>(null);
+  const [assignAgentUuid, setAssignAgentUuid] = useState<string | null>(null);
+  const [assignBranchUuid, setAssignBranchUuid] = useState<string | null>(null);
+  const [assignLoading, setAssignLoading] = useState(false);
+
+  async function handleCloneConfirm() {
+    if (!cloneUuid) return;
+    try {
+      setCloneLoading(true);
+      const cloned = await cloneEnquiry(cloneUuid);
+      showSnackbar({ message: t("enquiry.cloneSuccess", { enquiryNo: cloned.enquiry_no }), severity: "success" });
+      setCloneUuid(null);
+      onRefresh();
+    } catch (err: any) {
+      showSnackbar({ message: getErrorMessage(err, t("common.updateFailed")), severity: "error" });
+    } finally {
+      setCloneLoading(false);
+    }
+  }
+
+  async function handleReopenConfirm() {
+    if (!reopenUuid) return;
+    try {
+      setReopenLoading(true);
+      await reopenEnquiry(reopenUuid);
+      showSnackbar({ message: t("enquiry.reopenSuccess"), severity: "success" });
+      setReopenUuid(null);
+      onRefresh();
+    } catch (err: any) {
+      showSnackbar({ message: getErrorMessage(err, t("common.updateFailed")), severity: "error" });
+    } finally {
+      setReopenLoading(false);
+    }
+  }
+
+  async function handleMarkLostConfirm() {
+    if (!markLostUuid) return;
+    try {
+      setMarkLostLoading(true);
+      await markEnquiryLost(markLostUuid, lostReason);
+      showSnackbar({ message: t("enquiry.markLostSuccess"), severity: "success" });
+      setMarkLostUuid(null);
+      setLostReason("");
+      onRefresh();
+    } catch (err: any) {
+      showSnackbar({ message: getErrorMessage(err, t("common.updateFailed")), severity: "error" });
+    } finally {
+      setMarkLostLoading(false);
+    }
+  }
+
+  async function handleAssignConfirm() {
+    if (!assignUuid || !assignAgentUuid || !assignBranchUuid) return;
+    try {
+      setAssignLoading(true);
+      await assignEnquiryAgent(assignUuid, assignAgentUuid);
+      await assignEnquiryBranch(assignUuid, assignBranchUuid);
+      showSnackbar({ message: t("enquiry.assignSuccess"), severity: "success" });
+      setAssignUuid(null);
+      setAssignAgentUuid(null);
+      setAssignBranchUuid(null);
+      onRefresh();
+    } catch (err: any) {
+      showSnackbar({ message: getErrorMessage(err, t("common.updateFailed")), severity: "error" });
+    } finally {
+      setAssignLoading(false);
+    }
+  }
 
   function getRowActionGroups(row: EnquiryListItem): RowActionGroup[] {
     return [
@@ -205,11 +299,11 @@ export default function EnquiryTable({
           onClick: () => navigate(`/app/crm/followups?enquiry_uuid=${row.uuid}`),
         },
         {
-          key: "quotations",
-          label: t("menu.crm.quotations"),
+          key: "create-quotation",
+          label: t("enquiry.actionCreateQuotation"),
           icon: <RequestQuoteIcon fontSize="small" />,
-          show: quotationPerms.can_view,
-          onClick: () => navigate("/app/crm/quotations"),
+          show: quotationPerms.can_create,
+          onClick: () => navigate(`/app/crm/quotations/create?enquiry_uuid=${row.uuid}`),
         },
         {
           key: "documents",
@@ -238,30 +332,37 @@ export default function EnquiryTable({
           key: "convert-to-booking",
           label: t("enquiry.actionConvertToBooking"),
           icon: <BookOnlineIcon fontSize="small" />,
-          disabled: true,
-          disabledReason: t("common.comingSoon"),
+          show: bookingPerms.can_create,
+          onClick: () => navigate(`/app/bookings/list/create?enquiry_uuid=${row.uuid}`),
         },
         {
           key: "clone",
           label: t("enquiry.actionClone"),
           icon: <ContentCopyIcon fontSize="small" />,
-          disabled: true,
-          disabledReason: t("common.comingSoon"),
+          show: enquiryPerms.can_edit,
+          onClick: () => setCloneUuid(row.uuid),
+        },
+        {
+          key: "assign",
+          label: t("enquiry.assignSalesExecutiveAndBranch"),
+          icon: <AssignmentIndIcon fontSize="small" />,
+          show: enquiryPerms.can_edit,
+          onClick: () => { setAssignAgentUuid(null); setAssignBranchUuid(null); setAssignUuid(row.uuid); },
         },
         {
           key: "mark-lost",
           label: t("enquiry.actionMarkLost"),
           icon: <CancelIcon fontSize="small" />,
           color: "error",
-          disabled: true,
-          disabledReason: t("common.comingSoon"),
+          show: enquiryPerms.can_edit && !["Lost", "Converted"].includes(row.conversion_status),
+          onClick: () => setMarkLostUuid(row.uuid),
         },
         {
           key: "reopen",
           label: t("enquiry.actionReopen"),
           icon: <RestartAltIcon fontSize="small" />,
-          disabled: true,
-          disabledReason: t("common.comingSoon"),
+          show: enquiryPerms.can_edit && row.conversion_status === "Lost",
+          onClick: () => setReopenUuid(row.uuid),
         },
       ],
     ];
@@ -429,6 +530,36 @@ export default function EnquiryTable({
                   <Typography variant="caption">
                     {formatDate(row.created_at)}
                   </Typography>
+                </Stack>
+
+                <Divider sx={{ my: 1 }} />
+
+                <Stack direction="row" justifyContent="flex-end" alignItems="center">
+                  {isTrash ? (
+                    <IconButton
+                      size="small"
+                      color="success"
+                      onClick={() => setActionUuid(row.uuid)}
+                    >
+                      <RestoreFromTrashIcon fontSize="small" />
+                    </IconButton>
+                  ) : (
+                    <RowActionsMenu
+                      ariaLabel={t("common.actions")}
+                      groups={[
+                        ...getRowActionGroups(row),
+                        [
+                          {
+                            key: "delete",
+                            label: t("common.delete"),
+                            icon: <DeleteIcon fontSize="small" />,
+                            color: "error",
+                            onClick: () => setActionUuid(row.uuid),
+                          },
+                        ],
+                      ]}
+                    />
+                  )}
                 </Stack>
               </CardContent>
             </Paper>
@@ -618,6 +749,78 @@ export default function EnquiryTable({
         onClose={() => setBulkConfirmOpen(false)}
         onConfirm={handleBulkConfirm}
       />
+
+      <ConfirmDialog
+        open={Boolean(cloneUuid)}
+        title={t("enquiry.actionClone")}
+        message={t("enquiry.cloneConfirmMessage")}
+        confirmText={t("enquiry.actionClone")}
+        loading={cloneLoading}
+        onClose={() => setCloneUuid(null)}
+        onConfirm={handleCloneConfirm}
+      />
+
+      <ConfirmDialog
+        open={Boolean(reopenUuid)}
+        title={t("enquiry.actionReopen")}
+        message={t("enquiry.reopenConfirmMessage")}
+        confirmText={t("enquiry.actionReopen")}
+        loading={reopenLoading}
+        onClose={() => setReopenUuid(null)}
+        onConfirm={handleReopenConfirm}
+      />
+
+      <Dialog open={Boolean(markLostUuid)} onClose={() => setMarkLostUuid(null)} fullWidth maxWidth="sm">
+        <DialogTitle>{t("enquiry.actionMarkLost")}</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth multiline minRows={2} sx={{ mt: 1 }}
+            label={t("enquiry.markLostReason")}
+            value={lostReason}
+            onChange={(e) => setLostReason(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setMarkLostUuid(null)}>{t("common.cancel")}</Button>
+          <Button color="error" variant="contained" disabled={markLostLoading} onClick={handleMarkLostConfirm}>
+            {t("enquiry.actionMarkLost")}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={Boolean(assignUuid)} onClose={() => setAssignUuid(null)} fullWidth maxWidth="sm">
+        <DialogTitle>{t("enquiry.assignSalesExecutiveAndBranch")}</DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+            <EntityAutocomplete
+              name="agent_uuid"
+              label={t("booking.salesExecutive")}
+              dropdownName="users"
+              useForm={false}
+              value={assignAgentUuid}
+              onChange={(val) => setAssignAgentUuid(val)}
+            />
+            <EntityAutocomplete
+              name="branch_uuid"
+              label={t("enquiry.branch")}
+              dropdownName="branch"
+              useForm={false}
+              value={assignBranchUuid}
+              onChange={(val) => setAssignBranchUuid(val)}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAssignUuid(null)}>{t("common.cancel")}</Button>
+          <Button
+            variant="contained"
+            disabled={assignLoading || !assignAgentUuid || !assignBranchUuid}
+            onClick={handleAssignConfirm}
+          >
+            {t("enquiry.assignSalesExecutiveAndBranch")}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

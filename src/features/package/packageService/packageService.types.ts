@@ -30,6 +30,10 @@ export interface PackageServiceFormInput {
 
 export interface PackageServiceDetail extends PackageServiceFormInput {
   uuid: string;
+  package_code?: string;
+  package_name?: string;
+  inventory_code?: string;
+  inventory_name?: string;
   version_no: number;
 }
 

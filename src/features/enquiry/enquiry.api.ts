@@ -2,6 +2,8 @@
 import api from "../../services/api";
 
 import type {
+  EnquiryCustomerLinkResult,
+  EnquiryPackageLinkResult,
   EnquiryDetail,
   EnquiryFormInput,
   EnquiryListApiResponse,
@@ -134,6 +136,120 @@ export async function bulkRestoreEnquiries(
     { withCredentials: true },
   );
 
+  return data;
+}
+
+/* ==========================================================
+   ACTIONS — Clone, Mark Lost, Reopen, Assign Sales Executive
+========================================================== */
+
+export async function cloneEnquiry(uuid: string): Promise<EnquiryDetail> {
+  const { data } = await api.post<EnquiryDetail>(
+    `/api/v1/enquiries/${uuid}/clone`,
+    {},
+    { withCredentials: true },
+  );
+
+  return data;
+}
+
+export async function markEnquiryLost(uuid: string, lost_reason?: string): Promise<EnquiryDetail> {
+  const { data } = await api.post<EnquiryDetail>(
+    `/api/v1/enquiries/${uuid}/mark-lost`,
+    { lost_reason },
+    { withCredentials: true },
+  );
+
+  return data;
+}
+
+export async function reopenEnquiry(uuid: string): Promise<EnquiryDetail> {
+  const { data } = await api.post<EnquiryDetail>(
+    `/api/v1/enquiries/${uuid}/reopen`,
+    {},
+    { withCredentials: true },
+  );
+
+  return data;
+}
+
+export async function assignEnquiryAgent(uuid: string, agent_uuid: string): Promise<EnquiryDetail> {
+  const { data } = await api.patch<EnquiryDetail>(
+    `/api/v1/enquiries/${uuid}/assign`,
+    { agent_uuid },
+    { withCredentials: true },
+  );
+
+  return data;
+}
+
+export async function assignEnquiryBranch(uuid: string, branch_uuid: string): Promise<EnquiryDetail> {
+  const { data } = await api.patch<EnquiryDetail>(
+    `/api/v1/enquiries/${uuid}/assign-branch`,
+    { branch_uuid },
+    { withCredentials: true },
+  );
+
+  return data;
+}
+
+/* ==========================================================
+   LINK / CREATE CUSTOMER
+========================================================== */
+
+export async function linkCustomerForEnquiry(
+  uuid: string,
+): Promise<EnquiryCustomerLinkResult> {
+  const { data } = await api.post<EnquiryCustomerLinkResult>(
+    `/api/v1/enquiries/${uuid}/link-customer`,
+    {},
+    { withCredentials: true },
+  );
+
+  return data;
+}
+
+/* ==========================================================
+   LINK / CREATE PACKAGE
+========================================================== */
+
+export async function linkPackageForEnquiry(
+  uuid: string,
+): Promise<EnquiryPackageLinkResult> {
+  const { data } = await api.post<EnquiryPackageLinkResult>(
+    `/api/v1/enquiries/${uuid}/link-package`,
+    {},
+    { withCredentials: true },
+  );
+
+  return data;
+}
+
+/* ==========================================================
+   LINK EXISTING CUSTOMER / PACKAGE (explicit — Resolve Required Links UX)
+========================================================== */
+
+export async function linkExistingCustomerForEnquiry(
+  uuid: string,
+  custUuid: string,
+): Promise<EnquiryDetail> {
+  const { data } = await api.post<EnquiryDetail>(
+    `/api/v1/enquiries/${uuid}/link-existing-customer`,
+    { cust_uuid: custUuid },
+    { withCredentials: true },
+  );
+  return data;
+}
+
+export async function linkExistingPackageForEnquiry(
+  uuid: string,
+  pkgUuid: string,
+): Promise<EnquiryDetail> {
+  const { data } = await api.post<EnquiryDetail>(
+    `/api/v1/enquiries/${uuid}/link-existing-package`,
+    { pkg_uuid: pkgUuid },
+    { withCredentials: true },
+  );
   return data;
 }
 

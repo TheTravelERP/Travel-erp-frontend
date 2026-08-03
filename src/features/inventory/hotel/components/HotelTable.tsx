@@ -29,6 +29,7 @@ import {
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import InboxIcon from "@mui/icons-material/Inbox";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import type { HotelListItem } from "../hotel.types";
@@ -250,6 +251,18 @@ export default function HotelTable({
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
                   <Typography variant="caption">{row.hotel_group}</Typography>
                   <Stack direction="row" spacing={0.5}>
+                    <IconButton
+                      size="small"
+                      onClick={() =>
+                        navigate(
+                          isTrash
+                            ? `/app/inventory/hotels/${row.uuid}?is_deleted=true`
+                            : `/app/inventory/hotels/${row.uuid}`,
+                        )
+                      }
+                    >
+                      <VisibilityIcon fontSize="small" />
+                    </IconButton>
                     {!isTrash && (
                       <>
                         <IconButton size="small" onClick={() => navigate(`/app/inventory/hotels/${row.uuid}/edit`)}>
@@ -382,6 +395,18 @@ export default function HotelTable({
                   <TableCell>{renderActiveChip(row.is_active)}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                     <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          navigate(
+                            isTrash
+                              ? `/app/inventory/hotels/${row.uuid}?is_deleted=true`
+                              : `/app/inventory/hotels/${row.uuid}`,
+                          )
+                        }
+                      >
+                        <VisibilityIcon fontSize="small" />
+                      </IconButton>
                       {!isTrash && (
                         <>
                           <IconButton size="small" onClick={() => navigate(`/app/inventory/hotels/${row.uuid}/edit`)}>

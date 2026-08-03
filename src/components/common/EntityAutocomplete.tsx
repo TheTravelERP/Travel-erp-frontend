@@ -18,6 +18,11 @@ interface EntityAutocompleteProps {
   pageSize?: number;
   disabled?: boolean;
 
+  // Scopes the dropdown's rows to a specific Document Type (by its stable
+  // code, e.g. "QTN") — only applies to entities that carry a
+  // document_type_id FK on the backend, a no-op otherwise.
+  documentTypeCode?: string;
+
   // React Hook Form mode (default) — requires `control`.
   control?: any;
   useForm?: boolean;
@@ -38,6 +43,19 @@ interface EntityAutocompleteProps {
   // Generic autofill mapping (React Hook Form mode only)
   setValue?: any;
   autoFillMap?: Record<string, string>;
+
+  // Custom per-option rendering (e.g. a status chip) — passed straight
+  // through to MUI's Autocomplete. Option shape is {label, value, ...meta_columns}.
+  renderOption?: (
+    props: React.HTMLAttributes<HTMLLIElement> & { key?: any },
+    option: any,
+  ) => React.ReactNode;
+
+  // Fires with the complete raw option object (all meta_columns included,
+  // not just the fields covered by autoFillMap) whenever the selection
+  // changes — lets a caller react to more than one field at once without
+  // stitching together several autoFillMap-driven setValue calls.
+  onOptionSelected?: (option: any | null) => void;
 }
 
 /* ---------------- COMPONENT ---------------- */
@@ -49,6 +67,7 @@ export default function EntityAutocomplete({
   dropdownName,
   pageSize = 20,
   disabled = false,
+  documentTypeCode,
   onAddNew,
   allowAdd = false,
   setValue,
@@ -57,10 +76,13 @@ export default function EntityAutocomplete({
   value,
   onChange,
   filterOption,
+  renderOption,
+  onOptionSelected,
 }: EntityAutocompleteProps) {
   const { options: rawOptions, loading, setSearch, loadMore, ensureOptionLoaded } = useEntityDropdown({
     dropdownName,
     pageSize,
+    documentTypeCode,
   });
 
   const options = filterOption ? rawOptions.filter(filterOption) : rawOptions;
@@ -91,6 +113,7 @@ export default function EntityAutocomplete({
         options={options}
         loading={loading}
         disabled={disabled}
+        {...(renderOption ? { renderOption } : {})}
 
         /* ---------------- LABEL ---------------- */
         getOptionLabel={(option: any) => option?.label || ""}
@@ -116,6 +139,7 @@ export default function EntityAutocomplete({
           }
 
           handleChange(val ? val.value : null);
+          onOptionSelected?.(val ?? null);
 
           // 🔹 GENERIC AUTOFILL (REUSABLE, form mode only)
           if (val && setValue && autoFillMap) {

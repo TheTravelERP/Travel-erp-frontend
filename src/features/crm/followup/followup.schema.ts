@@ -20,10 +20,7 @@ export const getFollowupSchema = (t: TFunction) =>
         !data.next_followup_datetime ||
         !data.followup_datetime ||
         data.next_followup_datetime >= data.followup_datetime,
-      {
-        message: t('followup.validation.nextBeforeCurrent'),
-        path: ['next_followup_datetime'],
-      },
+      { message: t('followup.validation.nextBeforeCurrent'), path: ['next_followup_datetime'] },
     );
 
 export type FollowupSchema = ReturnType<typeof getFollowupSchema>;

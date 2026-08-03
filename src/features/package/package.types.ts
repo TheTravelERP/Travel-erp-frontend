@@ -41,6 +41,10 @@ export interface PackageFormInput {
 
   featured?: boolean;
   is_active?: boolean;
+
+  // Optional visibility restriction — which branches may sell this
+  // package. Empty/undefined = unrestricted (every branch can sell it).
+  allowed_branch_uuids?: string[];
 }
 
 /* ==========================================================

@@ -11,7 +11,9 @@ import UnauthorizedPage from '../../pages/errors/UnauthorizedPage';
 import ForgotPasswordPage from '../../auth/pages/ForgotPasswordPage';
 import EnquiryRoutes from '../../features/enquiry/enquiry.routes';
 import FollowupRoutes from '../../features/crm/followup/followup.routes';
+import TaskRoutes from '../../features/tasks/tasks.routes';
 import QuotationRoutes from '../../features/crm/quotation/quotation.routes';
+import BookingRoutes from '../../features/booking/booking.routes';
 import CustomerRoutes from '../../features/customer/customer.routes';
 import PackageTypeRoutes from '../../features/package/packageType/packageType.routes';
 import PackageDetailRoutes from '../../features/package/packageDetail/packageDetail.routes';
@@ -22,6 +24,7 @@ import HotelRoutes from '../../features/inventory/hotel/hotel.routes';
 import AirlineRoutes from '../../features/inventory/airline/airline.routes';
 import VendorRoutes from '../../features/inventory/vendor/vendor.routes';
 import VendorContractRoutes from '../../features/inventory/vendorContract/vendorContract.routes';
+import DepartureRoutes from '../../features/departure/departure.routes';
 import InventoryStockRoutes from '../../features/inventory/inventoryStock/inventoryStock.routes';
 import ZiyaratRoutes from '../../features/inventory/ziyarat/ziyarat.routes';
 import SettingsPage from '../../features/settings';
@@ -34,6 +37,7 @@ import DocumentTemplateSettingsPage from '../../features/settings/documentTempla
 import DocumentTemplateConfigRoutes from '../../features/settings/documentTemplates/documentTemplateConfig.routes';
 import BranchRoutes from '../../features/settings/branch/branch.routes';
 import DocumentTypeRoutes from '../../features/settings/documentType/documentType.routes';
+import TermsConditionRoutes from '../../features/settings/termsCondition/termsCondition.routes';
 import CurrencyMasterRoutes from '../../features/settings/currencyMaster/currencyMaster.routes';
 import ExchangeRateRoutes from '../../features/settings/exchangeRate/exchangeRate.routes';
 import CurrencyRatePolicyRoutes from '../../features/settings/currencyRatePolicy/currencyRatePolicy.routes';
@@ -54,8 +58,6 @@ import ComingSoonPage from '../../components/common/ComingSoonPage';
 // soon" placeholder behind the same permission gate a real page would use.
 // Keep this in sync with app/seeds/system/menu_data.py on the backend.
 const COMING_SOON_ROUTES: { menuId: string; path: string }[] = [
-  { menuId: 'packages.departures', path: '/app/packages/departures' },
-  { menuId: 'packages.bookings', path: '/app/bookings/list' },
   { menuId: 'packages.itinerary', path: '/app/bookings/services' },
   { menuId: 'packages.room_allocation', path: '/app/bookings/room-allocation' },
   { menuId: 'visa.travelers', path: '/app/ops/travelers' },
@@ -78,9 +80,6 @@ const COMING_SOON_ROUTES: { menuId: string; path: string }[] = [
   { menuId: 'agents.bookings', path: '/app/agents/bookings' },
   { menuId: 'agents.invoices', path: '/app/agents/invoices' },
   { menuId: 'agents.commission', path: '/app/agents/commission' },
-  { menuId: 'tasks.my', path: '/app/tasks/my' },
-  { menuId: 'tasks.team', path: '/app/tasks/team' },
-  { menuId: 'tasks.calendar', path: '/app/tasks/calendar' },
   { menuId: 'support.tickets', path: '/app/support/tickets' },
   { menuId: 'support.knowledge_base', path: '/app/support/kb' },
   { menuId: 'ai.chatbot', path: '/app/ai/chat' },
@@ -142,11 +141,14 @@ export default function AppRouter() {
 
         <Route path="/app/enquiries/*" element={<EnquiryRoutes />} />
         <Route path="/app/crm/followups/*" element={<FollowupRoutes />} />
+        <Route path="/app/tasks/*" element={<TaskRoutes />} />
         <Route path="/app/crm/quotations/*" element={<QuotationRoutes />} />
+        <Route path="/app/bookings/list/*" element={<BookingRoutes />} />
         <Route path="/app/crm/customers/*" element={<CustomerRoutes />} />
         <Route path="/app/packages/types/*" element={<PackageTypeRoutes />} />
         <Route path="/app/packages/details/*" element={<PackageDetailRoutes />} />
         <Route path="/app/packages/list/*" element={<PackageRoutes />} />
+        <Route path="/app/packages/departures/*" element={<DepartureRoutes />} />
         <Route path="/app/packages/pricing/*" element={<PackagePricingRoutes />} />
         <Route path="/app/packages/services/*" element={<PackageServiceRoutes />} />
         <Route path="/app/inventory/hotels/*" element={<HotelRoutes />} />
@@ -180,6 +182,7 @@ export default function AppRouter() {
         <Route path="/app/settings/document-templates/config/*" element={<DocumentTemplateConfigRoutes />} />
         <Route path="/app/settings/branch-master/*" element={<BranchRoutes />} />
         <Route path="/app/settings/document-type-master/*" element={<DocumentTypeRoutes />} />
+        <Route path="/app/settings/terms-conditions-master/*" element={<TermsConditionRoutes />} />
         <Route path="/app/settings/currency-master/*" element={<CurrencyMasterRoutes />} />
         <Route path="/app/settings/exchange-rate-master/*" element={<ExchangeRateRoutes />} />
         <Route path="/app/settings/currency-rate-policy/*" element={<CurrencyRatePolicyRoutes />} />

@@ -6,6 +6,7 @@ import PermissionRoute from "../../../app/router/PermissionRoute";
 import PackageTypeListPage from "./pages/PackageTypeListPage";
 import PackageTypeCreatePage from "./pages/PackageTypeCreatePage";
 import PackageTypeEditPage from "./pages/PackageTypeEditPage";
+import PackageTypeViewPage from "./pages/PackageTypeViewPage";
 
 export default function PackageTypeRoutes() {
   return (
@@ -24,6 +25,15 @@ export default function PackageTypeRoutes() {
         element={
           <PermissionRoute menuId="packages.types" action="can_create">
             <PackageTypeCreatePage />
+          </PermissionRoute>
+        }
+      />
+
+      <Route
+        path=":uuid"
+        element={
+          <PermissionRoute menuId="packages.types" action="can_view">
+            <PackageTypeViewPage />
           </PermissionRoute>
         }
       />

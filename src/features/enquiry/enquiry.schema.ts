@@ -14,7 +14,10 @@ export const getEnquirySchema = (t: TFunction) =>
       customer_alternate_mobile: z.string().optional(),
       customer_email: z.string().email().optional().or(z.literal('')),
 
-      // package
+      // business
+      business_type: z.string().trim().min(1, t('enquiry.validation.businessTypeRequired')),
+
+      // package — only meaningful when business_type === 'Package'
       pkg_uuid: z.string().nullable().optional(),
       package_mode: z.enum(['custom', 'existing']),
       package_name: z.string().trim().optional(),
@@ -76,6 +79,7 @@ export const getEnquirySchema = (t: TFunction) =>
     )
     .refine(
       (data) =>
+        data.business_type !== 'Package' ||
         data.package_mode !== 'custom' ||
         (!!data.package_name && data.package_name.trim().length > 0),
       {
@@ -84,7 +88,10 @@ export const getEnquirySchema = (t: TFunction) =>
       }
     )
     .refine(
-      (data) => data.package_mode !== 'existing' || !!data.pkg_uuid,
+      (data) =>
+        data.business_type !== 'Package' ||
+        data.package_mode !== 'existing' ||
+        !!data.pkg_uuid,
       {
         message: t('enquiry.validation.packageRequired'),
         path: ['pkg_uuid'],

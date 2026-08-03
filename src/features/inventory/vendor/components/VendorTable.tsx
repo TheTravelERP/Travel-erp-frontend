@@ -29,6 +29,7 @@ import {
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import InboxIcon from "@mui/icons-material/Inbox";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import type { VendorListItem } from "../vendor.types";
@@ -251,6 +252,18 @@ export default function VendorTable({
 
                 <Stack direction="row" justifyContent="flex-end" alignItems="center">
                   <Stack direction="row" spacing={0.5}>
+                    <IconButton
+                      size="small"
+                      onClick={() =>
+                        navigate(
+                          isTrash
+                            ? `/app/inventory/vendor-master/${row.uuid}?is_deleted=true`
+                            : `/app/inventory/vendor-master/${row.uuid}`,
+                        )
+                      }
+                    >
+                      <VisibilityIcon fontSize="small" />
+                    </IconButton>
                     {!isTrash && (
                       <>
                         <IconButton size="small" onClick={() => navigate(`/app/inventory/vendor-master/${row.uuid}/edit`)}>
@@ -383,6 +396,18 @@ export default function VendorTable({
                   <TableCell>{renderStatusChip(row.status)}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                     <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          navigate(
+                            isTrash
+                              ? `/app/inventory/vendor-master/${row.uuid}?is_deleted=true`
+                              : `/app/inventory/vendor-master/${row.uuid}`,
+                          )
+                        }
+                      >
+                        <VisibilityIcon fontSize="small" />
+                      </IconButton>
                       {!isTrash && (
                         <>
                           <IconButton size="small" onClick={() => navigate(`/app/inventory/vendor-master/${row.uuid}/edit`)}>

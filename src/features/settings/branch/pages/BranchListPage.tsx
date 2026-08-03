@@ -150,7 +150,14 @@ export default function BranchListPage() {
                 onClick: () => navigate("/app/settings/branch-master/create"),
               }
         }
-        secondaryActions={[
+        secondaryActions={[]}
+        overflowActions={[
+          {
+            key: "view-trash",
+            label: t("common.viewTrash"),
+            show: perms.can_delete && !isTrash,
+            onClick: () => updateURL({ is_deleted: true, page: 1 }),
+          },
           {
             key: "export",
             label: t("common.export"),
@@ -168,14 +175,6 @@ export default function BranchListPage() {
             icon: <UploadIcon />,
             show: perms.can_import && !isTrash,
             onClick: openFilePicker,
-          },
-        ]}
-        overflowActions={[
-          {
-            key: "view-trash",
-            label: t("common.viewTrash"),
-            show: perms.can_delete && !isTrash,
-            onClick: () => updateURL({ is_deleted: true, page: 1 }),
           },
         ]}
       />

@@ -42,6 +42,8 @@ export const getPackageSchema = (t: TFunction) =>
 
     featured: z.boolean().optional(),
     is_active: z.boolean().optional(),
+
+    allowed_branch_uuids: z.array(z.string()).optional(),
   });
 
 export type PackageSchema = ReturnType<typeof getPackageSchema>;

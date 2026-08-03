@@ -6,6 +6,7 @@ import type {
   QuotationListApiResponse,
   QuotationVersionSummary,
   GetQuotationsParams,
+  QuotationBulkActionResult,
 } from "./quotation.types";
 
 function cleanPayload<T extends object>(payload: T): Partial<T> {
@@ -47,6 +48,16 @@ export async function deleteQuotationByUuid(uuid: string) {
 
 export async function restoreQuotationByUuid(uuid: string) {
   const { data } = await api.put(`/api/v1/quotations/${uuid}/restore`);
+  return data;
+}
+
+export async function bulkDeleteQuotations(quotation_uuids: string[]): Promise<QuotationBulkActionResult> {
+  const { data } = await api.post("/api/v1/quotations/bulk-delete", { quotation_uuids });
+  return data;
+}
+
+export async function bulkRestoreQuotations(quotation_uuids: string[]): Promise<QuotationBulkActionResult> {
+  const { data } = await api.post("/api/v1/quotations/bulk-restore", { quotation_uuids });
   return data;
 }
 

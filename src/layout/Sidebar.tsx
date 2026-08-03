@@ -77,7 +77,17 @@ const SubMenuItemButton = styled(MenuItemButton)(({ theme }) => ({
 
 /* ---------------- COMPONENT ---------------- */
 
-export default function Sidebar({ open, drawerWidth = 280 }: any) {
+export default function Sidebar({
+  open,
+  drawerWidth = 280,
+  variant = "persistent",
+  onClose,
+}: {
+  open: boolean;
+  drawerWidth?: number;
+  variant?: "persistent" | "temporary";
+  onClose?: () => void;
+}) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const theme = useTheme();
@@ -91,11 +101,19 @@ export default function Sidebar({ open, drawerWidth = 280 }: any) {
         ...item,
         children: item.children ? filterViewable(item.children) : undefined,
       }))
-      // A group header (e.g. "CRM") has no page of its own and no explicit
-      // view grant, but must still show whenever any child under it is
-      // visible — only drop an item if it's both un-viewable itself AND has
-      // no visible children left.
-      .filter((item) => item.permissions?.can_view !== false || (item.children && item.children.length > 0));
+      .filter((item) => {
+        const hasVisibleChildren = Boolean(item.children && item.children.length > 0);
+        // A leaf node with no page of its own and no children is a
+        // permission-gated feature flag (menu_type "Action", e.g. a tab's
+        // Import/Export/Attachments permission key) — it exists only for
+        // permission resolution, never as a clickable nav destination.
+        if (!item.path && !hasVisibleChildren) return false;
+        // A group header (e.g. "CRM") has no page of its own and no explicit
+        // view grant, but must still show whenever any child under it is
+        // visible — only drop an item if it's both un-viewable itself AND has
+        // no visible children left.
+        return item.permissions?.can_view !== false || hasVisibleChildren;
+      });
 
   const menuItems = useMemo(() => filterViewable(menu), [menu]);
 
@@ -133,7 +151,13 @@ export default function Sidebar({ open, drawerWidth = 280 }: any) {
 
   if (loading) {
     return (
-      <StyledDrawer open={open} variant="persistent" drawerWidth={drawerWidth}>
+      <StyledDrawer
+        open={open}
+        variant={variant}
+        drawerWidth={drawerWidth}
+        onClose={onClose}
+        ModalProps={variant === "temporary" ? { keepMounted: true } : undefined}
+      >
         <Toolbar />
         <Typography sx={{ p: 2 }}>{t("common.loadingMenu")}</Typography>
       </StyledDrawer>
@@ -161,9 +185,16 @@ export default function Sidebar({ open, drawerWidth = 280 }: any) {
       <Box key={item.id}>
         <ButtonComponent
           selected={isSelected}
-          onClick={() =>
-            hasChildren ? toggleSubmenu(item.id) : navigate(item.path)
-          }
+          onClick={() => {
+            if (hasChildren) {
+              toggleSubmenu(item.id);
+              return;
+            }
+            navigate(item.path);
+            // Temporary (mobile/overlay) drawer — get out of the way once a
+            // destination is picked, same as any overlay nav menu.
+            if (variant === "temporary") onClose?.();
+          }}
           sx={{
             ...(depth > 1 ? { pl: 4 + (depth - 1) * 2 } : null),
             color: itemColor,
@@ -211,7 +242,13 @@ export default function Sidebar({ open, drawerWidth = 280 }: any) {
   };
 
   return (
-    <StyledDrawer variant="persistent" open={open} drawerWidth={drawerWidth}>
+    <StyledDrawer
+      variant={variant}
+      open={open}
+      drawerWidth={drawerWidth}
+      onClose={onClose}
+      ModalProps={variant === "temporary" ? { keepMounted: true } : undefined}
+    >
       <LogoToolbar onClick={() => navigate("/app/dashboard")}>
         <LogoImage src={Logo} alt="Travel ERP" />
       </LogoToolbar>

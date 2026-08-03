@@ -6,6 +6,7 @@ import PermissionRoute from "../../../app/router/PermissionRoute";
 import VendorListPage from "./pages/VendorListPage";
 import VendorCreatePage from "./pages/VendorCreatePage";
 import VendorEditPage from "./pages/VendorEditPage";
+import VendorViewPage from "./pages/VendorViewPage";
 
 export default function VendorRoutes() {
   return (
@@ -24,6 +25,15 @@ export default function VendorRoutes() {
         element={
           <PermissionRoute menuId="inventory.vendor_master" action="can_create">
             <VendorCreatePage />
+          </PermissionRoute>
+        }
+      />
+
+      <Route
+        path=":uuid"
+        element={
+          <PermissionRoute menuId="inventory.vendor_master" action="can_view">
+            <VendorViewPage />
           </PermissionRoute>
         }
       />

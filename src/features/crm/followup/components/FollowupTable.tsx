@@ -24,7 +24,7 @@ import {
   Paper,
   IconButton,
   Button,
-  Chip,
+  alpha,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -34,6 +34,7 @@ import InboxIcon from "@mui/icons-material/Inbox";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import type { FollowupListItem } from "../followup.types";
 import ConfirmDialog from "../../../../components/common/ConfirmDialog";
+import DropdownColorChip from "../../../../components/common/DropdownColorChip";
 import SortableTableCell from "../../../../components/common/SortableTableCell";
 import { useLocalizationProfile } from "../../../../hooks/useLocalizationProfile";
 import { createFormatters } from "../../../../utils/formatters/localization";
@@ -73,19 +74,22 @@ function getColumns(t: TFunction): TableColumn[] {
     { id: "followup_datetime", label: t("followup.colFollowupDate"), sortable: true, minWidth: 150 },
     { id: "followup_type", label: t("followup.colType"), sortable: true, minWidth: 130 },
     { id: "customer_name", label: t("followup.colCustomer"), minWidth: 170 },
+    { id: "quotation_no", label: t("followup.colQuotationNo"), minWidth: 130 },
     { id: "discussion_notes", label: t("followup.colDiscussion"), minWidth: 220 },
     { id: "outcome", label: t("followup.colOutcome"), minWidth: 130 },
     { id: "next_followup_datetime", label: t("followup.colNextFollowup"), sortable: true, minWidth: 150 },
     { id: "assigned_user_name", label: t("followup.colAssignedUser"), minWidth: 150 },
     { id: "status", label: t("followup.colStatus"), sortable: true, minWidth: 110 },
+    { id: "priority", label: t("followup.colPriority"), sortable: true, minWidth: 110 },
   ];
 }
 
-const STATUS_COLOR: Record<string, "success" | "warning" | "default"> = {
-  Completed: "success",
-  Pending: "warning",
-  Cancelled: "default",
-};
+// A follow-up whose own date/time has passed and is still sitting in
+// Pending means it was never actioned — flag the row so it can't be
+// missed while scrolling past it.
+function isOverdueAndPending(row: FollowupListItem): boolean {
+  return row.status === "Pending" && new Date(row.followup_datetime) < new Date();
+}
 
 export default function FollowupTable({
   rows,
@@ -102,6 +106,7 @@ export default function FollowupTable({
   onRefresh,
 }: Props) {
   const theme = useTheme();
+  // Same card/table breakpoint as EnquiryTable.
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -224,7 +229,11 @@ export default function FollowupTable({
   }
 
   const renderStatusChip = (status?: string) => (
-    <Chip size="small" label={status || "-"} color={status ? STATUS_COLOR[status] ?? "default" : "default"} />
+    <DropdownColorChip dropdownName="followup_status" value={status} />
+  );
+
+  const renderPriorityChip = (priority?: string) => (
+    <DropdownColorChip dropdownName="followup_priority" value={priority} />
   );
 
   const rowActions = (row: FollowupListItem) => (
@@ -269,18 +278,33 @@ export default function FollowupTable({
           [...Array(3)].map((_, i) => <Skeleton key={i} height={110} sx={{ mb: 2 }} />)
         ) : rows.length ? (
           rows.map((row) => (
-            <Paper key={row.uuid} sx={{ mb: 1 }}>
+            <Paper
+              key={row.uuid}
+              sx={{
+                mb: 1,
+                ...(!isTrash && isOverdueAndPending(row) && {
+                  bgcolor: (theme) => alpha(theme.palette.warning.main, 0.1),
+                  borderLeft: "4px solid",
+                  borderColor: "warning.main",
+                }),
+              }}
+            >
               <CardContent>
-                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                  <Stack direction="row" alignItems="center" spacing={1}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" rowGap={0.5}>
+                  <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: 0, flex: "1 1 auto" }}>
                     <Checkbox
                       size="small"
                       checked={selected.has(row.uuid)}
                       onChange={() => toggleRow(row.uuid)}
                     />
-                    <Typography fontWeight={600}>{row.customer_name || row.enquiry_no}</Typography>
+                    <Typography fontWeight={600} noWrap sx={{ minWidth: 0 }}>
+                      {row.customer_name || row.enquiry_no}
+                    </Typography>
                   </Stack>
-                  {renderStatusChip(row.status)}
+                  <Stack direction="row" spacing={0.5} sx={{ flexShrink: 0 }}>
+                    {renderPriorityChip(row.priority)}
+                    {renderStatusChip(row.status)}
+                  </Stack>
                 </Stack>
 
                 <Typography variant="caption" component="div">
@@ -377,7 +401,7 @@ export default function FollowupTable({
             {loading &&
               [...Array(pageSize)].map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell colSpan={9}>
+                  <TableCell colSpan={11}>
                     <Skeleton height={40} />
                   </TableCell>
                 </TableRow>
@@ -385,7 +409,7 @@ export default function FollowupTable({
 
             {!loading && rows.length === 0 && (
               <TableRow>
-                <TableCell colSpan={9}>
+                <TableCell colSpan={10}>
                   <Box textAlign="center" py={5}>
                     <InboxIcon sx={{ fontSize: 48, opacity: 0.4 }} />
                     <Typography>{t("common.noRecordsFound")}</Typography>
@@ -396,7 +420,20 @@ export default function FollowupTable({
 
             {!loading &&
               rows.map((row) => (
-                <TableRow key={row.uuid} hover selected={selected.has(row.uuid)}>
+                <TableRow
+                  key={row.uuid}
+                  hover
+                  selected={selected.has(row.uuid)}
+                  sx={
+                    !isTrash && isOverdueAndPending(row)
+                      ? {
+                          bgcolor: (theme) => alpha(theme.palette.warning.main, 0.1),
+                          borderLeft: "4px solid",
+                          borderColor: "warning.main",
+                        }
+                      : undefined
+                  }
+                >
                   <TableCell padding="checkbox">
                     <Checkbox checked={selected.has(row.uuid)} onChange={() => toggleRow(row.uuid)} />
                   </TableCell>
@@ -412,6 +449,7 @@ export default function FollowupTable({
                       </Typography>
                     )}
                   </TableCell>
+                  <TableCell>{row.quotation_no || "-"}</TableCell>
                   <TableCell sx={{ maxWidth: 260 }}>
                     <Typography variant="body2" noWrap title={row.discussion_notes}>
                       {row.discussion_notes}
@@ -423,6 +461,7 @@ export default function FollowupTable({
                   </TableCell>
                   <TableCell>{row.assigned_user_name || "-"}</TableCell>
                   <TableCell>{renderStatusChip(row.status)}</TableCell>
+                  <TableCell>{renderPriorityChip(row.priority)}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                     {rowActions(row)}
                   </TableCell>

@@ -50,6 +50,7 @@ export const getEntityDropdownOptions = async (
     search?: string;
     page?: number;
     page_size?: number;
+    document_type_code?: string;
   },
   signal?: AbortSignal
 ) => {

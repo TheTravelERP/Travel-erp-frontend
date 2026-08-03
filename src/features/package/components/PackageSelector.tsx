@@ -35,9 +35,9 @@ export default function PackageSelector({
   const { t } = useTranslation();
 
   // Editing an enquiry already linked to a package should open on "Inventory", not default to "Custom".
-  const initialPkgUuid = useWatch({ control, name: 'pkg_uuid' });
+  const pkgUuidWatched = useWatch({ control, name: 'pkg_uuid' });
   const [packageMode, setPackageMode] = useState<'custom' | 'existing'>(() =>
-    initialPkgUuid ? 'existing' : 'custom'
+    pkgUuidWatched ? 'existing' : 'custom'
   );
 
   // The active mode itself is part of the submitted form data (see enquiry.schema.ts) —
@@ -46,6 +46,19 @@ export default function PackageSelector({
     setValue('package_mode', packageMode);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // A populated pkg_uuid always means the enquiry is genuinely linked to a
+  // real Package — keep the toggle in sync with that for the *lifetime* of
+  // the form, not just at mount. See the identical fix (and its full
+  // rationale) in CustomerSelector.tsx. Deliberately one-directional: an
+  // empty pkg_uuid never forces packageMode back to 'custom'.
+  useEffect(() => {
+    if (pkgUuidWatched && packageMode !== 'existing') {
+      setPackageMode('existing');
+      setValue('package_mode', 'existing');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pkgUuidWatched]);
 
   /* ---------------- HANDLERS ---------------- */
   const handlePackageModeChange = (

@@ -6,6 +6,7 @@ import PermissionRoute from "../../../app/router/PermissionRoute";
 import ZiyaratListPage from "./pages/ZiyaratListPage";
 import ZiyaratCreatePage from "./pages/ZiyaratCreatePage";
 import ZiyaratEditPage from "./pages/ZiyaratEditPage";
+import ZiyaratViewPage from "./pages/ZiyaratViewPage";
 
 export default function ZiyaratRoutes() {
   return (
@@ -24,6 +25,15 @@ export default function ZiyaratRoutes() {
         element={
           <PermissionRoute menuId="inventory.ziyarat" action="can_create">
             <ZiyaratCreatePage />
+          </PermissionRoute>
+        }
+      />
+
+      <Route
+        path=":uuid"
+        element={
+          <PermissionRoute menuId="inventory.ziyarat" action="can_view">
+            <ZiyaratViewPage />
           </PermissionRoute>
         }
       />

@@ -6,9 +6,14 @@ import { getEntityDropdownOptions, getEntityDropdownOptionByValue } from "../ser
 export const useEntityDropdown = ({
   dropdownName,
   pageSize = 20,
+  documentTypeCode,
 }: {
   dropdownName: string;
   pageSize?: number;
+  /** Scopes the dropdown's rows to a specific Document Type (by its stable
+   *  code, e.g. "QTN") — only applies to entities that carry a
+   *  document_type_id FK, a no-op otherwise. */
+  documentTypeCode?: string;
 }) => {
   const [options, setOptions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -38,6 +43,7 @@ export const useEntityDropdown = ({
           search: searchValue,
           page: pageNumber,
           page_size: pageSize,
+          document_type_code: documentTypeCode,
         },
         signal,
       );
@@ -74,7 +80,8 @@ export const useEntityDropdown = ({
     setPage(1);
     fetchData(search, 1, true, controller.signal);
     return () => controller.abort();
-  }, [search]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, documentTypeCode]);
 
   const loadMore = () => {
     if (!hasMore || loading) return;

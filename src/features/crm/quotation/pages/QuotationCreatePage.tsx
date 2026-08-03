@@ -1,5 +1,6 @@
 // src/features/crm/quotation/pages/QuotationCreatePage.tsx
-import { Navigate, useNavigate } from "react-router-dom";
+import { useMemo } from "react";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import QuotationForm from "../components/QuotationForm";
@@ -14,8 +15,19 @@ export default function QuotationCreatePage() {
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
   const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
+  const enquiryUuid = searchParams.get("enquiry_uuid") || undefined;
 
   const perms = usePermission("crm.quotations");
+
+  // Stable reference across re-renders (e.g. one triggered by showSnackbar's
+  // own context update) — QuotationForm's defaultValues effect calls reset()
+  // whenever this object's identity changes, which would otherwise wipe out
+  // validation errors moments after they're set from an unrelated re-render.
+  const defaultValues = useMemo(
+    () => (enquiryUuid ? { enquiry_uuid: enquiryUuid } : undefined),
+    [enquiryUuid],
+  );
 
   if (!perms.can_create) {
     return <Navigate to="/app/unauthorized" replace />;
@@ -40,7 +52,12 @@ export default function QuotationCreatePage() {
         { label: t("common.create") },
       ]}
     >
-      <QuotationForm onSubmit={handleCreate} />
+      <QuotationForm
+        mode={enquiryUuid ? "fromEnquiry" : "standalone"}
+        enquiryUuid={enquiryUuid}
+        defaultValues={defaultValues}
+        onSubmit={handleCreate}
+      />
     </FormPageLayout>
   );
 }

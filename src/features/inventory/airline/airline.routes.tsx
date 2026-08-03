@@ -6,6 +6,7 @@ import PermissionRoute from "../../../app/router/PermissionRoute";
 import AirlineListPage from "./pages/AirlineListPage";
 import AirlineCreatePage from "./pages/AirlineCreatePage";
 import AirlineEditPage from "./pages/AirlineEditPage";
+import AirlineViewPage from "./pages/AirlineViewPage";
 
 export default function AirlineRoutes() {
   return (
@@ -24,6 +25,15 @@ export default function AirlineRoutes() {
         element={
           <PermissionRoute menuId="inventory.airlines" action="can_create">
             <AirlineCreatePage />
+          </PermissionRoute>
+        }
+      />
+
+      <Route
+        path=":uuid"
+        element={
+          <PermissionRoute menuId="inventory.airlines" action="can_view">
+            <AirlineViewPage />
           </PermissionRoute>
         }
       />

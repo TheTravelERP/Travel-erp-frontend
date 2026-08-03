@@ -177,6 +177,14 @@ export default function VendorListPage() {
             variant: showFilters ? "contained" : "outlined",
             onClick: () => setShowFilters((v) => !v),
           },
+        ]}
+        overflowActions={[
+          {
+            key: "view-trash",
+            label: t("common.viewTrash"),
+            show: perms.can_delete && !isTrash,
+            onClick: () => updateURL({ is_deleted: true, page: 1 }),
+          },
           {
             key: "export",
             label: t("common.export"),
@@ -194,14 +202,6 @@ export default function VendorListPage() {
             icon: <UploadIcon />,
             show: perms.can_import && !isTrash,
             onClick: openFilePicker,
-          },
-        ]}
-        overflowActions={[
-          {
-            key: "view-trash",
-            label: t("common.viewTrash"),
-            show: perms.can_delete && !isTrash,
-            onClick: () => updateURL({ is_deleted: true, page: 1 }),
           },
         ]}
       />

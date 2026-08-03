@@ -6,6 +6,7 @@ import PermissionRoute from "../../../app/router/PermissionRoute";
 import PackagePricingListPage from "./pages/PackagePricingListPage";
 import PackagePricingCreatePage from "./pages/PackagePricingCreatePage";
 import PackagePricingEditPage from "./pages/PackagePricingEditPage";
+import PackagePricingViewPage from "./pages/PackagePricingViewPage";
 
 export default function PackagePricingRoutes() {
   return (
@@ -24,6 +25,15 @@ export default function PackagePricingRoutes() {
         element={
           <PermissionRoute menuId="packages.pricing" action="can_create">
             <PackagePricingCreatePage />
+          </PermissionRoute>
+        }
+      />
+
+      <Route
+        path=":uuid"
+        element={
+          <PermissionRoute menuId="packages.pricing" action="can_view">
+            <PackagePricingViewPage />
           </PermissionRoute>
         }
       />

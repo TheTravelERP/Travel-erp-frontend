@@ -6,6 +6,7 @@ import PermissionRoute from "../../../app/router/PermissionRoute";
 import HotelListPage from "./pages/HotelListPage";
 import HotelCreatePage from "./pages/HotelCreatePage";
 import HotelEditPage from "./pages/HotelEditPage";
+import HotelViewPage from "./pages/HotelViewPage";
 
 export default function HotelRoutes() {
   return (
@@ -24,6 +25,15 @@ export default function HotelRoutes() {
         element={
           <PermissionRoute menuId="inventory.hotels" action="can_create">
             <HotelCreatePage />
+          </PermissionRoute>
+        }
+      />
+
+      <Route
+        path=":uuid"
+        element={
+          <PermissionRoute menuId="inventory.hotels" action="can_view">
+            <HotelViewPage />
           </PermissionRoute>
         }
       />

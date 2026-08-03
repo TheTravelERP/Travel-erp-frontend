@@ -22,14 +22,6 @@ import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
 import FormActions from "../../../../components/forms/FormActions";
 import NullableBooleanSelect from "./NullableBooleanSelect";
 
-// Only these document types have a print layout at all — document_type
-// also lists non-printable rows (GRN, Stock Transfer, Lead, Enquiry, ...)
-// that must never appear in this picker.
-const PRINTABLE_DOCUMENT_TYPE_NAMES = new Set([
-  "Quotation", "Invoice", "Receipt", "Credit Note",
-  "Debit Note", "Purchase Order", "Hotel Voucher", "Booking Confirmation",
-]);
-
 const PAPER_SIZES = ["A4", "Letter"] as const;
 const ORIENTATIONS = ["Portrait", "Landscape"] as const;
 const PAGE_NUMBER_POSITIONS = ["Header", "Footer", "None"] as const;
@@ -114,12 +106,8 @@ export default function DocumentTemplateConfigForm({ defaultValues, onSubmit, is
               dropdownName="document_type"
               disabled={isEdit}
               // document_type is a small, bounded master (~26 rows) — load
-              // it in one page so the curated filter below has the full set
-              // to work with. Without this, types alphabetically outside the
-              // default first page (e.g. "Hotel Voucher") silently vanish
-              // from the list until the user searches for them by name.
+              // it in one page so every type is visible without searching.
               pageSize={100}
-              filterOption={(o) => PRINTABLE_DOCUMENT_TYPE_NAMES.has(o.label)}
             />
           </Grid>
 

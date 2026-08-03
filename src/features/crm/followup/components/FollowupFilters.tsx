@@ -9,10 +9,13 @@ import QuickDateRangeFilter from "../../../../components/common/QuickDateRangeFi
 export interface FollowupFilterValues {
   search?: string;
   enquiry_uuid?: string;
+  quotation_uuid?: string;
   assigned_user_uuid?: string;
   followup_type?: string;
   status?: string;
   priority?: string;
+  from_date?: string;
+  to_date?: string;
   next_from_date?: string;
   next_to_date?: string;
   overdue?: boolean;
@@ -42,8 +45,44 @@ export default function FollowupFilters({ value, onChange, onApply, onReset }: F
   const { t } = useTranslation();
 
   const applyQuickRange = (from: Date, to: Date) => {
-    onChange({ next_from_date: toISODate(from), next_to_date: toISODate(to), overdue: undefined });
+    // These chips are about next_followup_datetime — a field that's
+    // routinely on entries logged well in the past. The Follow-up Date
+    // range (from_date/to_date) filters a different field entirely
+    // (followup_datetime) and, left in place, silently ANDs against these
+    // chips and hides the very records they're meant to surface. Clear it
+    // whenever a quick chip is used.
+    onChange({
+      from_date: undefined,
+      to_date: undefined,
+      next_from_date: toISODate(from),
+      next_to_date: toISODate(to),
+      overdue: undefined,
+    });
   };
+
+  // Which chip (if any) matches the currently applied filter values —
+  // drives the "selected" visual state below. Compared by value, not by a
+  // separately-tracked "last clicked" flag, so the active chip stays
+  // correct even after a page reload/deep link that lands directly on one
+  // of these date ranges.
+  const todayStr = toISODate(new Date());
+  const tomorrowDate = new Date();
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrowStr = toISODate(tomorrowDate);
+  const weekStart = startOfWeekMonday(new Date());
+  const weekEnd = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 6);
+  const weekStartStr = toISODate(weekStart);
+  const weekEndStr = toISODate(weekEnd);
+
+  const activeQuickFilter = value.overdue
+    ? "overdue"
+    : value.next_from_date === todayStr && value.next_to_date === todayStr
+    ? "today"
+    : value.next_from_date === tomorrowStr && value.next_to_date === tomorrowStr
+    ? "tomorrow"
+    : value.next_from_date === weekStartStr && value.next_to_date === weekEndStr
+    ? "this_week"
+    : null;
 
   const quickFilters = [
     {
@@ -75,7 +114,14 @@ export default function FollowupFilters({ value, onChange, onApply, onReset }: F
     {
       key: "overdue",
       label: t("followup.filterOverdue"),
-      onClick: () => onChange({ next_from_date: undefined, next_to_date: undefined, overdue: true }),
+      onClick: () =>
+        onChange({
+          from_date: undefined,
+          to_date: undefined,
+          next_from_date: undefined,
+          next_to_date: undefined,
+          overdue: true,
+        }),
     },
   ];
 
@@ -96,16 +142,19 @@ export default function FollowupFilters({ value, onChange, onApply, onReset }: F
         </Typography>
 
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-          {quickFilters.map((qf) => (
-            <Chip
-              key={qf.key}
-              label={qf.label}
-              onClick={qf.onClick}
-              color={qf.key === "overdue" && value.overdue ? "error" : "default"}
-              variant="outlined"
-              size="small"
-            />
-          ))}
+          {quickFilters.map((qf) => {
+            const active = qf.key === activeQuickFilter;
+            return (
+              <Chip
+                key={qf.key}
+                label={qf.label}
+                onClick={qf.onClick}
+                color={active ? (qf.key === "overdue" ? "error" : "primary") : "default"}
+                variant={active ? "filled" : "outlined"}
+                size="small"
+              />
+            );
+          })}
         </Stack>
       </Stack>
 
@@ -172,9 +221,18 @@ export default function FollowupFilters({ value, onChange, onApply, onReset }: F
         </Grid>
 
         <QuickDateRangeFilter
+          fromDate={value.from_date}
+          toDate={value.to_date}
+          onChange={(v) => onChange(v)}
+          fromLabel={t("followup.followupDateFrom")}
+          toLabel={t("followup.followupDateTo")}
+          gridSize={{ xs: 12, md: 2 }}
+        />
+
+        <QuickDateRangeFilter
           fromDate={value.next_from_date}
           toDate={value.next_to_date}
-          onChange={(v) => onChange({ ...v, overdue: undefined })}
+          onChange={(v) => onChange({ next_from_date: v.from_date, next_to_date: v.to_date, overdue: undefined })}
           fromLabel={t("followup.nextFollowupFrom")}
           toLabel={t("followup.nextFollowupTo")}
           gridSize={{ xs: 12, md: 2 }}

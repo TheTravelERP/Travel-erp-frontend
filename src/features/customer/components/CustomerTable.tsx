@@ -223,6 +223,52 @@ export default function CustomerTable({
     }
   }
 
+  const rowActions = (row: CustomerListItem) => (
+    <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+      <IconButton
+        size="small"
+        onClick={() =>
+          navigate(
+            isTrash
+              ? `/app/crm/customers/${row.uuid}?is_deleted=true`
+              : `/app/crm/customers/${row.uuid}`,
+          )
+        }
+      >
+        <VisibilityIcon fontSize="small" />
+      </IconButton>
+
+      {!isTrash && (
+        <>
+          <IconButton
+            size="small"
+            onClick={() => navigate(`/app/crm/customers/${row.uuid}/edit`)}
+          >
+            <EditIcon fontSize="small" />
+          </IconButton>
+
+          <IconButton
+            size="small"
+            color="error"
+            onClick={() => setActionUuid(row.uuid)}
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </>
+      )}
+
+      {isTrash && (
+        <IconButton
+          size="small"
+          color="success"
+          onClick={() => setActionUuid(row.uuid)}
+        >
+          <RestoreFromTrashIcon fontSize="small" />
+        </IconButton>
+      )}
+    </Stack>
+  );
+
   /* ---------- MOBILE ---------- */
   if (isMobile) {
     return (
@@ -261,6 +307,10 @@ export default function CustomerTable({
                   <Typography variant="caption">{row.country || "-"}</Typography>
                   <Typography variant="caption">{row.agent_name || "-"}</Typography>
                 </Stack>
+
+                <Divider sx={{ my: 1 }} />
+
+                {rowActions(row)}
               </CardContent>
             </Paper>
           ))
@@ -371,53 +421,7 @@ export default function CustomerTable({
                   <TableCell>{row.passport_no || "-"}</TableCell>
                   <TableCell>{formatDate(row.created_at)}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
-                    <Stack
-                      direction="row"
-                      spacing={0.5}
-                      justifyContent="flex-end"
-                    >
-                      <IconButton
-                        size="small"
-                        onClick={() =>
-                          navigate(
-                            isTrash
-                              ? `/app/crm/customers/${row.uuid}?is_deleted=true`
-                              : `/app/crm/customers/${row.uuid}`,
-                          )
-                        }
-                      >
-                        <VisibilityIcon fontSize="small" />
-                      </IconButton>
-
-                      {!isTrash && (
-                        <>
-                          <IconButton
-                            size="small"
-                            onClick={() => navigate(`/app/crm/customers/${row.uuid}/edit`)}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => setActionUuid(row.uuid)}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </>
-                      )}
-
-                      {isTrash && (
-                        <IconButton
-                          size="small"
-                          color="success"
-                          onClick={() => setActionUuid(row.uuid)}
-                        >
-                          <RestoreFromTrashIcon fontSize="small" />
-                        </IconButton>
-                      )}
-                    </Stack>
+                    {rowActions(row)}
                   </TableCell>
                 </TableRow>
               ))}

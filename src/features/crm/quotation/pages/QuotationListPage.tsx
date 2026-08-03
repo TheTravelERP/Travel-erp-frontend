@@ -1,19 +1,20 @@
 // src/features/crm/quotation/pages/QuotationListPage.tsx
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Box, MenuItem, Paper, TextField } from "@mui/material";
+import { Box, Paper, Collapse } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import AddIcon from "@mui/icons-material/Add";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import FilterListIcon from "@mui/icons-material/FilterList";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { SearchInput } from "../../../../components/ui/SearchInput";
 import ListPageToolbar from "../../../../components/common/ListPageToolbar";
 import QuotationTable from "../components/QuotationTable";
+import QuotationFilters, { type QuotationFilterValues } from "../components/QuotationFilters";
 import { usePermission } from "../../../../hooks/usePermission";
 import { getQuotationsList } from "../quotation.api";
 import type { QuotationListItem } from "../quotation.types";
-
-const STATUSES = ["Draft", "Sent", "Revised", "Accepted", "Rejected", "Expired", "Converted"];
 
 export default function QuotationListPage() {
   const navigate = useNavigate();
@@ -21,38 +22,60 @@ export default function QuotationListPage() {
   const perms = usePermission("crm.quotations");
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const [showFilters, setShowFilters] = useState(false);
+
   const page = Number(searchParams.get("page") || 1);
   const pageSize = Number(searchParams.get("page_size") || 10);
   const sortBy = searchParams.get("sort_by") || undefined;
   const sortOrder = (searchParams.get("sort_order") as "asc" | "desc") || undefined;
-  const search = searchParams.get("search") || "";
-  const status = searchParams.get("status") || "";
 
-  const [searchDraft, setSearchDraft] = useState(search);
-
-  const [rows, setRows] = useState<QuotationListItem[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-
-  const updateURL = (params: Record<string, any>) => {
-    const next = new URLSearchParams(searchParams);
-    Object.entries(params).forEach(([key, value]) => {
-      if (!value) next.delete(key);
-      else next.set(key, String(value));
-    });
-    setSearchParams(next);
-  };
+  const isTrash = searchParams.get("is_deleted") === "true";
 
   const handleSortChange = (columnId: string) => {
     const nextOrder = sortBy === columnId && sortOrder === "asc" ? "desc" : "asc";
     updateURL({ sort_by: columnId, sort_order: nextOrder, page: 1 });
   };
 
+  const appliedFilters: QuotationFilterValues = {
+    search: searchParams.get("search") || "",
+    status: searchParams.get("status") || "",
+    enquiry_uuid: searchParams.get("enquiry_uuid") || "",
+    from_date: searchParams.get("from_date") || "",
+    to_date: searchParams.get("to_date") || "",
+    is_active: searchParams.get("is_active") || "",
+  };
+
+  const [draftFilters, setDraftFilters] = useState<QuotationFilterValues>(appliedFilters);
+
+  const applyWildSearch = () => {
+    updateURL({ search: draftFilters.search, page: 1 });
+  };
+
+  const clearWildSearch = () => {
+    setDraftFilters((prev) => ({ ...prev, search: "" }));
+    updateURL({ search: undefined, page: 1 });
+  };
+
+  const [rows, setRows] = useState<QuotationListItem[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+
   const fetchData = async (signal?: AbortSignal) => {
     try {
       setLoading(true);
       const res = await getQuotationsList(
-        { page, page_size: pageSize, sort_by: sortBy, sort_order: sortOrder, search, status: status || undefined },
+        {
+          page,
+          page_size: pageSize,
+          is_deleted: isTrash,
+          sort_by: sortBy,
+          sort_order: sortOrder,
+          ...appliedFilters,
+          is_active:
+            appliedFilters.is_active === undefined || appliedFilters.is_active === ""
+              ? undefined
+              : appliedFilters.is_active === "true",
+        },
         signal,
       );
       setRows(res.data);
@@ -71,49 +94,85 @@ export default function QuotationListPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
+  const updateURL = (params: Record<string, any>) => {
+    const next = new URLSearchParams(searchParams);
+    Object.entries(params).forEach(([key, value]) => {
+      if (!value) next.delete(key);
+      else next.set(key, String(value));
+    });
+    setSearchParams(next);
+  };
+
   return (
     <Box sx={{ p: { xs: 1, md: 1 } }}>
       <ListPageToolbar
-        title={t("menu.crm.quotations")}
+        title={isTrash ? t("common.trash") : t("menu.crm.quotations")}
         breadcrumbs={[
           { label: t("menu.dashboard"), href: "/app/dashboard" },
-          { label: t("menu.crm.quotations") },
+          { label: isTrash ? t("common.trash") : t("menu.crm.quotations") },
         ]}
-        primaryAction={{
-          key: "add",
-          label: t("common.add"),
-          icon: <AddIcon />,
-          variant: "contained",
-          show: perms.can_create,
-          onClick: () => navigate("/app/crm/quotations/create"),
-        }}
+        primaryAction={
+          isTrash
+            ? {
+                key: "view",
+                label: t("menu.crm.quotations"),
+                icon: <ListAltIcon />,
+                variant: "contained",
+                onClick: () => updateURL({ is_deleted: undefined, page: 1 }),
+              }
+            : {
+                key: "add",
+                label: t("common.add"),
+                icon: <AddIcon />,
+                variant: "contained",
+                show: perms.can_create,
+                onClick: () => navigate("/app/crm/quotations/create"),
+              }
+        }
+        secondaryActions={[
+          {
+            key: "filters",
+            label: t("common.filters"),
+            icon: <FilterListIcon />,
+            variant: showFilters ? "contained" : "outlined",
+            onClick: () => setShowFilters((v) => !v),
+          },
+        ]}
+        overflowActions={[
+          {
+            key: "view-trash",
+            label: t("common.viewTrash"),
+            show: perms.can_delete && !isTrash,
+            onClick: () => updateURL({ is_deleted: true, page: 1 }),
+          },
+        ]}
       />
 
       <Paper sx={{ p: 2 }}>
-        <Box display="flex" gap={2} flexWrap="wrap" mb={2}>
-          <SearchInput
-            placeholder={t("common.searchByCodeName")}
-            value={searchDraft}
-            onChange={(e) => setSearchDraft(e.target.value)}
-            onSearch={() => updateURL({ search: searchDraft, page: 1 })}
-            onClear={() => { setSearchDraft(""); updateURL({ search: undefined, page: 1 }); }}
-            sx={{ flex: 1, minWidth: 240 }}
+        <Collapse in={showFilters}>
+          <QuotationFilters
+            value={draftFilters}
+            onChange={(v) => setDraftFilters((prev) => ({ ...prev, ...v }))}
+            onApply={() => updateURL({ ...draftFilters, page: 1 })}
+            onReset={() => {
+              setDraftFilters({});
+              setSearchParams({ page: "1", page_size: String(pageSize) });
+            }}
           />
-          <TextField
-            select
-            size="small"
-            label={t("common.status")}
-            value={status}
-            onChange={(e) => updateURL({ status: e.target.value, page: 1 })}
-            sx={{ minWidth: 160 }}
-          >
-            <MenuItem value="">{t("common.all")}</MenuItem>
-            {STATUSES.map((s) => <MenuItem key={s} value={s}>{s}</MenuItem>)}
-          </TextField>
-        </Box>
+        </Collapse>
+
+        <SearchInput
+          placeholder={t("quotation.searchPlaceholder")}
+          value={draftFilters.search || ""}
+          onChange={(e) => setDraftFilters({ ...draftFilters, search: e.target.value })}
+          onSearch={applyWildSearch}
+          onClear={clearWildSearch}
+          sx={{ mb: 2 }}
+        />
 
         <QuotationTable
           rows={rows} loading={loading} page={page} pageSize={pageSize} total={total}
+          isTrash={isTrash}
           sortBy={sortBy} sortOrder={sortOrder} onSortChange={handleSortChange}
           onPageChange={(p) => updateURL({ page: p })}
           onPageSizeChange={(s) => updateURL({ page_size: s, page: 1 })}

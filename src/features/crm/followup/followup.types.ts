@@ -16,6 +16,7 @@ export interface FollowupFormInput {
 export interface FollowupDetail extends FollowupFormInput {
   uuid: string;
   enquiry_no?: string;
+  quotation_no?: string;
   customer_name?: string;
   customer_mobile?: string;
   assigned_user_name?: string;
@@ -27,6 +28,8 @@ export interface FollowupListItem {
   uuid: string;
   enquiry_uuid?: string;
   enquiry_no?: string;
+  quotation_uuid?: string;
+  quotation_no?: string;
   customer_name?: string;
   customer_mobile?: string;
   assigned_user_uuid?: string;
@@ -47,10 +50,13 @@ export interface GetFollowupsParams {
   page_size?: number;
   search?: string;
   enquiry_uuid?: string;
+  quotation_uuid?: string;
   assigned_user_uuid?: string;
   followup_type?: string;
   status?: string;
   priority?: string;
+  from_date?: string;
+  to_date?: string;
   next_from_date?: string;
   next_to_date?: string;
   overdue?: boolean;

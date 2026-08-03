@@ -23,6 +23,8 @@ export interface PackagePricingFormInput {
 
 export interface PackagePricingDetail extends PackagePricingFormInput {
   uuid: string;
+  package_code?: string;
+  package_name?: string;
   version_no: number;
 }
 

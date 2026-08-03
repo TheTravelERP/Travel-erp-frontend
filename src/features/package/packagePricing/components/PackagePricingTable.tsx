@@ -29,6 +29,7 @@ import {
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import InboxIcon from "@mui/icons-material/Inbox";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import type { PackagePricingListItem } from "../packagePricing.types";
@@ -266,6 +267,18 @@ export default function PackagePricingTable({
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
                   <Typography variant="body2" fontWeight={600}>{formatPrice(row)}</Typography>
                   <Stack direction="row" spacing={0.5}>
+                    <IconButton
+                      size="small"
+                      onClick={() =>
+                        navigate(
+                          isTrash
+                            ? `/app/packages/pricing/${row.uuid}?is_deleted=true`
+                            : `/app/packages/pricing/${row.uuid}`,
+                        )
+                      }
+                    >
+                      <VisibilityIcon fontSize="small" />
+                    </IconButton>
                     {!isTrash && (
                       <>
                         <IconButton size="small" onClick={() => navigate(`/app/packages/pricing/${row.uuid}/edit`)}>
@@ -403,6 +416,18 @@ export default function PackagePricingTable({
                   <TableCell>{renderActiveChip(row.is_active)}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                     <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          navigate(
+                            isTrash
+                              ? `/app/packages/pricing/${row.uuid}?is_deleted=true`
+                              : `/app/packages/pricing/${row.uuid}`,
+                          )
+                        }
+                      >
+                        <VisibilityIcon fontSize="small" />
+                      </IconButton>
                       {!isTrash && (
                         <>
                           <IconButton size="small" onClick={() => navigate(`/app/packages/pricing/${row.uuid}/edit`)}>

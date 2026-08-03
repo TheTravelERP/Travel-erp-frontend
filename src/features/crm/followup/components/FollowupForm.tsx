@@ -1,7 +1,7 @@
 // src/features/crm/followup/components/FollowupForm.tsx
 
 import { Box, Grid, TextField } from "@mui/material";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -94,6 +94,8 @@ export default function FollowupForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValues, lockedEnquiryUuid, reset]);
 
+  const followupDatetime = useWatch({ control, name: "followup_datetime" });
+
   return (
     <Box
       component="form"
@@ -185,7 +187,10 @@ export default function FollowupForm({
                   type="datetime-local"
                   label={t("followup.nextFollowupDatetime")}
                   fullWidth
-                  slotProps={{ inputLabel: { shrink: true } }}
+                  slotProps={{
+                    inputLabel: { shrink: true },
+                    htmlInput: { min: followupDatetime || undefined },
+                  }}
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message || t("followup.nextFollowupHint")}
                 />
