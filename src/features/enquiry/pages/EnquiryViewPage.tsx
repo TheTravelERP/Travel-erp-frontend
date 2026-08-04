@@ -1,6 +1,6 @@
 // src/features/enquiry/pages/EnquiryViewPage.tsx
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   Alert,
@@ -94,6 +94,18 @@ export default function EnquiryViewPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uuid]);
+
+  // Arriving from the Enquiry list's "View Quotations" row action — the
+  // Quotations section is already rendered inline above, just scroll to it
+  // once the list has finished loading. Guarded to fire only once per mount.
+  const scrolledToQuotationsRef = useRef(false);
+  useEffect(() => {
+    if (quotationsLoading || scrolledToQuotationsRef.current) return;
+    if (window.location.hash === "#quotations") {
+      scrolledToQuotationsRef.current = true;
+      document.getElementById("quotations")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [quotationsLoading]);
 
   if (!perms.can_view) {
     return <Navigate to="/app/unauthorized" replace />;
@@ -394,7 +406,7 @@ export default function EnquiryViewPage() {
         {/* ================= QUOTATIONS ================= */}
 
         {!isTrash && (
-          <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+          <Paper id="quotations" variant="outlined" sx={{ p: 2, mb: 2 }}>
             <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
               {t("enquiry.quotations")}
             </Typography>
@@ -543,7 +555,7 @@ export default function EnquiryViewPage() {
                 size="large"
                 onClick={() => navigate(`/app/crm/quotations/create?enquiry_uuid=${uuid}`)}
               >
-                {t("enquiry.actionCreateQuotation")}
+                {quotations.length > 0 ? t("enquiry.actionNewQuotation") : t("enquiry.actionCreateQuotation")}
               </Button>
             )}
 

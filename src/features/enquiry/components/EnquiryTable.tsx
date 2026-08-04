@@ -38,6 +38,7 @@ import InboxIcon from "@mui/icons-material/Inbox";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import EventRepeatIcon from "@mui/icons-material/EventRepeat";
 import RequestQuoteIcon from "@mui/icons-material/RequestQuote";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import DescriptionIcon from "@mui/icons-material/Description";
 import ForumIcon from "@mui/icons-material/Forum";
 import ChecklistIcon from "@mui/icons-material/Checklist";
@@ -298,13 +299,32 @@ export default function EnquiryTable({
           show: followupPerms.can_view,
           onClick: () => navigate(`/app/crm/followups?enquiry_uuid=${row.uuid}`),
         },
-        {
-          key: "create-quotation",
-          label: t("enquiry.actionCreateQuotation"),
-          icon: <RequestQuoteIcon fontSize="small" />,
-          show: quotationPerms.can_create,
-          onClick: () => navigate(`/app/crm/quotations/create?enquiry_uuid=${row.uuid}`),
-        },
+        ...(row.quotation_count > 0
+          ? [
+              {
+                key: "view-quotations",
+                label: t("enquiry.actionViewQuotations", { count: row.quotation_count }),
+                icon: <ReceiptLongIcon fontSize="small" />,
+                show: quotationPerms.can_view,
+                onClick: () => navigate(`/app/enquiries/${row.uuid}#quotations`),
+              },
+              {
+                key: "new-quotation",
+                label: t("enquiry.actionNewQuotation"),
+                icon: <RequestQuoteIcon fontSize="small" />,
+                show: quotationPerms.can_create,
+                onClick: () => navigate(`/app/crm/quotations/create?enquiry_uuid=${row.uuid}`),
+              },
+            ]
+          : [
+              {
+                key: "create-quotation",
+                label: t("enquiry.actionCreateQuotation"),
+                icon: <RequestQuoteIcon fontSize="small" />,
+                show: quotationPerms.can_create,
+                onClick: () => navigate(`/app/crm/quotations/create?enquiry_uuid=${row.uuid}`),
+              },
+            ]),
         {
           key: "documents",
           label: t("enquiry.actionDocuments"),

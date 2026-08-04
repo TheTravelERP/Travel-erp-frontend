@@ -7,6 +7,7 @@ export const useEntityDropdown = ({
   dropdownName,
   pageSize = 20,
   documentTypeCode,
+  pkgUuid,
 }: {
   dropdownName: string;
   pageSize?: number;
@@ -14,6 +15,9 @@ export const useEntityDropdown = ({
    *  code, e.g. "QTN") — only applies to entities that carry a
    *  document_type_id FK, a no-op otherwise. */
   documentTypeCode?: string;
+  /** Scopes the dropdown's rows to a specific Package — only applies to
+   *  entities that carry a pkg_id FK (e.g. Departures), a no-op otherwise. */
+  pkgUuid?: string | null;
 }) => {
   const [options, setOptions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -44,6 +48,7 @@ export const useEntityDropdown = ({
           page: pageNumber,
           page_size: pageSize,
           document_type_code: documentTypeCode,
+          pkg_uuid: pkgUuid ?? undefined,
         },
         signal,
       );
@@ -81,7 +86,7 @@ export const useEntityDropdown = ({
     fetchData(search, 1, true, controller.signal);
     return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, documentTypeCode]);
+  }, [search, documentTypeCode, pkgUuid]);
 
   const loadMore = () => {
     if (!hasMore || loading) return;

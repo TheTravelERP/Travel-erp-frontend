@@ -1,7 +1,7 @@
 // src/features/booking/components/BookingForm.tsx
-import { Box, Grid, TextField, Typography } from "@mui/material";
-import { Controller, useForm } from "react-hook-form";
-import { useEffect, useMemo } from "react";
+import { Box, Chip, Grid, Stack, TextField, Typography } from "@mui/material";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
@@ -17,10 +17,17 @@ import FormActions from "../../../components/forms/FormActions";
 import { getEnquiryByUuid } from "../../enquiry/enquiry.api";
 
 interface Props {
-  defaultValues?: Partial<BookingFormInput>;
+  defaultValues?: Partial<BookingFormInput> & {
+    quotation_no?: string | null;
+    service_types?: string[];
+  };
   onSubmit: (data: BookingFormInput) => Promise<void>;
   disabled?: boolean;
   disabledReason?: string;
+  // Sales Context (Customer, Enquiry, Business Type, Package, Departure,
+  // Currency) — a commitment made at the sales stage. Defaults to true so
+  // BookingCreatePage (always pre-commit) needs no change.
+  salesContextEditable?: boolean;
 }
 
 const emptyValues: BookingFormInput = {
@@ -42,7 +49,13 @@ const emptyValues: BookingFormInput = {
   customer_notes: "",
 };
 
-export default function BookingForm({ defaultValues, onSubmit, disabled = false, disabledReason }: Props) {
+export default function BookingForm({
+  defaultValues,
+  onSubmit,
+  disabled = false,
+  disabledReason,
+  salesContextEditable = true,
+}: Props) {
   const { t } = useTranslation();
   const { showSnackbar } = useSnackbar();
   const navigate = useNavigate();
@@ -53,6 +66,7 @@ export default function BookingForm({ defaultValues, onSubmit, disabled = false,
     handleSubmit,
     reset,
     setValue,
+    clearErrors,
     formState: { isSubmitting },
   } = useForm<BookingFormInput>({
     resolver: zodResolver(schema),
@@ -64,6 +78,27 @@ export default function BookingForm({ defaultValues, onSubmit, disabled = false,
       reset(mergeFormDefaults(emptyValues, defaultValues));
     }
   }, [defaultValues, reset]);
+
+  const businessType = useWatch({ control, name: "business_type" });
+  const pkgUuid = useWatch({ control, name: "pkg_uuid" });
+  const isPackageBooking = businessType === "Package";
+  const salesContextDisabled = disabled || !salesContextEditable;
+
+  // Business Type drives Travel Package's visibility — when it changes away
+  // from "Package", clear pkg_uuid/departure_uuid AND any validation error
+  // still attached to them immediately, not just their values. Skips the
+  // very first render (loading defaultValues isn't a "change").
+  const prevBusinessTypeRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const prev = prevBusinessTypeRef.current;
+    prevBusinessTypeRef.current = businessType;
+    if (prev === undefined || prev === businessType) return;
+    if (businessType !== "Package") {
+      setValue("pkg_uuid", null);
+      setValue("departure_uuid", null);
+      clearErrors(["pkg_uuid", "departure_uuid"]);
+    }
+  }, [businessType, setValue, clearErrors]);
 
   // Pre-fill business_type from the picked Enquiry — still editable
   // afterward, same convention as Quotation's own enquiry-driven pre-fill.
@@ -77,6 +112,10 @@ export default function BookingForm({ defaultValues, onSubmit, disabled = false,
       // remains directly editable below.
     }
   }
+
+  const salesContextLockChip = !salesContextEditable ? (
+    <Chip size="small" color="warning" label={t("booking.salesContextLocked")} />
+  ) : undefined;
 
   return (
     <Box
@@ -93,14 +132,14 @@ export default function BookingForm({ defaultValues, onSubmit, disabled = false,
       )}
 
       <Grid container spacing={2}>
-        <FormSection title={t("booking.sectionDetails")}>
+        <FormSection title={t("booking.sectionDetails")} titleAdornment={salesContextLockChip}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <EntityAutocomplete
               name="cust_uuid"
               label={t("common.customer")}
               control={control}
               dropdownName="customers"
-              disabled={disabled}
+              disabled={salesContextDisabled}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
@@ -109,10 +148,20 @@ export default function BookingForm({ defaultValues, onSubmit, disabled = false,
               label={t("booking.enquiry")}
               control={control}
               dropdownName="enquiries"
-              disabled={disabled}
+              disabled={salesContextDisabled}
               onOptionSelected={handleEnquirySelected}
             />
           </Grid>
+          {defaultValues?.quotation_no && (
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField
+                label={t("booking.quotation")}
+                value={defaultValues.quotation_no}
+                fullWidth
+                disabled
+              />
+            </Grid>
+          )}
           <Grid size={{ xs: 12, sm: 6 }}>
             <DropdownAutocomplete
               name="business_type"
@@ -121,16 +170,7 @@ export default function BookingForm({ defaultValues, onSubmit, disabled = false,
               useForm={true}
               allowAdd={false}
               pagination
-              disabled={disabled}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <EntityAutocomplete
-              name="pkg_uuid"
-              label={t("booking.package")}
-              control={control}
-              dropdownName="packages"
-              disabled={disabled}
+              disabled={salesContextDisabled}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
@@ -142,17 +182,8 @@ export default function BookingForm({ defaultValues, onSubmit, disabled = false,
               disabled={disabled}
             />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <EntityAutocomplete
-              name="departure_uuid"
-              label={t("booking.departure")}
-              control={control}
-              dropdownName="departures"
-              disabled={disabled}
-            />
-          </Grid>
 
-          <Grid size={{ xs: 12, sm: 3 }}>
+          <Grid size={{ xs: 12, sm: 4 }}>
             <Controller
               name="booking_date"
               control={control}
@@ -161,7 +192,7 @@ export default function BookingForm({ defaultValues, onSubmit, disabled = false,
               )}
             />
           </Grid>
-          <Grid size={{ xs: 12, sm: 3 }}>
+          <Grid size={{ xs: 12, sm: 4 }}>
             <Controller
               name="travel_start_date"
               control={control}
@@ -170,7 +201,7 @@ export default function BookingForm({ defaultValues, onSubmit, disabled = false,
               )}
             />
           </Grid>
-          <Grid size={{ xs: 12, sm: 3 }}>
+          <Grid size={{ xs: 12, sm: 4 }}>
             <Controller
               name="travel_end_date"
               control={control}
@@ -179,12 +210,53 @@ export default function BookingForm({ defaultValues, onSubmit, disabled = false,
               )}
             />
           </Grid>
-          <Grid size={{ xs: 12, sm: 3 }}>
+          <Grid size={{ xs: 12, sm: 4 }}>
             <Controller name="currency_code" control={control} render={({ field, fieldState }) => (
-              <TextField {...field} label={t("booking.currencyCode")} fullWidth disabled={disabled} error={!!fieldState.error} helperText={fieldState.error?.message} />
+              <TextField {...field} label={t("booking.currencyCode")} fullWidth disabled={salesContextDisabled} error={!!fieldState.error} helperText={fieldState.error?.message} />
             )} />
           </Grid>
 
+          {!!defaultValues?.service_types?.length && (
+            <Grid size={{ xs: 12 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                {t("booking.services")}
+              </Typography>
+              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                {defaultValues.service_types.map((serviceType) => (
+                  <Chip key={serviceType} size="small" label={serviceType} />
+                ))}
+              </Stack>
+            </Grid>
+          )}
+        </FormSection>
+
+        {isPackageBooking && (
+          <FormSection title={t("booking.sectionTravelPackage")} titleAdornment={salesContextLockChip}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <EntityAutocomplete
+                name="pkg_uuid"
+                label={t("booking.package")}
+                control={control}
+                dropdownName="packages"
+                disabled={salesContextDisabled}
+              />
+            </Grid>
+            {!!pkgUuid && (
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <EntityAutocomplete
+                  name="departure_uuid"
+                  label={t("booking.departure")}
+                  control={control}
+                  dropdownName="departures"
+                  pkgUuid={pkgUuid}
+                  disabled={salesContextDisabled}
+                />
+              </Grid>
+            )}
+          </FormSection>
+        )}
+
+        <FormSection title={t("booking.sectionPassengers")}>
           <Grid size={{ xs: 12, sm: 4 }}>
             <Controller name="pax_adult" control={control} render={({ field }) => (
               <TextField {...field} type="number" label={t("booking.paxAdult")} fullWidth disabled={disabled} />
@@ -200,7 +272,9 @@ export default function BookingForm({ defaultValues, onSubmit, disabled = false,
               <TextField {...field} type="number" label={t("booking.paxInfant")} fullWidth disabled={disabled} />
             )} />
           </Grid>
+        </FormSection>
 
+        <FormSection title={t("common.notes")}>
           <Grid size={{ xs: 12, sm: 4 }}>
             <Controller name="reference" control={control} render={({ field }) => (
               <TextField {...field} label={t("booking.reference")} fullWidth disabled={disabled} />

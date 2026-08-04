@@ -83,6 +83,8 @@ export interface EnquiryListItem {
   conversion_status: string;
 
   created_at: string;
+
+  quotation_count: number;
 }
 
 /* ==========================================================

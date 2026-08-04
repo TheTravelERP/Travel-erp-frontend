@@ -51,6 +51,7 @@ export const getEntityDropdownOptions = async (
     page?: number;
     page_size?: number;
     document_type_code?: string;
+    pkg_uuid?: string;
   },
   signal?: AbortSignal
 ) => {

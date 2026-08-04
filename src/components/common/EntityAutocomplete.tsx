@@ -23,6 +23,11 @@ interface EntityAutocompleteProps {
   // document_type_id FK on the backend, a no-op otherwise.
   documentTypeCode?: string;
 
+  // Scopes the dropdown's rows to a specific Package (e.g. Departures on
+  // the Booking form) — only applies to entities that carry a pkg_id FK on
+  // the backend, a no-op otherwise.
+  pkgUuid?: string | null;
+
   // React Hook Form mode (default) — requires `control`.
   control?: any;
   useForm?: boolean;
@@ -68,6 +73,7 @@ export default function EntityAutocomplete({
   pageSize = 20,
   disabled = false,
   documentTypeCode,
+  pkgUuid,
   onAddNew,
   allowAdd = false,
   setValue,
@@ -83,6 +89,7 @@ export default function EntityAutocomplete({
     dropdownName,
     pageSize,
     documentTypeCode,
+    pkgUuid,
   });
 
   const options = filterOption ? rawOptions.filter(filterOption) : rawOptions;

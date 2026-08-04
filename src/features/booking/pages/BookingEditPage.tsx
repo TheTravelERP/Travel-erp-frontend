@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import BookingForm from "../components/BookingForm";
 import type { BookingDetail, BookingFormInput } from "../booking.types";
 import { getBookingByUuid, updateBookingByUuid } from "../booking.api";
+import { isSalesContextEditable } from "../booking.status";
 import { usePermission } from "../../../hooks/usePermission";
 import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 import { getErrorMessage } from "../../../utils/errorMessage";
@@ -35,7 +36,7 @@ export default function BookingEditPage() {
   async function loadBooking() {
     try {
       const data = await getBookingByUuid(uuid!);
-      if (data.status !== "Draft") {
+      if (data.status === "Cancelled" || data.status === "Closed") {
         showSnackbar({ message: t("booking.onlyDraftEditable"), severity: "error" });
         navigate(`/app/bookings/list/${uuid}`);
         return;
@@ -77,7 +78,11 @@ export default function BookingEditPage() {
           <CircularProgress />
         </Box>
       ) : (
-        <BookingForm defaultValues={defaultValues} onSubmit={handleUpdate} />
+        <BookingForm
+          defaultValues={defaultValues}
+          onSubmit={handleUpdate}
+          salesContextEditable={isSalesContextEditable(defaultValues)}
+        />
       )}
     </FormPageLayout>
   );
