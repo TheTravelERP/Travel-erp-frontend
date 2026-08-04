@@ -17,6 +17,17 @@ export interface QuotationServiceLineInput {
   remarks?: string;
 }
 
+// Flat Package Pricing fallback — only sent when business_type is "Package"
+// and the selected package has zero PackageService rows (see
+// QuotationOccupancyGroups.tsx / resolve_package_pricing on the backend).
+export interface QuotationOccupancyGroupInput {
+  occupancy_type: string;
+  adult_count: number;
+  child_count: number;
+  infant_count: number;
+  discount_percent?: number;
+}
+
 export interface QuotationServiceLineDetail extends QuotationServiceLineInput {
   uuid: string;
   line_no: number;
@@ -61,6 +72,24 @@ export interface QuotationFormInput {
   internal_notes?: string;
   customer_notes?: string;
   service_lines: QuotationServiceLineInput[];
+  occupancy_groups?: QuotationOccupancyGroupInput[];
+}
+
+// Frozen at quotation-creation time from the source Package (see
+// build_package_snapshot on the backend) — deliberately never re-read from
+// the live Package/PackagePricing rows, so it stays accurate even after the
+// source package is edited or deactivated (see snapshot independence).
+export interface QuotationPackageSnapshot {
+  pkg_code?: string | null;
+  pkg_name?: string | null;
+  departure_city?: string | null;
+  arrival_city?: string | null;
+  country?: string | null;
+  departure_date?: string | null;
+  return_date?: string | null;
+  duration_days?: number | null;
+  duration_nights?: number | null;
+  currency_code?: string | null;
 }
 
 export interface QuotationDetail extends QuotationFormInput {
@@ -75,6 +104,7 @@ export interface QuotationDetail extends QuotationFormInput {
   cust_uuid?: string | null;
   customer_name?: string | null;
   agent_name?: string | null;
+  package_snapshot?: QuotationPackageSnapshot | null;
   exchange_rate_used: number;
   gross_amount: number;
   taxable_amount: number;

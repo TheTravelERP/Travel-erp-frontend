@@ -202,8 +202,31 @@ export default function QuotationViewPage() {
             <Grid container spacing={1.5}>
               <Grid size={{ xs: 6 }}><Typography variant="body2" color="text.secondary">{t("common.customer")}</Typography><Typography>{quotation.customer_name}</Typography></Grid>
               <Grid size={{ xs: 6 }}><Typography variant="body2" color="text.secondary">{t("quotation.enquiry")}</Typography><Typography>{quotation.enquiry_no}</Typography></Grid>
+              <Grid size={{ xs: 6 }}><Typography variant="body2" color="text.secondary">{t("quotation.businessType")}</Typography><Typography>{quotation.business_type}</Typography></Grid>
+              {quotation.business_type === "Package" && (
+                <Grid size={{ xs: 6 }}>
+                  <Typography variant="body2" color="text.secondary">{t("quotation.package")}</Typography>
+                  <Typography>
+                    {quotation.package_snapshot?.pkg_name ?? "-"}
+                    {quotation.package_snapshot?.duration_days
+                      ? ` (${quotation.package_snapshot.duration_days}D/${quotation.package_snapshot.duration_nights}N)`
+                      : ""}
+                  </Typography>
+                </Grid>
+              )}
               <Grid size={{ xs: 6 }}><Typography variant="body2" color="text.secondary">{t("quotation.quotationDate")}</Typography><Typography>{formatDate(quotation.quotation_date!)}</Typography></Grid>
               <Grid size={{ xs: 6 }}><Typography variant="body2" color="text.secondary">{t("quotation.validUntil")}</Typography><Typography>{quotation.valid_until ? formatDate(quotation.valid_until) : "-"}</Typography></Grid>
+              <Grid size={{ xs: 6 }}><Typography variant="body2" color="text.secondary">{t("quotation.travelDateFrom")}</Typography><Typography>{quotation.travel_date_from ? formatDate(quotation.travel_date_from) : "-"}</Typography></Grid>
+              <Grid size={{ xs: 6 }}><Typography variant="body2" color="text.secondary">{t("quotation.travelDateTo")}</Typography><Typography>{quotation.travel_date_to ? formatDate(quotation.travel_date_to) : "-"}</Typography></Grid>
+              <Grid size={{ xs: 6 }}>
+                <Typography variant="body2" color="text.secondary">{t("quotation.summaryPax")}</Typography>
+                <Typography>
+                  {quotation.pax_adult} {t("quotation.paxAdult")}
+                  {quotation.pax_child ? `, ${quotation.pax_child} ${t("quotation.paxChild")}` : ""}
+                  {quotation.pax_infant ? `, ${quotation.pax_infant} ${t("quotation.paxInfant")}` : ""}
+                </Typography>
+              </Grid>
+              <Grid size={{ xs: 6 }}><Typography variant="body2" color="text.secondary">{t("quotation.currencyCode")}</Typography><Typography>{quotation.currency_code}</Typography></Grid>
             </Grid>
           </Paper>
 

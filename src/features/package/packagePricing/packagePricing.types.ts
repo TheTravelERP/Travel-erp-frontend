@@ -84,3 +84,15 @@ export interface PackagePricingBulkActionResult {
   message: string;
   count: number;
 }
+
+/* ==========================================================
+   RESOLVE (live preview for the Flat Package Pricing fallback)
+========================================================== */
+
+export interface PackagePricingResolveResult {
+  resolved: boolean;
+  price?: number;
+  currency_code?: string;
+  effective_from?: string;
+  effective_to?: string;
+}

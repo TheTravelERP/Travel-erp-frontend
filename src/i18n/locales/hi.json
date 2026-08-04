@@ -708,7 +708,8 @@
       "currencyCodeLength": "मुद्रा कोड बिल्कुल 3 अक्षरों का होना चाहिए",
       "priceRequired": "मूल्य 0 या उससे अधिक होना चाहिए",
       "effectiveFromRequired": "प्रभावी तिथि आवश्यक है"
-    }
+    },
+    "currencyFromPackage": "मुद्रा चयनित पैकेज द्वारा निर्धारित होती है"
   },
   "packageService": {
     "package": "पैकेज",
@@ -1491,12 +1492,23 @@
       "paxNoNegative": "ऋणात्मक नहीं हो सकता",
       "businessTypeRequired": "व्यवसाय प्रकार आवश्यक है",
       "customerOrEnquiryRequired": "यह कोटेशन बनाने के लिए एक पूछताछ चुनें, या ग्राहक चुनें/दर्ज करें",
-      "packageRequired": "एक पैकेज चुनें — बिज़नेस टाइप 'पैकेज' पर सेट है"
+      "packageRequired": "एक पैकेज चुनें — बिज़नेस टाइप 'पैकेज' पर सेट है",
+      "atLeastOneOccupancyGroup": "कम से कम एक अधिभोग समूह जोड़ें"
     },
     "addFollowup": "फॉलो-अप जोड़ें",
     "followups": "फॉलो-अप",
     "noFollowupsYet": "इस कोटेशन के लिए अभी तक कोई फॉलो-अप नहीं है।",
-    "convertedSuccess": "कोटेशन को बुकिंग में बदल दिया गया।"
+    "convertedSuccess": "कोटेशन को बुकिंग में बदल दिया गया।",
+    "occupancyGroups": "अधिभोग समूह",
+    "addOccupancyGroup": "अधिभोग समूह जोड़ें",
+    "noOccupancyGroupsYet": "अभी तक कोई अधिभोग समूह नहीं जोड़ा गया है।",
+    "resolvedPrice": "निर्धारित मूल्य",
+    "pricingNotFound": "इस संयोजन के लिए कोई मूल्य नहीं मिला",
+    "createPricingDialogTitle": "पैकेज मूल्य बनाएं",
+    "createPricingButton": "मूल्य बनाएं",
+    "missingPricingCombinations": "कुछ संयोजनों के लिए मूल्य उपलब्ध नहीं है:",
+    "fixPricingHere": "ठीक करें",
+    "noServiceLinesForPackage": "इस पैकेज में कोई पूर्वनिर्धारित सेवा लाइनें नहीं हैं — इसके बजाय अधिभोग समूह जोड़ें।"
   },
   "booking": {
     "sectionDetails": "बुकिंग विवरण",

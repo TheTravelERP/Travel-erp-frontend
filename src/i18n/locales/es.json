@@ -708,7 +708,8 @@
       "currencyCodeLength": "El código de moneda debe tener exactamente 3 caracteres",
       "priceRequired": "El precio debe ser 0 o mayor",
       "effectiveFromRequired": "La fecha de inicio de vigencia es obligatoria"
-    }
+    },
+    "currencyFromPackage": "La moneda la define el paquete seleccionado"
   },
   "packageService": {
     "package": "Paquete",
@@ -1491,12 +1492,23 @@
       "paxNoNegative": "No puede ser negativo",
       "businessTypeRequired": "El tipo de negocio es obligatorio",
       "customerOrEnquiryRequired": "Selecciona una consulta, o selecciona/introduce un cliente para crear esta cotización",
-      "packageRequired": "Selecciona un Paquete — el Tipo de Negocio está establecido en 'Paquete'"
+      "packageRequired": "Selecciona un Paquete — el Tipo de Negocio está establecido en 'Paquete'",
+      "atLeastOneOccupancyGroup": "Añada al menos un grupo de ocupación"
     },
     "addFollowup": "Agregar seguimiento",
     "followups": "Seguimientos",
     "noFollowupsYet": "Aún no hay seguimientos para esta cotización.",
-    "convertedSuccess": "La cotización se convirtió en una reserva."
+    "convertedSuccess": "La cotización se convirtió en una reserva.",
+    "occupancyGroups": "Grupos de ocupación",
+    "addOccupancyGroup": "Añadir grupo de ocupación",
+    "noOccupancyGroupsYet": "Aún no se han añadido grupos de ocupación.",
+    "resolvedPrice": "Precio resuelto",
+    "pricingNotFound": "No se encontró tarifa para esta combinación",
+    "createPricingDialogTitle": "Crear tarifa de paquete",
+    "createPricingButton": "Crear tarifa",
+    "missingPricingCombinations": "A algunas combinaciones les falta la tarifa:",
+    "fixPricingHere": "Corregir",
+    "noServiceLinesForPackage": "Este paquete no tiene líneas de servicio predefinidas; añada grupos de ocupación en su lugar."
   },
   "booking": {
     "sectionDetails": "Detalles de la reserva",

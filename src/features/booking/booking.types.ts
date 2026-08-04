@@ -37,6 +37,7 @@ export interface BookingDetail extends BookingFormInput {
   departure_uuid?: string | null;
   package_snapshot?: { pkg_code?: string; pkg_name?: string; [key: string]: any } | null;
   enquiry_no?: string | null;
+  lead_source?: string | null;
   quotation_uuid?: string | null;
   quotation_no?: string | null;
   cust_uuid: string;

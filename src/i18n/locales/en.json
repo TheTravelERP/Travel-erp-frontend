@@ -708,7 +708,8 @@
       "currencyCodeLength": "Currency code must be exactly 3 characters",
       "priceRequired": "Price must be 0 or greater",
       "effectiveFromRequired": "Effective from date is required"
-    }
+    },
+    "currencyFromPackage": "Currency is set by the selected package"
   },
   "packageService": {
     "package": "Package",
@@ -1491,12 +1492,23 @@
       "paxNoNegative": "Cannot be negative",
       "businessTypeRequired": "Business type is required",
       "customerOrEnquiryRequired": "Select an enquiry, or select/enter a customer to create this quotation",
-      "packageRequired": "Select a Package — Business Type is set to 'Package'"
+      "packageRequired": "Select a Package — Business Type is set to 'Package'",
+      "atLeastOneOccupancyGroup": "Add at least one occupancy group"
     },
     "addFollowup": "Add Follow-up",
     "followups": "Follow-ups",
     "noFollowupsYet": "No follow-ups for this quotation yet.",
-    "convertedSuccess": "Quotation converted to booking."
+    "convertedSuccess": "Quotation converted to booking.",
+    "occupancyGroups": "Occupancy Groups",
+    "addOccupancyGroup": "Add Occupancy Group",
+    "noOccupancyGroupsYet": "No occupancy groups added yet.",
+    "resolvedPrice": "Resolved Price",
+    "pricingNotFound": "No pricing found for this combination",
+    "createPricingDialogTitle": "Create Package Pricing",
+    "createPricingButton": "Create Pricing",
+    "missingPricingCombinations": "Some combinations are missing pricing:",
+    "fixPricingHere": "Fix",
+    "noServiceLinesForPackage": "This package has no predefined service lines — add Occupancy Groups instead."
   },
   "booking": {
     "sectionDetails": "Booking Details",

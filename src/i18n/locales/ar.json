@@ -708,7 +708,8 @@
       "currencyCodeLength": "يجب أن يتكون رمز العملة من 3 أحرف بالضبط",
       "priceRequired": "يجب أن يكون السعر 0 أو أكثر",
       "effectiveFromRequired": "تاريخ السريان مطلوب"
-    }
+    },
+    "currencyFromPackage": "يتم تحديد العملة بواسطة الباقة المختارة"
   },
   "packageService": {
     "package": "الباقة",
@@ -1491,12 +1492,23 @@
       "paxNoNegative": "لا يمكن أن يكون سالبًا",
       "businessTypeRequired": "نوع العمل مطلوب",
       "customerOrEnquiryRequired": "اختر استفسارًا، أو اختر/أدخل عميلاً لإنشاء عرض السعر هذا",
-      "packageRequired": "اختر باقة — نوع العمل محدد كـ 'باقة'"
+      "packageRequired": "اختر باقة — نوع العمل محدد كـ 'باقة'",
+      "atLeastOneOccupancyGroup": "أضف مجموعة إشغال واحدة على الأقل"
     },
     "addFollowup": "إضافة متابعة",
     "followups": "المتابعات",
     "noFollowupsYet": "لا توجد متابعات لعرض السعر هذا حتى الآن.",
-    "convertedSuccess": "تم تحويل عرض السعر إلى حجز."
+    "convertedSuccess": "تم تحويل عرض السعر إلى حجز.",
+    "occupancyGroups": "مجموعات الإشغال",
+    "addOccupancyGroup": "إضافة مجموعة إشغال",
+    "noOccupancyGroupsYet": "لم تتم إضافة أي مجموعة إشغال بعد.",
+    "resolvedPrice": "السعر المحدد",
+    "pricingNotFound": "لم يتم العثور على تسعير لهذا المزيج",
+    "createPricingDialogTitle": "إنشاء تسعير الباقة",
+    "createPricingButton": "إنشاء التسعير",
+    "missingPricingCombinations": "بعض المجموعات لا تحتوي على تسعير:",
+    "fixPricingHere": "إصلاح",
+    "noServiceLinesForPackage": "لا تحتوي هذه الباقة على بنود خدمة محددة مسبقًا — أضف مجموعات إشغال بدلاً من ذلك."
   },
   "booking": {
     "sectionDetails": "تفاصيل الحجز",

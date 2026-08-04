@@ -31,6 +31,9 @@ import type { EnquiryDetail } from "../../../enquiry/enquiry.types";
 import ResolveEnquiryLinksCard from "./resolveLinks/ResolveEnquiryLinksCard";
 import EnquirySummaryBar from "./EnquirySummaryBar";
 import CustomerSelector from "../../../customer/components/CustomerSelector";
+import QuotationOccupancyGroups from "./QuotationOccupancyGroups";
+import { getPackageByUuid } from "../../../package/package.api";
+import { getPackageServices } from "../../../package/packageService/packageService.api";
 
 // Enquiries whose conversion_status leaves them effectively closed — flagged
 // (not hidden) in the standalone picker so a user can still knowingly pick one.
@@ -73,6 +76,7 @@ const emptyValues: QuotationFormInput = {
   internal_notes: "",
   customer_notes: "",
   service_lines: [],
+  occupancy_groups: [],
 };
 
 const emptyLine = {
@@ -106,7 +110,19 @@ export default function QuotationForm({
   const { t } = useTranslation();
   const { showSnackbar } = useSnackbar();
   const navigate = useNavigate();
-  const schema = useMemo(() => getQuotationSchema(t), [t]);
+
+  // Flips once the selected Package is confirmed to have zero PackageService
+  // rows (see the effect below, keyed off business_type/pkg_uuid) — swaps
+  // the Occupancy Group UI in for the standard service-lines table and
+  // relaxes service_lines.min(1) in the zod schema accordingly. Kept as its
+  // own state (rather than derived inline) because computing it requires
+  // watching fields off `control`, which doesn't exist until after this
+  // schema/useForm call — it settles one render after the watches below.
+  const [useOccupancyGroupsFlag, setUseOccupancyGroupsFlag] = useState(false);
+  const schema = useMemo(
+    () => getQuotationSchema(t, { useOccupancyGroups: useOccupancyGroupsFlag }),
+    [t, useOccupancyGroupsFlag],
+  );
 
   const {
     control,
@@ -207,6 +223,11 @@ export default function QuotationForm({
         (errors.service_lines as any)?.message ?? (errors.service_lines as any)?.root?.message
       : undefined;
 
+  const occupancyGroupsError =
+    errors.occupancy_groups && !Array.isArray(errors.occupancy_groups)
+      ? (errors.occupancy_groups as any)?.message ?? (errors.occupancy_groups as any)?.root?.message
+      : undefined;
+
   /* ==========================================================
      RESOLVE-REQUIRED-LINKS — the enquiry a Quotation is built from may
      only carry snapshot customer/package data (leads shouldn't pollute
@@ -233,6 +254,46 @@ export default function QuotationForm({
   const customerNameWatched = useWatch({ control, name: "customer_name" });
   const customerMobileWatched = useWatch({ control, name: "customer_mobile" });
   const pkgUuidWatched = useWatch({ control, name: "pkg_uuid" });
+
+  /* ==========================================================
+     FLAT PACKAGE PRICING FALLBACK — a Package business-type quotation whose
+     selected package has zero PackageService rows can't produce any
+     service_lines via the normal copy path, so the Occupancy Group UI
+     substitutes for it. Checked once per package selection, before the user
+     ever reaches the service-lines section (not deferred to submit time).
+  ========================================================== */
+  const [packagePricingInfo, setPackagePricingInfo] = useState<{ hasServiceLines: boolean; currency: string } | null>(null);
+
+  useEffect(() => {
+    if (!isPackageBusiness || !pkgUuidWatched) {
+      setPackagePricingInfo(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const [pkg, services] = await Promise.all([
+          getPackageByUuid(pkgUuidWatched),
+          getPackageServices({ package_uuid: pkgUuidWatched, page: 1, page_size: 1 }),
+        ]);
+        if (cancelled) return;
+        setPackagePricingInfo({ hasServiceLines: services.pagination.total > 0, currency: pkg.currency_code });
+      } catch {
+        if (!cancelled) setPackagePricingInfo(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isPackageBusiness, pkgUuidWatched]);
+
+  const useOccupancyGroups = isPackageBusiness && packagePricingInfo !== null && !packagePricingInfo.hasServiceLines;
+
+  useEffect(() => {
+    setUseOccupancyGroupsFlag(useOccupancyGroups);
+  }, [useOccupancyGroups]);
+
+  const priceAsOfDate = travelDateFromWatched || quotationDateWatched || new Date().toISOString().slice(0, 10);
 
   // Checked against *either* the enquiry's own link (the create-time
   // "Resolve Required Links" signal) *or* the quotation's own already-set
@@ -325,6 +386,9 @@ export default function QuotationForm({
     const payload = { ...data };
     if (!isPackageBusiness) {
       payload.pkg_uuid = null;
+    }
+    if (!useOccupancyGroups) {
+      payload.occupancy_groups = [];
     }
     if (payload.enquiry_uuid) {
       payload.cust_uuid = null;
@@ -445,7 +509,7 @@ export default function QuotationForm({
           </Grid>
 
           {isPackageBusiness && (
-            <Grid size={{ xs: 12, sm: 6 }}>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <EntityAutocomplete
                 name="pkg_uuid"
                 label={t("quotation.package")}
@@ -637,6 +701,15 @@ export default function QuotationForm({
               </Box>
             </Alert>
           </Grid>
+        ) : useOccupancyGroups ? (
+          <QuotationOccupancyGroups
+            control={control}
+            packageUuid={pkgUuidWatched!}
+            packageCurrency={packagePricingInfo!.currency}
+            priceAsOfDate={priceAsOfDate}
+            disabled={disabled}
+            errorMessage={occupancyGroupsError}
+          />
         ) : (
         <FormSection
           title={t("quotation.serviceLines")}

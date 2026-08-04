@@ -21,6 +21,7 @@ import type { PackagePricingFormInput } from "../packagePricing.types";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
 import FormActions from "../../../../components/forms/FormActions";
+import { getPackageByUuid } from "../../package.api";
 
 interface PackagePricingFormProps {
   defaultValues?: Partial<PackagePricingFormInput>;
@@ -33,7 +34,7 @@ const emptyValues = {
   occupancy_type: "",
   passenger_type: "",
   price_category: "Normal",
-  currency_code: "INR",
+  currency_code: "",
   price: 0,
   effective_from: "",
   effective_to: "",
@@ -87,6 +88,18 @@ export default function PackagePricingForm({
                   control={control}
                   dropdownName="packages"
                   setValue={setValue}
+                  onOptionSelected={async (option) => {
+                    if (!option) {
+                      setValue("currency_code", "", { shouldDirty: true, shouldValidate: true });
+                      return;
+                    }
+                    // Currency is locked to the parent Package (see
+                    // pkg_pricing_service.py's currency-match validation) —
+                    // fetched here rather than via meta_columns since
+                    // "packages" dropdown_config doesn't carry currency_code.
+                    const pkg = await getPackageByUuid(option.value);
+                    setValue("currency_code", pkg.currency_code, { shouldDirty: true, shouldValidate: true });
+                  }}
                 />
               </Grid>
 
@@ -133,8 +146,9 @@ export default function PackagePricingForm({
                       label={t("packagePricing.currencyCode")}
                       fullWidth
                       required
+                      slotProps={{ input: { readOnly: true } }}
+                      helperText={fieldState.error?.message ?? t("packagePricing.currencyFromPackage")}
                       error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
                     />
                   )}
                 />

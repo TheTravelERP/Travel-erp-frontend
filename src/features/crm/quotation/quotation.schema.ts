@@ -21,8 +21,24 @@ const serviceLineSchema = (t: TFunction) =>
     remarks: z.string().nullish(),
   });
 
-export const getQuotationSchema = (t: TFunction) =>
+const occupancyGroupSchema = (t: TFunction) =>
   z.object({
+    occupancy_type: z.string().trim().min(1, t('packagePricing.validation.occupancyTypeRequired')),
+    adult_count: z.coerce.number().int().min(0).default(0),
+    child_count: z.coerce.number().int().min(0).default(0),
+    infant_count: z.coerce.number().int().min(0).default(0),
+    discount_percent: z.coerce.number().min(0).max(100).optional(),
+  });
+
+// `useOccupancyGroups` is set by QuotationForm once it knows the selected
+// Package has zero PackageService rows (business_type "Package") — in that
+// case service_lines is legitimately empty and occupancy_groups carries the
+// Flat Package Pricing fallback payload instead. Every other quotation keeps
+// the original service_lines.min(1) requirement unchanged.
+export const getQuotationSchema = (t: TFunction, options?: { useOccupancyGroups?: boolean }) => {
+  const useOccupancyGroups = options?.useOccupancyGroups ?? false;
+
+  return z.object({
     // Optional — when no enquiry is picked (Direct Quotation), the
     // customer_*/cust_uuid fields below are required instead.
     enquiry_uuid: z.string().trim().optional(),
@@ -63,7 +79,10 @@ export const getQuotationSchema = (t: TFunction) =>
     terms_conditions: z.string().nullish(),
     internal_notes: z.string().nullish(),
     customer_notes: z.string().nullish(),
-    service_lines: z.array(serviceLineSchema(t)).min(1, t('quotation.validation.atLeastOneLine')),
+    service_lines: useOccupancyGroups
+      ? z.array(serviceLineSchema(t))
+      : z.array(serviceLineSchema(t)).min(1, t('quotation.validation.atLeastOneLine')),
+    occupancy_groups: z.array(occupancyGroupSchema(t)).optional(),
   }).refine(
     (data) => !data.travel_date_from || !data.travel_date_to || data.travel_date_from <= data.travel_date_to,
     { message: t('validation.endDateBeforeStartDate'), path: ['travel_date_to'] },
@@ -95,6 +114,17 @@ export const getQuotationSchema = (t: TFunction) =>
       message: t('quotation.validation.packageRequired'),
       path: ['pkg_uuid'],
     },
+  ).refine(
+    (data) =>
+      !useOccupancyGroups ||
+      (data.occupancy_groups ?? []).some(
+        (g) => g.adult_count > 0 || g.child_count > 0 || g.infant_count > 0,
+      ),
+    {
+      message: t('quotation.validation.atLeastOneOccupancyGroup'),
+      path: ['occupancy_groups'],
+    },
   );
+};
 
 export type QuotationSchema = ReturnType<typeof getQuotationSchema>;

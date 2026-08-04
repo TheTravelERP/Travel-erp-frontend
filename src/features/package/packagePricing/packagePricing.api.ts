@@ -7,6 +7,7 @@ import type {
   PackagePricingListApiResponse,
   GetPackagePricingsParams,
   PackagePricingBulkActionResult,
+  PackagePricingResolveResult,
 } from "./packagePricing.types";
 
 // Empty-string date fields (e.g. an untouched date input) are not valid dates —
@@ -24,6 +25,23 @@ function cleanPayload<T extends object>(payload: T): Partial<T> {
 
 export async function createPackagePricing(payload: PackagePricingFormInput) {
   const { data } = await api.post("/api/v1/package-pricings", cleanPayload(payload));
+  return data;
+}
+
+/* ==========================================================
+   RESOLVE (live preview for the Flat Package Pricing fallback)
+========================================================== */
+
+export async function resolvePackagePricing(params: {
+  package_uuid: string;
+  occupancy_type: string;
+  passenger_type: string;
+  price_as_of_date: string;
+}, signal?: AbortSignal): Promise<PackagePricingResolveResult> {
+  const { data } = await api.get<PackagePricingResolveResult>("/api/v1/package-pricings/resolve", {
+    params,
+    signal,
+  });
   return data;
 }
 

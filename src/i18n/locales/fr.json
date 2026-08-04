@@ -708,7 +708,8 @@
       "currencyCodeLength": "Le code devise doit comporter exactement 3 caractères",
       "priceRequired": "Le prix doit être supérieur ou égal à 0",
       "effectiveFromRequired": "La date de début de validité est requise"
-    }
+    },
+    "currencyFromPackage": "La devise est définie par le forfait sélectionné"
   },
   "packageService": {
     "package": "Forfait",
@@ -1491,12 +1492,23 @@
       "paxNoNegative": "Ne peut pas être négatif",
       "businessTypeRequired": "Le type d'activité est requis",
       "customerOrEnquiryRequired": "Sélectionnez une demande, ou sélectionnez/saisissez un client pour créer ce devis",
-      "packageRequired": "Sélectionnez un forfait — le type d'activité est défini sur « Forfait »"
+      "packageRequired": "Sélectionnez un forfait — le type d'activité est défini sur « Forfait »",
+      "atLeastOneOccupancyGroup": "Ajoutez au moins un groupe d'occupation"
     },
     "addFollowup": "Ajouter un suivi",
     "followups": "Suivis",
     "noFollowupsYet": "Aucun suivi pour ce devis pour le moment.",
-    "convertedSuccess": "Le devis a été converti en réservation."
+    "convertedSuccess": "Le devis a été converti en réservation.",
+    "occupancyGroups": "Groupes d'occupation",
+    "addOccupancyGroup": "Ajouter un groupe d'occupation",
+    "noOccupancyGroupsYet": "Aucun groupe d'occupation ajouté pour l'instant.",
+    "resolvedPrice": "Prix résolu",
+    "pricingNotFound": "Aucun tarif trouvé pour cette combinaison",
+    "createPricingDialogTitle": "Créer un tarif de forfait",
+    "createPricingButton": "Créer le tarif",
+    "missingPricingCombinations": "Certaines combinaisons n'ont pas de tarif :",
+    "fixPricingHere": "Corriger",
+    "noServiceLinesForPackage": "Ce forfait n'a pas de lignes de service prédéfinies — ajoutez plutôt des groupes d'occupation."
   },
   "booking": {
     "sectionDetails": "Détails de la réservation",

@@ -146,12 +146,14 @@ export default function BookingViewPage() {
 
       <Grid container spacing={1.5}>
         <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">{t("common.customer")}</Typography><Typography>{booking.customer_name}</Typography></Grid>
+        <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">{t("quotation.businessType")}</Typography><Typography>{booking.business_type || "-"}</Typography></Grid>
         <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">{t("booking.enquiry")}</Typography><Typography>{booking.enquiry_no || "-"}</Typography></Grid>
         <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">{t("quotation.quotationNo")}</Typography><Typography>{booking.quotation_no || "-"}</Typography></Grid>
         <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">{t("booking.bookingDate")}</Typography><Typography>{formatDate(booking.booking_date!)}</Typography></Grid>
         <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">{t("booking.travelStartDate")}</Typography><Typography>{booking.travel_start_date ? formatDate(booking.travel_start_date) : "-"}</Typography></Grid>
         <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">{t("booking.travelEndDate")}</Typography><Typography>{booking.travel_end_date ? formatDate(booking.travel_end_date) : "-"}</Typography></Grid>
         <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">{t("booking.salesExecutive")}</Typography><Typography>{booking.agent_name || "-"}</Typography></Grid>
+        <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">{t("common.source")}</Typography><Typography>{booking.lead_source || "-"}</Typography></Grid>
         <Grid size={{ xs: 6, sm: 3 }}><Typography variant="body2" color="text.secondary">{t("booking.reference")}</Typography><Typography>{booking.reference || "-"}</Typography></Grid>
       </Grid>
 
