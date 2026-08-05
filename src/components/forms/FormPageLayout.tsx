@@ -35,7 +35,7 @@ export default function FormPageLayout({ title, breadcrumbs, children }: FormPag
         )}
       </Breadcrumbs>
 
-      <Paper sx={{ p: 3, borderRadius: 2 }}>{children}</Paper>
+      <Paper sx={{ p: 2, borderRadius: 2 }}>{children}</Paper>
     </Box>
   );
 }

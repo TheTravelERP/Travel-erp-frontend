@@ -1,6 +1,6 @@
 // src/components/common/EntityAutocomplete.tsx
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Autocomplete,
   TextField,
@@ -61,6 +61,13 @@ interface EntityAutocompleteProps {
   // changes — lets a caller react to more than one field at once without
   // stitching together several autoFillMap-driven setValue calls.
   onOptionSelected?: (option: any | null) => void;
+
+  // Seeds the dropdown's first fetch AND the visible input text with a
+  // search term (e.g. an Enquiry's customer-name snapshot), so the options
+  // list arrives already filtered instead of a general/blank listing. Only
+  // ever read once at mount — when omitted (every existing caller), the
+  // input stays fully uncontrolled exactly as before this prop existed.
+  initialInputValue?: string;
 }
 
 /* ---------------- COMPONENT ---------------- */
@@ -84,13 +91,22 @@ export default function EntityAutocomplete({
   filterOption,
   renderOption,
   onOptionSelected,
+  initialInputValue,
 }: EntityAutocompleteProps) {
   const { options: rawOptions, loading, setSearch, loadMore, ensureOptionLoaded } = useEntityDropdown({
     dropdownName,
     pageSize,
     documentTypeCode,
     pkgUuid,
+    initialSearch: initialInputValue,
   });
+
+  // Mirrors MUI Autocomplete's own inputValue so a caller-seeded
+  // initialInputValue actually shows in the text box on mount (Autocomplete
+  // is otherwise fully uncontrolled here) — only spread onto the element
+  // below when initialInputValue was provided at all, so every other caller
+  // keeps today's exact uncontrolled behavior.
+  const [inputValue, setInputValue] = useState(initialInputValue ?? "");
 
   const options = filterOption ? rawOptions.filter(filterOption) : rawOptions;
 
@@ -121,6 +137,7 @@ export default function EntityAutocomplete({
         loading={loading}
         disabled={disabled}
         {...(renderOption ? { renderOption } : {})}
+        {...(initialInputValue !== undefined ? { inputValue } : {})}
 
         /* ---------------- LABEL ---------------- */
         getOptionLabel={(option: any) => option?.label || ""}
@@ -132,6 +149,7 @@ export default function EntityAutocomplete({
 
         /* ---------------- SEARCH ---------------- */
         onInputChange={(_, value, reason) => {
+          setInputValue(value);
           if (reason === "input") {
             setSearch(value);
           }

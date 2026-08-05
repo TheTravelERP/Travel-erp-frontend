@@ -3,9 +3,7 @@
 import {
   Box,
   TextField,
-  Typography,
   InputAdornment,
-  Paper,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { Controller, useForm, useWatch } from "react-hook-form";
@@ -27,6 +25,7 @@ import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../utils/mergeFormDefaults";
 import FormActions from "../../../components/forms/FormActions";
+import FormSection from "../../../components/forms/FormSection";
 
 interface EnquiryFormProps {
   defaultValues?: Partial<EnquiryFormInput>;
@@ -143,7 +142,7 @@ export default function EnquiryForm({
       noValidate
       sx={{ flexGrow: 1 }}
     >
-      <Grid container spacing={2}>
+      <Grid container spacing={1.5}>
         {/* First row */}
         <Grid size={{ xs: 12, md: 4 }}>
           <DropdownAutocomplete
@@ -178,95 +177,87 @@ export default function EnquiryForm({
 
        
         {/* ENQUIRY DETAILS */}
-        <Grid size={{ xs: 12, md: 12 }}>
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-              {t("enquiry.enquiryDetails")}
-            </Typography>
+        <FormSection title={t("enquiry.enquiryDetails")}>
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <Controller
+              name="pax_count"
+              control={control}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  type="number"
+                  label={t("enquiry.paxCount")}
+                  fullWidth
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    if (raw === "") {
+                      field.onChange(raw);
+                      return;
+                    }
+                    const num = Number(raw);
+                    field.onChange(
+                      Number.isFinite(num) ? Math.min(num, 9999) : raw,
+                    );
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <GroupIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              )}
+            />
+          </Grid>
 
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <Controller
-                  name="pax_count"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <TextField
-                      {...field}
-                      type="number"
-                      label={t("enquiry.paxCount")}
-                      fullWidth
-                      error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
-                      onChange={(e) => {
-                        const raw = e.target.value;
-                        if (raw === "") {
-                          field.onChange(raw);
-                          return;
-                        }
-                        const num = Number(raw);
-                        field.onChange(
-                          Number.isFinite(num) ? Math.min(num, 9999) : raw,
-                        );
-                      }}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <GroupIcon fontSize="small" />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <DropdownAutocomplete
+              name="lead_source"
+              label={t("common.source")}
+              control={control}
+              useForm={true}
+              allowAdd={true}
+              pagination
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <DropdownAutocomplete
+              name="enquiry_priority"
+              label={t("common.priority")}
+              control={control}
+              useForm={true}
+              allowAdd={false}
+              pagination
+            />
+          </Grid>
 
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <DropdownAutocomplete
-                  name="lead_source"
-                  label={t("common.source")}
-                  control={control}
-                  useForm={true}
-                  allowAdd={true}
-                  pagination
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <DropdownAutocomplete
-                  name="enquiry_priority"
-                  label={t("common.priority")}
-                  control={control}
-                  useForm={true}
-                  allowAdd={false}
-                  pagination
-                />
-              </Grid>
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <MobileNumberField
+              name="customer_alternate_mobile"
+              control={control}
+              label={t("enquiry.alternateMobile")}
+            />
+          </Grid>
 
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <MobileNumberField
-                  name="customer_alternate_mobile"
-                  control={control}
-                  label={t("enquiry.alternateMobile")}
+          <Grid size={{ xs: 12 }}>
+            <Controller
+              name="description"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label={t("common.notes")}
+                  multiline
+                  rows={2}
+                  fullWidth
                 />
-              </Grid>
-
-              <Grid size={{ xs: 12 }}>
-                <Controller
-                  name="description"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label={t("common.notes")}
-                      multiline
-                      rows={2}
-                      fullWidth
-                    />
-                  )}
-                />
-              </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
+              )}
+            />
+          </Grid>
+        </FormSection>
 
         <FormActions
           onBack={() => navigate("/app/enquiries")}

@@ -5,6 +5,7 @@ import {
   Button,
   Grid,
   IconButton,
+  Paper,
   Stack,
   TextField,
   Typography,
@@ -28,9 +29,9 @@ import FormSection from "../../../../components/forms/FormSection";
 import FormActions from "../../../../components/forms/FormActions";
 import { getEnquiryByUuid } from "../../../enquiry/enquiry.api";
 import type { EnquiryDetail } from "../../../enquiry/enquiry.types";
-import ResolveEnquiryLinksCard from "./resolveLinks/ResolveEnquiryLinksCard";
 import EnquirySummaryBar from "./EnquirySummaryBar";
-import CustomerSelector from "../../../customer/components/CustomerSelector";
+import QuotationCustomerPanel from "./quickResolve/QuotationCustomerPanel";
+import QuotationPackagePanel from "./quickResolve/QuotationPackagePanel";
 import QuotationOccupancyGroups from "./QuotationOccupancyGroups";
 import { getPackageByUuid } from "../../../package/package.api";
 import { getPackageServices } from "../../../package/packageService/packageService.api";
@@ -58,12 +59,9 @@ interface Props {
 const emptyValues: QuotationFormInput = {
   enquiry_uuid: "",
   cust_uuid: null,
-  customer_mode: "new",
-  customer_name: "",
-  customer_mobile: "",
-  customer_email: "",
   business_type: "",
   pkg_uuid: null,
+  pkg_count: 1,
   quotation_date: new Date().toISOString().slice(0, 10),
   valid_until: "",
   travel_date_from: "",
@@ -234,8 +232,8 @@ export default function QuotationForm({
      the master tables). A single `enquiry` object is the source of truth
      here: customerResolved/packageResolved derive from its cust_uuid/
      pkg_uuid on every render, so linking/creating either master record
-     (via ResolveEnquiryLinksCard, inline — no popups) just needs to patch
-     this state locally to unlock Save/Service Lines, with no re-fetch.
+     (via QuotationCustomerPanel/QuotationPackagePanel below) just needs to
+     patch this state locally to unlock Save/Service Lines, with no re-fetch.
   ========================================================== */
   const [enquiry, setEnquiry] = useState<EnquiryDetail | null>(null);
   const [loadingEnquiry, setLoadingEnquiry] = useState<boolean>(
@@ -245,15 +243,14 @@ export default function QuotationForm({
   const businessType = useWatch({ control, name: "business_type" });
   const isPackageBusiness = businessType === "Package";
 
-  // Direct Quotation (no enquiry picked, standalone mode only) — the inline
-  // Customer section below stands in for the enquiry-driven "Resolve
-  // Required Links" flow; a customer is "resolved" here once either an
-  // existing customer is picked or enough info is present to create one.
-  const custModeWatched = useWatch({ control, name: "customer_mode" });
   const custUuidWatched = useWatch({ control, name: "cust_uuid" });
-  const customerNameWatched = useWatch({ control, name: "customer_name" });
-  const customerMobileWatched = useWatch({ control, name: "customer_mobile" });
   const pkgUuidWatched = useWatch({ control, name: "pkg_uuid" });
+  // Header — the only source of truth for passenger counts (see
+  // QuotationOccupancyGroups.tsx's Passenger Allocation summary, which
+  // reads these but never writes back to them).
+  const paxAdultWatched = useWatch({ control, name: "pax_adult" });
+  const paxChildWatched = useWatch({ control, name: "pax_child" });
+  const paxInfantWatched = useWatch({ control, name: "pax_infant" });
 
   /* ==========================================================
      FLAT PACKAGE PRICING FALLBACK — a Package business-type quotation whose
@@ -296,17 +293,13 @@ export default function QuotationForm({
   const priceAsOfDate = travelDateFromWatched || quotationDateWatched || new Date().toISOString().slice(0, 10);
 
   // Checked against *either* the enquiry's own link (the create-time
-  // "Resolve Required Links" signal) *or* the quotation's own already-set
-  // field (the source of truth once a quotation exists — e.g. editing a
-  // Direct Quotation, whose auto-created bookkeeping enquiry never gets its
-  // own cust/pkg link filled in even though the quotation's fields are
-  // valid). Either one being set is enough; neither is clobbered by the
-  // other's absence.
-  const customerResolved = enquiry
-    ? !!enquiry.cust_uuid || !!custUuidWatched
-    : custModeWatched === "existing"
-      ? !!custUuidWatched
-      : !!customerNameWatched?.trim() && !!customerMobileWatched;
+  // resolution signal) *or* the quotation's own already-set field (the
+  // source of truth once a quotation exists — e.g. editing a Direct
+  // Quotation, whose auto-created bookkeeping enquiry never gets its own
+  // cust/pkg link filled in even though the quotation's fields are valid).
+  // Either one being set is enough; neither is clobbered by the other's
+  // absence.
+  const customerResolved = enquiry ? !!enquiry.cust_uuid || !!custUuidWatched : !!custUuidWatched;
   // Package resolution only applies when business_type is "Package" — for
   // every other business_type, or when there's no enquiry at all (Direct
   // Quotation), it's a non-issue.
@@ -378,10 +371,9 @@ export default function QuotationForm({
     if (updated.pkg_uuid) setValue("pkg_uuid", updated.pkg_uuid);
   }
 
-  // pkg_uuid only means anything for business_type "Package"; the inline
-  // customer_*/cust_uuid capture fields only mean anything when there's no
-  // enquiry_uuid (Direct Quotation) — never send stale values from a toggle
-  // the user isn't currently on.
+  // pkg_uuid only means anything for business_type "Package". cust_uuid is
+  // only meaningful for Direct Quotation — once an Enquiry is attached, the
+  // backend resolves the customer via the already-linked Enquiry instead.
   const submitCleaned = (data: QuotationFormInput) => {
     const payload = { ...data };
     if (!isPackageBusiness) {
@@ -391,15 +383,6 @@ export default function QuotationForm({
       payload.occupancy_groups = [];
     }
     if (payload.enquiry_uuid) {
-      payload.cust_uuid = null;
-      payload.customer_name = "";
-      payload.customer_mobile = "";
-      payload.customer_email = "";
-    } else if (payload.customer_mode === "existing") {
-      payload.customer_name = "";
-      payload.customer_mobile = "";
-      payload.customer_email = "";
-    } else {
       payload.cust_uuid = null;
     }
     return onSubmit(payload);
@@ -421,36 +404,14 @@ export default function QuotationForm({
 
       {enquiry && <EnquirySummaryBar enquiry={enquiry} businessType={businessType} />}
 
-      <Grid container spacing={2}>
-        {mode === "standalone" && !enquiry && !loadingEnquiry && (
-          <Grid size={{ xs: 12 }}>
-            <CustomerSelector control={control} setValue={setValue} />
-          </Grid>
-        )}
-
-        {enquiry && !linksResolved && (
-          <ResolveEnquiryLinksCard
-            enquiry={enquiry}
-            onEnquiryUpdated={handleEnquiryLinkResolved}
-            isPackageBusiness={isPackageBusiness}
-            disabled={disabled}
-          />
-        )}
-
-        <FormSection title={t("quotation.sectionDetails")}>
-          <Grid size={{ xs: 12, sm: 3 }}>
-            <DropdownAutocomplete
-              name="business_type"
-              label={t("quotation.businessType")}
-              control={control}
-              useForm={true}
-              allowAdd={false}
-              pagination
-              disabled={disabled}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: isPackageBusiness ? 5 : 9 }}>
+      <Grid container spacing={1.5}>
+        {/* Sales Context leads the form — Enquiry, Business Type, and
+            Package (conditional) establish what's being sold before the
+            Customer section (below) asks who it's for. Customer and
+            Business Type/Package are derived from Enquiry once attached,
+            so the source fields render first regardless of mode. */}
+        <FormSection title={t("quotation.sectionSalesContext")}>
+          <Grid size={{ xs: 12, sm: 9 }}>
             {mode === "fromEnquiry" ? (
               <TextField
                 label={t("quotation.enquiry")}
@@ -508,18 +469,66 @@ export default function QuotationForm({
             )}
           </Grid>
 
-          {isPackageBusiness && (
-            <Grid size={{ xs: 12, sm: 4 }}>
-              <EntityAutocomplete
-                name="pkg_uuid"
-                label={t("quotation.package")}
-                control={control}
-                dropdownName="packages"
-                disabled={disabled}
-              />
-            </Grid>
-          )}
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <DropdownAutocomplete
+              name="business_type"
+              label={t("quotation.businessType")}
+              control={control}
+              useForm={true}
+              allowAdd={false}
+              pagination
+              disabled={disabled || !!enquiry}
+            />
+            {!!enquiry && (
+              <Typography variant="caption" color="text.secondary" display="block" mt={0.5}>
+                {t("quotation.businessTypeInheritedFromEnquiry")}
+              </Typography>
+            )}
+          </Grid>
 
+        </FormSection>
+
+        {/* Customer / Package resolution — same panels for Direct Quotation
+            (enquiry null) and Quotation-from-Enquiry (enquiry set, snapshot
+            card + pre-searched autocomplete). Customer stays left/md:6
+            whether or not Package renders, so its width never shifts. */}
+        {!loadingEnquiry && (
+          <>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Paper variant="outlined" sx={{ p: 2, height: "100%" }}>
+                <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
+                  {t("quotation.customerSectionTitle")}
+                </Typography>
+                <QuotationCustomerPanel
+                  control={control}
+                  setValue={setValue}
+                  enquiry={enquiry}
+                  onEnquiryUpdated={handleEnquiryLinkResolved}
+                  disabled={disabled}
+                />
+              </Paper>
+            </Grid>
+
+            {isPackageBusiness && (
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Paper variant="outlined" sx={{ p: 2, height: "100%" }}>
+                  <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
+                    {t("quotation.packageSectionTitle")}
+                  </Typography>
+                  <QuotationPackagePanel
+                    control={control}
+                    setValue={setValue}
+                    enquiry={enquiry}
+                    onEnquiryUpdated={handleEnquiryLinkResolved}
+                    disabled={disabled}
+                  />
+                </Paper>
+              </Grid>
+            )}
+          </>
+        )}
+
+        <FormSection title={t("quotation.sectionDetails")}>
           <Grid size={{ xs: 12, sm: 2 }}>
             <Controller
               name="quotation_date"
@@ -608,7 +617,21 @@ export default function QuotationForm({
             />
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 3 }}>
+          <Grid size={{ xs: 12, sm: 2 }}>
+            <Controller name="pkg_count" control={control} render={({ field, fieldState }) => (
+              <TextField
+                {...field}
+                type="number"
+                label={t("quotation.numberOfPackages")}
+                fullWidth
+                disabled={disabled}
+                slotProps={{ htmlInput: { min: 1, max: 999 } }}
+                error={!!fieldState.error}
+                helperText={fieldState.error?.message}
+              />
+            )} />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 2 }}>
             <Controller name="pax_adult" control={control} render={({ field, fieldState }) => (
               <TextField
                 {...field}
@@ -622,7 +645,7 @@ export default function QuotationForm({
               />
             )} />
           </Grid>
-          <Grid size={{ xs: 12, sm: 3 }}>
+          <Grid size={{ xs: 12, sm: 2 }}>
             <Controller name="pax_child" control={control} render={({ field, fieldState }) => (
               <TextField
                 {...field}
@@ -636,7 +659,7 @@ export default function QuotationForm({
               />
             )} />
           </Grid>
-          <Grid size={{ xs: 12, sm: 3 }}>
+          <Grid size={{ xs: 12, sm: 2 }}>
             <Controller name="pax_infant" control={control} render={({ field, fieldState }) => (
               <TextField
                 {...field}
@@ -650,7 +673,16 @@ export default function QuotationForm({
               />
             )} />
           </Grid>
-          <Grid size={{ xs: 12, sm: 3 }}>
+          <Grid size={{ xs: 12, sm: 2 }}>
+            <TextField
+              label={t("quotation.paxCount")}
+              value={(Number(paxAdultWatched) || 0) + (Number(paxChildWatched) || 0) + (Number(paxInfantWatched) || 0)}
+              fullWidth
+              disabled
+              slotProps={{ htmlInput: { readOnly: true } }}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 2 }}>
             <Controller name="currency_code" control={control} render={({ field, fieldState }) => (
               <TextField {...field} label={t("quotation.currencyCode")} fullWidth disabled={disabled} error={!!fieldState.error} helperText={fieldState.error?.message} />
             )} />
@@ -704,11 +736,15 @@ export default function QuotationForm({
         ) : useOccupancyGroups ? (
           <QuotationOccupancyGroups
             control={control}
+            setValue={setValue}
             packageUuid={pkgUuidWatched!}
             packageCurrency={packagePricingInfo!.currency}
             priceAsOfDate={priceAsOfDate}
             disabled={disabled}
             errorMessage={occupancyGroupsError}
+            paxAdult={paxAdultWatched ?? 0}
+            paxChild={paxChildWatched ?? 0}
+            paxInfant={paxInfantWatched ?? 0}
           />
         ) : (
         <FormSection

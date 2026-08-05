@@ -31,7 +31,6 @@ export default function BookingCreatePage() {
       .then((enquiry) => {
         setPrefill({
           enquiry_uuid: enquiryUuid,
-          cust_uuid: enquiry.cust_uuid ?? undefined,
           business_type: enquiry.business_type,
         });
       })

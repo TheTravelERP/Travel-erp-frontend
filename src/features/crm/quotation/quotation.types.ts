@@ -20,12 +20,16 @@ export interface QuotationServiceLineInput {
 // Flat Package Pricing fallback — only sent when business_type is "Package"
 // and the selected package has zero PackageService rows (see
 // QuotationOccupancyGroups.tsx / resolve_package_pricing on the backend).
+// LOCKED: each row is exactly one pricing rule — Occupancy Type + Passenger
+// Type + Quantity — resolved 1:1 against PackagePricing.
 export interface QuotationOccupancyGroupInput {
   occupancy_type: string;
-  adult_count: number;
-  child_count: number;
-  infant_count: number;
-  discount_percent?: number;
+  passenger_type: string;
+  quantity: number;
+  // Row-level commercial override of the resolved per-unit Package Price.
+  // Defaults to the resolved price and is user-editable; Package Pricing
+  // master data itself is never modified by editing this.
+  selling_price?: number;
 }
 
 export interface QuotationServiceLineDetail extends QuotationServiceLineInput {
@@ -44,20 +48,20 @@ export interface QuotationServiceLineDetail extends QuotationServiceLineInput {
 
 export interface QuotationFormInput {
   // Optional — when omitted, the backend auto-creates a minimal Enquiry
-  // from the customer_*/cust_uuid + business_type + pax fields below (Direct
-  // Quotation). When provided, those customer_* fields are ignored.
+  // from cust_uuid + business_type + pax fields below (Direct Quotation).
+  // When provided, cust_uuid is ignored (the backend resolves the customer
+  // via the already-linked Enquiry instead).
   enquiry_uuid?: string;
   cust_uuid?: string | null;
-  customer_mode?: 'new' | 'existing';
-  customer_name?: string;
-  customer_mobile?: string;
-  customer_email?: string;
 
   // Pre-filled from the enquiry's business_type when an enquiry is picked,
   // editable; required directly from the user otherwise.
   business_type: string;
 
   pkg_uuid?: string | null;
+  // Header-level commercial value, independent of the Occupancy section —
+  // never derived/updated from occupancy_groups. See quotation.schema.ts.
+  pkg_count: number;
   quotation_date?: string;
   valid_until?: string;
   travel_date_from?: string;

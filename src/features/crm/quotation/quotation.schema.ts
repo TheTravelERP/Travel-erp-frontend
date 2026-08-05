@@ -1,7 +1,6 @@
 // src/features/crm/quotation/quotation.schema.ts
 import * as z from 'zod';
 import type { TFunction } from 'i18next';
-import { MOBILE_NUMBER_REGEX } from '../../../utils/validator';
 
 const serviceLineSchema = (t: TFunction) =>
   z.object({
@@ -21,13 +20,19 @@ const serviceLineSchema = (t: TFunction) =>
     remarks: z.string().nullish(),
   });
 
+// LOCKED: one row = one pricing rule (Occupancy Type + Passenger Type +
+// Quantity) — no more mixed Adult/Child/Infant counts within a single row.
 const occupancyGroupSchema = (t: TFunction) =>
   z.object({
     occupancy_type: z.string().trim().min(1, t('packagePricing.validation.occupancyTypeRequired')),
-    adult_count: z.coerce.number().int().min(0).default(0),
-    child_count: z.coerce.number().int().min(0).default(0),
-    infant_count: z.coerce.number().int().min(0).default(0),
-    discount_percent: z.coerce.number().min(0).max(100).optional(),
+    passenger_type: z.string().trim().min(1, t('packagePricing.validation.passengerTypeRequired')),
+    quantity: z.coerce
+      .number()
+      .int()
+      .min(1, t('quotation.validation.quantityPositive'))
+      .max(999, t('quotation.validation.paxMax999'))
+      .default(1),
+    selling_price: z.coerce.number().min(0).optional(),
   });
 
 // `useOccupancyGroups` is set by QuotationForm once it knows the selected
@@ -39,18 +44,22 @@ export const getQuotationSchema = (t: TFunction, options?: { useOccupancyGroups?
   const useOccupancyGroups = options?.useOccupancyGroups ?? false;
 
   return z.object({
-    // Optional — when no enquiry is picked (Direct Quotation), the
-    // customer_*/cust_uuid fields below are required instead.
+    // Optional — when no enquiry is picked (Direct Quotation), cust_uuid is
+    // required instead (see the customerOrEnquiryRequired refine below).
     enquiry_uuid: z.string().trim().optional(),
     cust_uuid: z.string().nullable().optional(),
-    customer_mode: z.enum(['new', 'existing']).optional(),
-    customer_name: z.string().trim().optional(),
-    customer_mobile: z.string().optional(),
-    customer_email: z.string().email().optional().or(z.literal('')),
 
     business_type: z.string().trim().min(1, t('quotation.validation.businessTypeRequired')),
 
     pkg_uuid: z.string().nullable().optional(),
+    // Header-level commercial value — LOCKED as independent of the
+    // Occupancy section; occupancy rows never update this.
+    pkg_count: z.coerce
+      .number()
+      .int()
+      .min(1, t('quotation.validation.packageCountMin'))
+      .max(999, t('quotation.validation.paxMax999'))
+      .default(1),
     quotation_date: z.string().nullish(),
     valid_until: z.string().nullish(),
     travel_date_from: z.string().nullish(),
@@ -90,23 +99,10 @@ export const getQuotationSchema = (t: TFunction, options?: { useOccupancyGroups?
     (data) => !data.quotation_date || !data.valid_until || data.valid_until >= data.quotation_date,
     { message: t('validation.endDateBeforeStartDate'), path: ['valid_until'] },
   ).refine(
-    (data) =>
-      !!data.enquiry_uuid ||
-      !!data.cust_uuid ||
-      (!!data.customer_name?.trim() && !!data.customer_mobile),
+    (data) => !!data.enquiry_uuid || !!data.cust_uuid,
     {
       message: t('quotation.validation.customerOrEnquiryRequired'),
-      path: ['customer_name'],
-    },
-  ).refine(
-    (data) =>
-      !!data.enquiry_uuid ||
-      !!data.cust_uuid ||
-      !data.customer_mobile ||
-      MOBILE_NUMBER_REGEX.test(data.customer_mobile),
-    {
-      message: t('validation.internationalMobile'),
-      path: ['customer_mobile'],
+      path: ['cust_uuid'],
     },
   ).refine(
     (data) => data.business_type !== 'Package' || !!data.pkg_uuid,
@@ -115,16 +111,43 @@ export const getQuotationSchema = (t: TFunction, options?: { useOccupancyGroups?
       path: ['pkg_uuid'],
     },
   ).refine(
-    (data) =>
-      !useOccupancyGroups ||
-      (data.occupancy_groups ?? []).some(
-        (g) => g.adult_count > 0 || g.child_count > 0 || g.infant_count > 0,
-      ),
+    (data) => !useOccupancyGroups || (data.occupancy_groups ?? []).length > 0,
     {
       message: t('quotation.validation.atLeastOneOccupancyGroup'),
       path: ['occupancy_groups'],
     },
-  );
+  ).superRefine((data, ctx) => {
+    // LOCKED: the Quotation Header (pax_adult/pax_child/pax_infant) is the
+    // only source of truth for passenger counts — Occupancy rows must
+    // allocate EXACTLY that many before Save succeeds, in either direction
+    // (Rule 1: never exceed: Rule 3: must exactly match at Save). The live,
+    // non-blocking under-allocation warning during editing (Rule 2) is a
+    // separate, purely visual concern handled by the Passenger Allocation
+    // summary in QuotationOccupancyGroups.tsx — this is only the Save gate.
+    if (!useOccupancyGroups) return;
+    const allocated: Record<string, number> = { Adult: 0, Child: 0, Infant: 0 };
+    for (const group of data.occupancy_groups ?? []) {
+      if (group.passenger_type in allocated) {
+        allocated[group.passenger_type] += group.quantity ?? 0;
+      }
+    }
+    const header: Record<string, number> = { Adult: data.pax_adult, Child: data.pax_child, Infant: data.pax_infant };
+    for (const type of ['Adult', 'Child', 'Infant']) {
+      if (allocated[type] > header[type]) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t('quotation.allocationExceedsQuantity', { type }),
+          path: ['occupancy_groups'],
+        });
+      } else if (allocated[type] < header[type]) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t('quotation.allocationIncomplete', { count: header[type] - allocated[type], type }),
+          path: ['occupancy_groups'],
+        });
+      }
+    }
+  });
 };
 
 export type QuotationSchema = ReturnType<typeof getQuotationSchema>;

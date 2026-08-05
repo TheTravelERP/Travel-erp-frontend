@@ -8,13 +8,23 @@ export type BookingStatus = (typeof BOOKING_STATUSES)[number];
 
 export interface BookingFormInput {
   enquiry_uuid?: string | null;
-  cust_uuid: string;
+  // Only used when enquiry_uuid is unset — same shape/semantics as
+  // Enquiry/Quotation's own CustomerSelector-driven customer capture.
+  cust_uuid: string | null;
+  customer_mode?: 'new' | 'existing';
+  customer_name?: string;
+  customer_mobile?: string;
+  customer_email?: string;
   // Pre-filled from the linked Enquiry's business_type when enquiry_uuid is
   // set, editable. Required directly from the user for a fully Direct
   // Booking (no enquiry_uuid at all) — same mandatory-with-default rule as
   // Enquiry/Quotation.
   business_type: string;
   pkg_uuid?: string | null;
+  // Header-level commercial value, inherited from the source Quotation at
+  // conversion (or entered directly for a Direct Booking) — independent of
+  // anything else.
+  pkg_count: number;
   departure_uuid?: string | null;
   agent_uuid?: string | null;
   booking_date?: string;

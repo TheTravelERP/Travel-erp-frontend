@@ -26,11 +26,13 @@ import MobileNumberField from '../../../components/common/MobileNumberField';
 interface CustomerSelectorProps {
   control: Control<any>;
   setValue: UseFormSetValue<any>;
+  disabled?: boolean;
 }
 
 export default function CustomerSelector({
   control,
   setValue,
+  disabled = false,
 }: CustomerSelectorProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -106,6 +108,7 @@ export default function CustomerSelector({
           onChange={handleModeChange}
           size="small"
           fullWidth={isMobile}
+          disabled={disabled}
           sx={{ '& .MuiToggleButton-root': { flex: 1 } }}
         >
           <ToggleButton value="new">
@@ -134,6 +137,7 @@ export default function CustomerSelector({
                     fullWidth
                     label={t('common.customerName')}
                     required
+                    disabled={disabled}
                     error={!!fieldState.error}
                     helperText={fieldState.error?.message}
                   />
@@ -142,7 +146,7 @@ export default function CustomerSelector({
             </Grid>
 
             <Grid size={{ xs: 12, sm: 4 }}>
-              <MobileNumberField name="customer_mobile" control={control} label={t('common.mobile')} required />
+              <MobileNumberField name="customer_mobile" control={control} label={t('common.mobile')} required disabled={disabled} />
             </Grid>
             <Grid size={{ xs: 12, sm: 4 }}>
               <Controller
@@ -153,6 +157,7 @@ export default function CustomerSelector({
                     {...field}
                     fullWidth
                     label={t('common.email')}
+                    disabled={disabled}
                     error={!!fieldState.error}
                     helperText={fieldState.error?.message}
                   />
@@ -168,6 +173,7 @@ export default function CustomerSelector({
             control={control}
             dropdownName="customers"
             setValue={setValue}
+            disabled={disabled}
             allowAdd
             onAddNew={() => console.log("Open modal")}
             autoFillMap={{

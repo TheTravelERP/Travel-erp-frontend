@@ -8,6 +8,7 @@ export const useEntityDropdown = ({
   pageSize = 20,
   documentTypeCode,
   pkgUuid,
+  initialSearch,
 }: {
   dropdownName: string;
   pageSize?: number;
@@ -18,10 +19,14 @@ export const useEntityDropdown = ({
   /** Scopes the dropdown's rows to a specific Package — only applies to
    *  entities that carry a pkg_id FK (e.g. Departures), a no-op otherwise. */
   pkgUuid?: string | null;
+  /** Seeds the very first fetch with a search term (e.g. an Enquiry's
+   *  customer-name snapshot) instead of the default empty/general listing.
+   *  Only affects the initial state — omitted by every existing caller. */
+  initialSearch?: string;
 }) => {
   const [options, setOptions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch ?? "");
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
