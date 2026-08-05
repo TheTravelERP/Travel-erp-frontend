@@ -81,20 +81,21 @@ export default function QuotationCustomerPanel({
         </Box>
       )}
 
-      <EntityAutocomplete
-        name="cust_uuid"
-        label={t("quotation.customerMasterSection")}
-        control={control}
-        setValue={setValue}
-        dropdownName="customers"
-        disabled={disabled || linking}
-        initialInputValue={enquiry?.customer_name || undefined}
-        onOptionSelected={(option) => {
-          if (option) resolveCustomer(option.value);
-        }}
-      />
-
-      <Box display="flex" justifyContent="flex-end">
+      <Box sx={{ display: "flex", gap: 1, alignItems: "flex-start" }}>
+        <Box sx={{ flex: 1 }}>
+          <EntityAutocomplete
+            name="cust_uuid"
+            label={t("quotation.customerMasterSection")}
+            control={control}
+            setValue={setValue}
+            dropdownName="customers"
+            disabled={disabled || linking}
+            initialInputValue={enquiry?.customer_name || undefined}
+            onOptionSelected={(option) => {
+              if (option) resolveCustomer(option.value);
+            }}
+          />
+        </Box>
         <Button size="small" variant="outlined" disabled={disabled || linking} onClick={() => setDialogOpen(true)}>
           {t("quotation.createNew")} {t("common.customer")}
         </Button>

@@ -74,20 +74,21 @@ export default function QuotationPackagePanel({
         </Box>
       )}
 
-      <EntityAutocomplete
-        name="pkg_uuid"
-        label={t("quotation.packageMasterSection")}
-        control={control}
-        setValue={setValue}
-        dropdownName="packages"
-        disabled={disabled || linking}
-        initialInputValue={enquiry?.package_name || undefined}
-        onOptionSelected={(option) => {
-          if (option) resolvePackage(option.value);
-        }}
-      />
-
-      <Box display="flex" justifyContent="flex-end">
+      <Box sx={{ display: "flex", gap: 1, alignItems: "flex-start" }}>
+        <Box sx={{ flex: 1 }}>
+          <EntityAutocomplete
+            name="pkg_uuid"
+            label={t("quotation.packageMasterSection")}
+            control={control}
+            setValue={setValue}
+            dropdownName="packages"
+            disabled={disabled || linking}
+            initialInputValue={enquiry?.package_name || undefined}
+            onOptionSelected={(option) => {
+              if (option) resolvePackage(option.value);
+            }}
+          />
+        </Box>
         <Button size="small" variant="outlined" disabled={disabled || linking} onClick={() => setDialogOpen(true)}>
           {t("quotation.createNew")} {t("quotation.package")}
         </Button>

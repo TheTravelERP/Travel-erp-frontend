@@ -5,7 +5,6 @@ import {
   Button,
   Grid,
   IconButton,
-  Paper,
   Stack,
   TextField,
   Typography,
@@ -495,34 +494,24 @@ export default function QuotationForm({
         {!loadingEnquiry && (
           <>
             <Grid size={{ xs: 12, md: 6 }}>
-              <Paper variant="outlined" sx={{ p: 2, height: "100%" }}>
-                <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
-                  {t("quotation.customerSectionTitle")}
-                </Typography>
-                <QuotationCustomerPanel
+              <QuotationCustomerPanel
+                control={control}
+                setValue={setValue}
+                enquiry={enquiry}
+                onEnquiryUpdated={handleEnquiryLinkResolved}
+                disabled={disabled}
+              />
+            </Grid>
+
+            {isPackageBusiness && (
+              <Grid size={{ xs: 12, md: 6 }}>
+                <QuotationPackagePanel
                   control={control}
                   setValue={setValue}
                   enquiry={enquiry}
                   onEnquiryUpdated={handleEnquiryLinkResolved}
                   disabled={disabled}
                 />
-              </Paper>
-            </Grid>
-
-            {isPackageBusiness && (
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Paper variant="outlined" sx={{ p: 2, height: "100%" }}>
-                  <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
-                    {t("quotation.packageSectionTitle")}
-                  </Typography>
-                  <QuotationPackagePanel
-                    control={control}
-                    setValue={setValue}
-                    enquiry={enquiry}
-                    onEnquiryUpdated={handleEnquiryLinkResolved}
-                    disabled={disabled}
-                  />
-                </Paper>
               </Grid>
             )}
           </>

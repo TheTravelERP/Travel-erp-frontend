@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import {
   Box,
-  Paper,
   Typography,
   TextField,
   ToggleButton,
@@ -79,7 +78,7 @@ export default function PackageSelector({
 
   /* ---------------- RENDER ---------------- */
   return (
-    <Paper variant="outlined" sx={{ p: 2, height: '100%' }}>
+    <Box>
       {/* Header */}
       <Box
         display="flex"
@@ -89,7 +88,7 @@ export default function PackageSelector({
         gap={2}
         mb={2}
       >
-        <Typography variant="h6" color="primary">
+        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 400 }}>
           {t('enquiry.packageSelection')}
         </Typography>
 
@@ -147,6 +146,6 @@ export default function PackageSelector({
           </Grid>
         )}
       </Grid>
-    </Paper>
+    </Box>
   );
 }

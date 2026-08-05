@@ -143,39 +143,40 @@ export default function EnquiryForm({
       sx={{ flexGrow: 1 }}
     >
       <Grid container spacing={1.5}>
-        {/* First row */}
-        <Grid size={{ xs: 12, md: 4 }}>
-          <DropdownAutocomplete
-            name="business_type"
-            label={t("enquiry.businessType")}
-            control={control}
-            useForm
-            allowAdd={false}
-            pagination
-          />
-        </Grid>
-
-        {/* Empty space to complete the first row */}
-        <Grid size={{ md: 8 }} />
-
-         {/* Second row */}
-        <Grid size={{ xs: 12, md: isPackageBusiness ? 8 : 12 }}>
-          <CustomerSelector
-            control={control}
-            setValue={setValue}
-          />
-        </Grid>
-
-        {isPackageBusiness && (
+        <FormSection title={t("enquiry.enquiryContext")}>
+          {/* First row */}
           <Grid size={{ xs: 12, md: 4 }}>
-            <PackageSelector
+            <DropdownAutocomplete
+              name="business_type"
+              label={t("enquiry.businessType")}
+              control={control}
+              useForm
+              allowAdd={false}
+              pagination
+            />
+          </Grid>
+
+          {/* Empty space to complete the first row */}
+          <Grid size={{ md: 8 }} />
+
+           {/* Second row */}
+          <Grid size={{ xs: 12, md: 8 }}>
+            <CustomerSelector
               control={control}
               setValue={setValue}
             />
           </Grid>
-        )}
 
-       
+          <Grid size={{ xs: 12, md: 4 }}>
+            {isPackageBusiness && (
+              <PackageSelector
+                control={control}
+                setValue={setValue}
+              />
+            )}
+          </Grid>
+        </FormSection>
+
         {/* ENQUIRY DETAILS */}
         <FormSection title={t("enquiry.enquiryDetails")}>
           <Grid size={{ xs: 12, sm: 3 }}>
