@@ -162,6 +162,7 @@ export interface GetQuotationsParams {
   search?: string;
   status?: string;
   enquiry_uuid?: string;
+  cust_uuid?: string;
   from_date?: string;
   to_date?: string;
   is_active?: boolean;

@@ -8,7 +8,7 @@
 
 import { useState } from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import type { Control, UseFormSetValue } from "react-hook-form";
+import { useWatch, type Control, type UseFormSetValue } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import EntityAutocomplete from "../../../../../components/common/EntityAutocomplete";
@@ -44,6 +44,12 @@ export default function QuotationPackagePanel({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [linking, setLinking] = useState(false);
 
+  // A Package is "linked" once the Enquiry carries a pkg_uuid (Quotation-
+  // from-Enquiry) or, absent an Enquiry, once the Quotation's own pkg_uuid
+  // field is set (Direct Quotation). Mirrors QuotationCustomerPanel.tsx.
+  const pkgUuidWatched = useWatch({ control, name: "pkg_uuid" });
+  const isResolved = enquiry ? !!enquiry.pkg_uuid : !!pkgUuidWatched;
+
   async function resolvePackage(pkgUuid: string) {
     if (!enquiry) return;
     setLinking(true);
@@ -60,7 +66,7 @@ export default function QuotationPackagePanel({
 
   return (
     <Stack spacing={1.5}>
-      {enquiry && (
+      {enquiry && !isResolved && (
         <Box>
           <Typography variant="subtitle2" color="text.secondary" mb={0.5}>
             {t("quotation.packageSnapshotTitle")}
@@ -82,16 +88,18 @@ export default function QuotationPackagePanel({
             control={control}
             setValue={setValue}
             dropdownName="packages"
-            disabled={disabled || linking}
+            disabled={disabled || linking || isResolved}
             initialInputValue={enquiry?.package_name || undefined}
             onOptionSelected={(option) => {
               if (option) resolvePackage(option.value);
             }}
           />
         </Box>
-        <Button size="small" variant="outlined" disabled={disabled || linking} onClick={() => setDialogOpen(true)}>
-          {t("quotation.createNew")} {t("quotation.package")}
-        </Button>
+        {!isResolved && (
+          <Button size="small" variant="outlined" disabled={disabled || linking} onClick={() => setDialogOpen(true)}>
+            {t("quotation.createNew")} {t("quotation.package")}
+          </Button>
+        )}
       </Box>
 
       <CreatePackageDialog

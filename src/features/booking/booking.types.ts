@@ -100,6 +100,7 @@ export interface GetBookingsParams {
   search?: string;
   status?: string;
   enquiry_uuid?: string;
+  cust_uuid?: string;
   departure_uuid?: string;
   from_date?: string;
   travel_from_date?: string;

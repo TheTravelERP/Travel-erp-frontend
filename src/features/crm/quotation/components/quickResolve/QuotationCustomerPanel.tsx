@@ -10,7 +10,7 @@
 
 import { useState } from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import type { Control, UseFormSetValue } from "react-hook-form";
+import { useWatch, type Control, type UseFormSetValue } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import EntityAutocomplete from "../../../../../components/common/EntityAutocomplete";
@@ -45,6 +45,14 @@ export default function QuotationCustomerPanel({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [linking, setLinking] = useState(false);
 
+  // A Customer is "linked" once the Enquiry carries a cust_uuid (Quotation-
+  // from-Enquiry) or, absent an Enquiry, once the Quotation's own cust_uuid
+  // field is set (Direct Quotation). Once linked, the snapshot/Create-New
+  // shortcut are redundant and the field itself locks — relinking to a
+  // different customer isn't supported from this panel once resolved.
+  const custUuidWatched = useWatch({ control, name: "cust_uuid" });
+  const isResolved = enquiry ? !!enquiry.cust_uuid : !!custUuidWatched;
+
   // Direct Quotation: the EntityAutocomplete's own Controller binding
   // already wrote cust_uuid — nothing else to persist. Quotation-from-
   // Enquiry: the Enquiry itself must be linked to a real Customer before
@@ -66,7 +74,7 @@ export default function QuotationCustomerPanel({
 
   return (
     <Stack spacing={1.5}>
-      {enquiry && (
+      {enquiry && !isResolved && (
         <Box>
           <Typography variant="subtitle2" color="text.secondary" mb={0.5}>
             {t("quotation.customerSnapshotTitle")}
@@ -89,16 +97,18 @@ export default function QuotationCustomerPanel({
             control={control}
             setValue={setValue}
             dropdownName="customers"
-            disabled={disabled || linking}
+            disabled={disabled || linking || isResolved}
             initialInputValue={enquiry?.customer_name || undefined}
             onOptionSelected={(option) => {
               if (option) resolveCustomer(option.value);
             }}
           />
         </Box>
-        <Button size="small" variant="outlined" disabled={disabled || linking} onClick={() => setDialogOpen(true)}>
-          {t("quotation.createNew")} {t("common.customer")}
-        </Button>
+        {!isResolved && (
+          <Button size="small" variant="outlined" disabled={disabled || linking} onClick={() => setDialogOpen(true)}>
+            {t("quotation.createNew")} {t("common.customer")}
+          </Button>
+        )}
       </Box>
 
       <CreateCustomerDialog

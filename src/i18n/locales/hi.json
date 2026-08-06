@@ -1442,7 +1442,7 @@
     "summaryAssignedTo": "नियत सेल्स एग्जीक्यूटिव",
     "package": "पैकेज",
     "businessType": "व्यवसाय प्रकार",
-    "businessTypeInheritedFromEnquiry": "चयनित पूछताछ से विरासत में मिला — इसे बदलने के लिए पूछताछ संपादित करें।",
+    "inheritedFromEnquiryAlert": "अक्षम फ़ील्ड लिंक की गई पूछताछ से विरासत में मिली हैं और केवल पूछताछ में ही संपादित की जा सकती हैं।",
     "quotationDate": "कोटेशन दिनांक",
     "validFor": "वैध अवधि",
     "validUntil": "इस तक मान्य",

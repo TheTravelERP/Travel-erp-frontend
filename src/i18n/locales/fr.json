@@ -1442,7 +1442,7 @@
     "summaryAssignedTo": "Commercial assigné",
     "package": "Forfait",
     "businessType": "Type d'activité",
-    "businessTypeInheritedFromEnquiry": "Hérité de la demande sélectionnée — modifiez la demande pour le changer.",
+    "inheritedFromEnquiryAlert": "Les champs désactivés sont hérités de la demande liée et ne peuvent être modifiés que dans la demande.",
     "quotationDate": "Date du devis",
     "validFor": "Valable",
     "validUntil": "Valable jusqu'au",

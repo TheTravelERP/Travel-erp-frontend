@@ -101,6 +101,7 @@ export interface GetEnquiriesParams {
   conversion_status?: string;
 
   lead_source?: string;
+  cust_uuid?: string;
 
   from_date?: string;
   to_date?: string;

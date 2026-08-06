@@ -1442,7 +1442,7 @@
     "summaryAssignedTo": "Ejecutivo de ventas asignado",
     "package": "Paquete",
     "businessType": "Tipo de negocio",
-    "businessTypeInheritedFromEnquiry": "Heredado de la consulta seleccionada — edita la consulta para cambiarlo.",
+    "inheritedFromEnquiryAlert": "Los campos deshabilitados se heredan de la consulta vinculada y solo se pueden editar en la consulta.",
     "quotationDate": "Fecha de cotización",
     "validFor": "Válido por",
     "validUntil": "Válido hasta",

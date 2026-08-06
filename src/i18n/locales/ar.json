@@ -1442,7 +1442,7 @@
     "summaryAssignedTo": "مندوب المبيعات المكلّف",
     "package": "باقة",
     "businessType": "نوع العمل",
-    "businessTypeInheritedFromEnquiry": "موروث من الاستفسار المحدد — قم بتعديل الاستفسار لتغييره.",
+    "inheritedFromEnquiryAlert": "الحقول المعطلة موروثة من الاستفسار المرتبط ولا يمكن تعديلها إلا في الاستفسار.",
     "quotationDate": "تاريخ عرض السعر",
     "validFor": "صالح لمدة",
     "validUntil": "صالح حتى",

@@ -1442,7 +1442,7 @@
     "summaryAssignedTo": "Assigned Sales Executive",
     "package": "Package",
     "businessType": "Business Type",
-    "businessTypeInheritedFromEnquiry": "Inherited from the selected enquiry — edit the enquiry to change it.",
+    "inheritedFromEnquiryAlert": "Disabled fields are inherited from the linked enquiry and can only be edited in the enquiry.",
     "quotationDate": "Quotation Date",
     "validFor": "Valid For",
     "validUntil": "Valid Until",

@@ -33,7 +33,6 @@ import QuotationCustomerPanel from "./quickResolve/QuotationCustomerPanel";
 import QuotationPackagePanel from "./quickResolve/QuotationPackagePanel";
 import QuotationOccupancyGroups from "./QuotationOccupancyGroups";
 import { getPackageByUuid } from "../../../package/package.api";
-import { getPackageServices } from "../../../package/packageService/packageService.api";
 
 // Enquiries whose conversion_status leaves them effectively closed — flagged
 // (not hidden) in the standalone picker so a user can still knowingly pick one.
@@ -108,17 +107,14 @@ export default function QuotationForm({
   const { showSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
-  // Flips once the selected Package is confirmed to have zero PackageService
-  // rows (see the effect below, keyed off business_type/pkg_uuid) — swaps
-  // the Occupancy Group UI in for the standard service-lines table and
-  // relaxes service_lines.min(1) in the zod schema accordingly. Kept as its
-  // own state (rather than derived inline) because computing it requires
-  // watching fields off `control`, which doesn't exist until after this
-  // schema/useForm call — it settles one render after the watches below.
-  const [useOccupancyGroupsFlag, setUseOccupancyGroupsFlag] = useState(false);
+  // Mirrors business_type === "Package" into the zod schema options — kept
+  // as its own state (rather than derived inline) because computing it
+  // requires watching fields off `control`, which doesn't exist until after
+  // this schema/useForm call — it settles one render after the watch below.
+  const [isPackageBusinessFlag, setIsPackageBusinessFlag] = useState(false);
   const schema = useMemo(
-    () => getQuotationSchema(t, { useOccupancyGroups: useOccupancyGroupsFlag }),
-    [t, useOccupancyGroupsFlag],
+    () => getQuotationSchema(t, { isPackageBusiness: isPackageBusinessFlag }),
+    [t, isPackageBusinessFlag],
   );
 
   const {
@@ -242,6 +238,18 @@ export default function QuotationForm({
   const businessType = useWatch({ control, name: "business_type" });
   const isPackageBusiness = businessType === "Package";
 
+  useEffect(() => {
+    setIsPackageBusinessFlag(isPackageBusiness);
+    // Occupancy Groups only exists in the form's live tree while Package is
+    // selected — its Controller-bound fields unmount without clearing their
+    // RHF values, leaving stale (now-invalid) entries behind that fail the
+    // per-item occupancy_type/passenger_type required checks silently, since
+    // the section that would surface the error is itself hidden.
+    if (!isPackageBusiness) {
+      setValue("occupancy_groups", []);
+    }
+  }, [isPackageBusiness, setValue]);
+
   const custUuidWatched = useWatch({ control, name: "cust_uuid" });
   const pkgUuidWatched = useWatch({ control, name: "pkg_uuid" });
   // Header — the only source of truth for passenger counts (see
@@ -252,42 +260,31 @@ export default function QuotationForm({
   const paxInfantWatched = useWatch({ control, name: "pax_infant" });
 
   /* ==========================================================
-     FLAT PACKAGE PRICING FALLBACK — a Package business-type quotation whose
-     selected package has zero PackageService rows can't produce any
-     service_lines via the normal copy path, so the Occupancy Group UI
-     substitutes for it. Checked once per package selection, before the user
-     ever reaches the service-lines section (not deferred to submit time).
+     PACKAGE CURRENCY — QuotationOccupancyGroups (always shown for Package,
+     alongside Service Lines) needs the selected Package's currency_code for
+     display; fetched once per package selection.
   ========================================================== */
-  const [packagePricingInfo, setPackagePricingInfo] = useState<{ hasServiceLines: boolean; currency: string } | null>(null);
+  const [packageCurrency, setPackageCurrency] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isPackageBusiness || !pkgUuidWatched) {
-      setPackagePricingInfo(null);
+      setPackageCurrency(null);
       return;
     }
     let cancelled = false;
     (async () => {
       try {
-        const [pkg, services] = await Promise.all([
-          getPackageByUuid(pkgUuidWatched),
-          getPackageServices({ package_uuid: pkgUuidWatched, page: 1, page_size: 1 }),
-        ]);
+        const pkg = await getPackageByUuid(pkgUuidWatched);
         if (cancelled) return;
-        setPackagePricingInfo({ hasServiceLines: services.pagination.total > 0, currency: pkg.currency_code });
+        setPackageCurrency(pkg.currency_code);
       } catch {
-        if (!cancelled) setPackagePricingInfo(null);
+        if (!cancelled) setPackageCurrency(null);
       }
     })();
     return () => {
       cancelled = true;
     };
   }, [isPackageBusiness, pkgUuidWatched]);
-
-  const useOccupancyGroups = isPackageBusiness && packagePricingInfo !== null && !packagePricingInfo.hasServiceLines;
-
-  useEffect(() => {
-    setUseOccupancyGroupsFlag(useOccupancyGroups);
-  }, [useOccupancyGroups]);
 
   const priceAsOfDate = travelDateFromWatched || quotationDateWatched || new Date().toISOString().slice(0, 10);
 
@@ -381,7 +378,7 @@ export default function QuotationForm({
     if (!isPackageBusiness) {
       payload.pkg_uuid = null;
     }
-    if (!useOccupancyGroups) {
+    if (!isPackageBusiness) {
       payload.occupancy_groups = [];
     }
     if (payload.enquiry_uuid) {
@@ -404,7 +401,7 @@ export default function QuotationForm({
         </Box>
       )}
 
-      {enquiry && <EnquirySummaryBar enquiry={enquiry} businessType={businessType} />}
+      {enquiry && <EnquirySummaryBar enquiry={enquiry} />}
 
       <Grid container spacing={1.5}>
         {/* Sales Context leads the form — Enquiry, Business Type, and
@@ -413,6 +410,25 @@ export default function QuotationForm({
             Business Type/Package are derived from Enquiry once attached,
             so the source fields render first regardless of mode. */}
         <FormSection title={t("quotation.sectionSalesContext")}>
+          {!!enquiry && (
+            <Grid size={{ xs: 12 }}>
+              <Alert
+                severity="info"
+                sx={{
+                  py: 0,
+                  px: 1,
+                  minHeight: 0,
+                  fontSize: "0.75rem",
+                  alignItems: "center",
+                  "& .MuiAlert-icon": { fontSize: "1rem", py: 0, mr: 0.75 },
+                  "& .MuiAlert-message": { py: 0.5 },
+                }}
+              >
+                {t("quotation.inheritedFromEnquiryAlert")}
+              </Alert>
+            </Grid>
+          )}
+
           <Grid size={{ xs: 12, sm: 9 }}>
             {mode === "fromEnquiry" ? (
               <TextField
@@ -481,11 +497,6 @@ export default function QuotationForm({
               pagination
               disabled={disabled || !!enquiry}
             />
-            {!!enquiry && (
-              <Typography variant="caption" color="text.secondary" display="block" mt={0.5}>
-                {t("quotation.businessTypeInheritedFromEnquiry")}
-              </Typography>
-            )}
           </Grid>
 
         </FormSection>
@@ -569,8 +580,20 @@ export default function QuotationForm({
             <Controller
               name="travel_date_from"
               control={control}
-              render={({ field }) => (
-                <TextField {...field} type="date" label={t("quotation.travelDateFrom")} fullWidth disabled={disabled} slotProps={{ inputLabel: { shrink: true } }} />
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  type="date"
+                  label={t("quotation.travelDateFrom")}
+                  fullWidth
+                  disabled={disabled}
+                  slotProps={{
+                    inputLabel: { shrink: true },
+                    htmlInput: { min: quotationDateWatched || undefined },
+                  }}
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                />
               )}
             />
           </Grid>
@@ -725,123 +748,131 @@ export default function QuotationForm({
               </Box>
             </Alert>
           </Grid>
-        ) : useOccupancyGroups ? (
-          <QuotationOccupancyGroups
-            control={control}
-            setValue={setValue}
-            packageUuid={pkgUuidWatched!}
-            packageCurrency={packagePricingInfo!.currency}
-            priceAsOfDate={priceAsOfDate}
-            disabled={disabled}
-            errorMessage={occupancyGroupsError}
-            paxAdult={paxAdultWatched ?? 0}
-            paxChild={paxChildWatched ?? 0}
-            paxInfant={paxInfantWatched ?? 0}
-          />
         ) : (
-        <FormSection
-          title={t("quotation.serviceLines")}
-          titleAdornment={
-            !disabled && (
-              <Button size="small" variant="outlined" startIcon={<AddIcon />} onClick={() => append({ ...emptyLine })} sx={{ ml: 2 }}>
-                {t("quotation.addLine")}
-              </Button>
-            )
-          }
-        >
-          {linesError && (
-            <Grid size={{ xs: 12 }}>
-              <Typography color="error" variant="body2">{linesError}</Typography>
-            </Grid>
-          )}
+          <>
+            {/* Package: Occupancy is mandatory and Service Lines is optional
+                (for extras beyond the package) — both render together, in
+                that order. Every other business type shows Service Lines
+                only, with its original min(1) requirement. */}
+            {isPackageBusiness && (
+              <QuotationOccupancyGroups
+                control={control}
+                setValue={setValue}
+                packageUuid={pkgUuidWatched!}
+                packageCurrency={packageCurrency ?? ""}
+                priceAsOfDate={priceAsOfDate}
+                disabled={disabled}
+                errorMessage={occupancyGroupsError}
+                paxAdult={paxAdultWatched ?? 0}
+                paxChild={paxChildWatched ?? 0}
+                paxInfant={paxInfantWatched ?? 0}
+              />
+            )}
 
-          {fields.length === 0 && (
-            <Grid size={{ xs: 12 }}>
-              <Typography variant="body2" color="text.secondary">{t("quotation.noLinesYet")}</Typography>
-            </Grid>
-          )}
-
-          <Grid size={{ xs: 12 }}>
-            <Stack spacing={2}>
-              {fields.map((field, index) => (
-                <Grid container spacing={1.5} key={field.id} alignItems="center">
-                  <Grid size={{ xs: 12, sm: 2 }}>
-                    <DropdownAutocomplete
-                      name={`service_lines.${index}.service_type`}
-                      label={t("quotation.serviceType")}
-                      control={control}
-                      dropdownName="quotation_service_type"
-                      useForm={true}
-                      allowAdd={false}
-                      disabled={disabled}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 3 }}>
-                    <Controller
-                      name={`service_lines.${index}.description`}
-                      control={control}
-                      render={({ field: f }) => (
-                        <TextField {...f} label={t("quotation.description")} fullWidth disabled={disabled} />
-                      )}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 6, sm: 1.2 }}>
-                    <Controller
-                      name={`service_lines.${index}.quantity`}
-                      control={control}
-                      render={({ field: f, fieldState }) => (
-                        <TextField {...f} type="number" label={t("quotation.quantity")} fullWidth disabled={disabled} error={!!fieldState.error} helperText={fieldState.error?.message} />
-                      )}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 6, sm: 1.4 }}>
-                    <Controller
-                      name={`service_lines.${index}.cost_price`}
-                      control={control}
-                      render={({ field: f }) => (
-                        <TextField {...f} type="number" label={t("quotation.costPrice")} fullWidth disabled={disabled} />
-                      )}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 6, sm: 1.4 }}>
-                    <Controller
-                      name={`service_lines.${index}.selling_price`}
-                      control={control}
-                      render={({ field: f }) => (
-                        <TextField {...f} type="number" label={t("quotation.sellingPrice")} fullWidth disabled={disabled} />
-                      )}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 6, sm: 1.4 }}>
-                    <Controller
-                      name={`service_lines.${index}.discount_percent`}
-                      control={control}
-                      render={({ field: f }) => (
-                        <TextField {...f} type="number" label={t("quotation.discountPercent")} fullWidth disabled={disabled} />
-                      )}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 1.6 }}>
-                    <EntityAutocomplete
-                      name={`service_lines.${index}.vendor_uuid`}
-                      label={t("quotation.vendor")}
-                      control={control}
-                      dropdownName="vendors"
-                      disabled={disabled}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 0.4 }}>
-                    {!disabled && (
-                      <IconButton color="error" onClick={() => remove(index)}>
-                        <DeleteIcon />
-                      </IconButton>
-                    )}
-                  </Grid>
+            <FormSection
+              title={t("quotation.serviceLines")}
+              titleAdornment={
+                !disabled && (
+                  <Button size="small" variant="outlined" startIcon={<AddIcon />} onClick={() => append({ ...emptyLine })} sx={{ ml: 2 }}>
+                    {t("quotation.addLine")}
+                  </Button>
+                )
+              }
+            >
+              {linesError && (
+                <Grid size={{ xs: 12 }}>
+                  <Typography color="error" variant="body2">{linesError}</Typography>
                 </Grid>
-              ))}
-            </Stack>
-          </Grid>
-        </FormSection>
+              )}
+
+              {fields.length === 0 && (
+                <Grid size={{ xs: 12 }}>
+                  <Typography variant="body2" color="text.secondary">{t("quotation.noLinesYet")}</Typography>
+                </Grid>
+              )}
+
+              <Grid size={{ xs: 12 }}>
+                <Stack spacing={2}>
+                  {fields.map((field, index) => (
+                    <Grid container spacing={1.5} key={field.id} alignItems="center">
+                      <Grid size={{ xs: 12, sm: 2 }}>
+                        <DropdownAutocomplete
+                          name={`service_lines.${index}.service_type`}
+                          label={t("quotation.serviceType")}
+                          control={control}
+                          dropdownName="quotation_service_type"
+                          useForm={true}
+                          allowAdd={false}
+                          disabled={disabled}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 3 }}>
+                        <Controller
+                          name={`service_lines.${index}.description`}
+                          control={control}
+                          render={({ field: f }) => (
+                            <TextField {...f} label={t("quotation.description")} fullWidth disabled={disabled} />
+                          )}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 6, sm: 1.2 }}>
+                        <Controller
+                          name={`service_lines.${index}.quantity`}
+                          control={control}
+                          render={({ field: f, fieldState }) => (
+                            <TextField {...f} type="number" label={t("quotation.quantity")} fullWidth disabled={disabled} error={!!fieldState.error} helperText={fieldState.error?.message} />
+                          )}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 6, sm: 1.4 }}>
+                        <Controller
+                          name={`service_lines.${index}.cost_price`}
+                          control={control}
+                          render={({ field: f }) => (
+                            <TextField {...f} type="number" label={t("quotation.costPrice")} fullWidth disabled={disabled} />
+                          )}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 6, sm: 1.4 }}>
+                        <Controller
+                          name={`service_lines.${index}.selling_price`}
+                          control={control}
+                          render={({ field: f }) => (
+                            <TextField {...f} type="number" label={t("quotation.sellingPrice")} fullWidth disabled={disabled} />
+                          )}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 6, sm: 1.4 }}>
+                        <Controller
+                          name={`service_lines.${index}.discount_percent`}
+                          control={control}
+                          render={({ field: f }) => (
+                            <TextField {...f} type="number" label={t("quotation.discountPercent")} fullWidth disabled={disabled} />
+                          )}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 1.6 }}>
+                        <EntityAutocomplete
+                          name={`service_lines.${index}.vendor_uuid`}
+                          label={t("quotation.vendor")}
+                          control={control}
+                          dropdownName="vendors"
+                          disabled={disabled}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 0.4 }}>
+                        {!disabled && (
+                          <IconButton color="error" onClick={() => remove(index)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        )}
+                      </Grid>
+                    </Grid>
+                  ))}
+                </Stack>
+              </Grid>
+            </FormSection>
+          </>
         )}
 
         {!disabled && (

@@ -35,13 +35,12 @@ const occupancyGroupSchema = (t: TFunction) =>
     selling_price: z.coerce.number().min(0).optional(),
   });
 
-// `useOccupancyGroups` is set by QuotationForm once it knows the selected
-// Package has zero PackageService rows (business_type "Package") — in that
-// case service_lines is legitimately empty and occupancy_groups carries the
-// Flat Package Pricing fallback payload instead. Every other quotation keeps
-// the original service_lines.min(1) requirement unchanged.
-export const getQuotationSchema = (t: TFunction, options?: { useOccupancyGroups?: boolean }) => {
-  const useOccupancyGroups = options?.useOccupancyGroups ?? false;
+// `isPackageBusiness` mirrors business_type === "Package" — Occupancy
+// Groups and Service Lines coexist for Package (Occupancy mandatory,
+// Service Lines optional, for extras beyond the package) while every other
+// business type keeps the original service_lines.min(1)/no-Occupancy rules.
+export const getQuotationSchema = (t: TFunction, options?: { isPackageBusiness?: boolean }) => {
+  const isPackageBusiness = options?.isPackageBusiness ?? false;
 
   return z.object({
     // Optional — when no enquiry is picked (Direct Quotation), cust_uuid is
@@ -88,7 +87,7 @@ export const getQuotationSchema = (t: TFunction, options?: { useOccupancyGroups?
     terms_conditions: z.string().nullish(),
     internal_notes: z.string().nullish(),
     customer_notes: z.string().nullish(),
-    service_lines: useOccupancyGroups
+    service_lines: isPackageBusiness
       ? z.array(serviceLineSchema(t))
       : z.array(serviceLineSchema(t)).min(1, t('quotation.validation.atLeastOneLine')),
     occupancy_groups: z.array(occupancyGroupSchema(t)).optional(),
@@ -98,6 +97,9 @@ export const getQuotationSchema = (t: TFunction, options?: { useOccupancyGroups?
   ).refine(
     (data) => !data.quotation_date || !data.valid_until || data.valid_until >= data.quotation_date,
     { message: t('validation.endDateBeforeStartDate'), path: ['valid_until'] },
+  ).refine(
+    (data) => !data.quotation_date || !data.travel_date_from || data.travel_date_from >= data.quotation_date,
+    { message: t('validation.endDateBeforeStartDate'), path: ['travel_date_from'] },
   ).refine(
     (data) => !!data.enquiry_uuid || !!data.cust_uuid,
     {
@@ -111,7 +113,7 @@ export const getQuotationSchema = (t: TFunction, options?: { useOccupancyGroups?
       path: ['pkg_uuid'],
     },
   ).refine(
-    (data) => !useOccupancyGroups || (data.occupancy_groups ?? []).length > 0,
+    (data) => !isPackageBusiness || (data.occupancy_groups ?? []).length > 0,
     {
       message: t('quotation.validation.atLeastOneOccupancyGroup'),
       path: ['occupancy_groups'],
@@ -124,7 +126,7 @@ export const getQuotationSchema = (t: TFunction, options?: { useOccupancyGroups?
     // non-blocking under-allocation warning during editing (Rule 2) is a
     // separate, purely visual concern handled by the Passenger Allocation
     // summary in QuotationOccupancyGroups.tsx — this is only the Save gate.
-    if (!useOccupancyGroups) return;
+    if (!isPackageBusiness) return;
     const allocated: Record<string, number> = { Adult: 0, Child: 0, Infant: 0 };
     for (const group of data.occupancy_groups ?? []) {
       if (group.passenger_type in allocated) {

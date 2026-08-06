@@ -1,4 +1,11 @@
 // src/features/customer/pages/CustomerViewPage.tsx
+//
+// Customer 360° view — structural reference point for uniformity across
+// Customer/Quotation/Booking 360° views (Enquiry's EnquiryViewPage.tsx is
+// the other reference this pattern was extracted from). Built on the shared
+// DetailPageLayout/DetailSection/DetailField components under
+// src/components/detail/ — Quotation/Booking's view pages should adopt the
+// same three components rather than re-hand-rolling section Paper blocks.
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -7,8 +14,8 @@ import {
   Box,
   Button,
   Chip,
-  Divider,
-  Paper,
+  CircularProgress,
+  Stack,
   Typography,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
@@ -23,12 +30,35 @@ import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 import { usePermission } from "../../../hooks/usePermission";
 import FilePreviewDialog from "../../../components/common/FilePreviewDialog";
 import { getFileKind, resolveUploadUrl } from "../../../services/upload.service";
-import FormPageLayout from "../../../components/forms/FormPageLayout";
+import DetailPageLayout from "../../../components/detail/DetailPageLayout";
+import DetailSection from "../../../components/detail/DetailSection";
+import DetailField from "../../../components/detail/DetailField";
+import DropdownColorChip from "../../../components/common/DropdownColorChip";
+import CommunicationHistory from "../../../components/common/CommunicationHistory";
+import AttachmentList from "../../../components/common/AttachmentList";
+import NoteList from "../../../components/common/NoteList";
+import TaskList from "../../../components/common/TaskList";
+import ActivityTimeline from "../../../components/common/ActivityTimeline";
 import { useLocalizationProfile } from "../../../hooks/useLocalizationProfile";
 import { formatDate } from "../../../utils/formatters/localization";
-import CommunicationHistory from "../../../components/common/CommunicationHistory";
+import { getEnquiries } from "../../enquiry/enquiry.api";
+import type { EnquiryListItem } from "../../enquiry/enquiry.types";
+import { getQuotationsList } from "../../crm/quotation/quotation.api";
+import type { QuotationListItem } from "../../crm/quotation/quotation.types";
+import { getBookingsList } from "../../booking/booking.api";
+import type { BookingListItem } from "../../booking/booking.types";
 
 import type { CustomerDetail } from "../customer.types";
+
+const QUOTATION_STATUS_COLOR: Record<string, "default" | "primary" | "success" | "error" | "warning"> = {
+  Draft: "default", Sent: "primary", Revised: "warning",
+  Accepted: "success", Rejected: "error", Expired: "error", Converted: "success",
+};
+
+const BOOKING_STATUS_COLOR: Record<string, "default" | "primary" | "success" | "error" | "warning"> = {
+  Draft: "default", Confirmed: "success", "Partially Confirmed": "warning",
+  "Travel Started": "primary", Completed: "success", Cancelled: "error", Closed: "default",
+};
 
 function DocumentThumb({ label, url }: { label: string; url?: string | null }) {
   const [open, setOpen] = useState(false);
@@ -87,10 +117,23 @@ export default function CustomerViewPage() {
   const [loading, setLoading] = useState(true);
   const [customer, setCustomer] = useState<CustomerDetail | null>(null);
 
+  const [enquiries, setEnquiries] = useState<EnquiryListItem[]>([]);
+  const [enquiriesLoading, setEnquiriesLoading] = useState(false);
+
+  const [quotations, setQuotations] = useState<QuotationListItem[]>([]);
+  const [quotationsLoading, setQuotationsLoading] = useState(false);
+
+  const [bookings, setBookings] = useState<BookingListItem[]>([]);
+  const [bookingsLoading, setBookingsLoading] = useState(false);
+
   useEffect(() => {
     if (uuid) {
       loadCustomer();
+      loadEnquiries();
+      loadQuotations();
+      loadBookings();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uuid]);
 
   if (!perms.can_view) {
@@ -113,6 +156,61 @@ export default function CustomerViewPage() {
     }
   }
 
+  async function loadEnquiries() {
+    if (!uuid) return;
+    setEnquiriesLoading(true);
+    try {
+      const res = await getEnquiries({
+        cust_uuid: uuid,
+        page_size: 50,
+        sort_by: "created_at",
+        sort_order: "desc",
+      });
+      setEnquiries(res.data);
+    } catch {
+      // Non-critical panel — a failed fetch just leaves it empty rather
+      // than blocking the rest of the customer page.
+    } finally {
+      setEnquiriesLoading(false);
+    }
+  }
+
+  async function loadQuotations() {
+    if (!uuid) return;
+    setQuotationsLoading(true);
+    try {
+      const res = await getQuotationsList({
+        cust_uuid: uuid,
+        page_size: 50,
+        sort_by: "quotation_date",
+        sort_order: "desc",
+      });
+      setQuotations(res.data);
+    } catch {
+      // Non-critical panel, same reasoning as loadEnquiries above.
+    } finally {
+      setQuotationsLoading(false);
+    }
+  }
+
+  async function loadBookings() {
+    if (!uuid) return;
+    setBookingsLoading(true);
+    try {
+      const res = await getBookingsList({
+        cust_uuid: uuid,
+        page_size: 50,
+        sort_by: "booking_date",
+        sort_order: "desc",
+      });
+      setBookings(res.data);
+    } catch {
+      // Non-critical panel, same reasoning as loadEnquiries above.
+    } finally {
+      setBookingsLoading(false);
+    }
+  }
+
   if (loading) {
     return <Typography>{t("common.loading")}</Typography>;
   }
@@ -122,167 +220,223 @@ export default function CustomerViewPage() {
   }
 
   return (
-    <FormPageLayout
+    <DetailPageLayout
       title={t("common.view")}
       breadcrumbs={[
         { label: t("menu.dashboard"), href: "/app/dashboard" },
         { label: t("menu.crm.customers"), href: "/app/crm/customers" },
         { label: t("common.view") },
       ]}
-    >
-        {/* ================= PERSONAL ================= */}
-
-        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-          <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-            {t("settings.personalDetails")}
-          </Typography>
-
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="caption">{t("common.customerName")}</Typography>
-              <Typography mt={0.5}>{customer.name || "-"}</Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="caption">{t("common.mobile")}</Typography>
-              <Typography mt={0.5}>{customer.mobile || "-"}</Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="caption">{t("common.email")}</Typography>
-              <Typography mt={0.5}>{customer.email || "-"}</Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="caption">{t("settings.dateOfBirth")}</Typography>
-              <Typography mt={0.5}>{customer.dob ? formatDate(customer.dob, localizationProfile) : "-"}</Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="caption">{t("settings.gender")}</Typography>
-              <Typography mt={0.5}>{customer.gender || "-"}</Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="caption">{t("customer.nationality")}</Typography>
-              <Typography mt={0.5}>{customer.nationality || "-"}</Typography>
-            </Grid>
-          </Grid>
-        </Paper>
-
-        {/* ================= PASSPORT ================= */}
-
-        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-          <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-            {t("customer.passportDetails")}
-          </Typography>
-
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 3 }}>
-              <Typography variant="caption">{t("customer.passportNumber")}</Typography>
-              <Typography mt={0.5}>{customer.passport_no || "-"}</Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 3 }}>
-              <Typography variant="caption">{t("customer.passportIssueDate")}</Typography>
-              <Typography mt={0.5}>{customer.passport_issue_date ? formatDate(customer.passport_issue_date, localizationProfile) : "-"}</Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 3 }}>
-              <Typography variant="caption">{t("customer.passportExpiryDate")}</Typography>
-              <Typography mt={0.5}>{customer.passport_expiry_date ? formatDate(customer.passport_expiry_date, localizationProfile) : "-"}</Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 3 }}>
-              <Typography variant="caption">{t("customer.passportIssueCountry")}</Typography>
-              <Typography mt={0.5}>{customer.passport_issue_country || "-"}</Typography>
-            </Grid>
-          </Grid>
-        </Paper>
-
-        {/* ================= DOCUMENTS ================= */}
-
-        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-          <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-            {t("customer.documents")}
-          </Typography>
-
-          <Grid container spacing={3}>
-            <DocumentThumb label={t("customer.picture")} url={customer.picture_url} />
-            <DocumentThumb label={t("customer.passportFront")} url={customer.passport_front_url} />
-            <DocumentThumb label={t("customer.passportBack")} url={customer.passport_back_url} />
-            {(["doc1", "doc2", "doc3", "doc4"] as const).map((slot) => {
-              const url = customer[`${slot}_url`];
-              if (!url) return null;
-              return (
-                <DocumentThumb
-                  key={slot}
-                  label={customer[`${slot}_label`] || t("settings.documentFile")}
-                  url={url}
-                />
-              );
-            })}
-          </Grid>
-        </Paper>
-
-        {/* ================= BUSINESS ================= */}
-
-        <Paper variant="outlined" sx={{ p: 2 }}>
-          <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-            {t("customer.businessDetails")}
-          </Typography>
-
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="caption">{t("customer.taxId")}</Typography>
-              <Typography mt={0.5}>{customer.gstin || "-"}</Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <Typography variant="caption">{t("customer.billingAddress")}</Typography>
-              <Typography mt={0.5} whiteSpace="pre-wrap">
-                {customer.billing_address || "-"}
-              </Typography>
-            </Grid>
-          </Grid>
-        </Paper>
-
-        {/* ================= COMMUNICATION HISTORY ================= */}
-
-        {!isTrash && (
-          <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-            <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-              {t("communicationHistory.title")}
-            </Typography>
-            <CommunicationHistory entityType="customer" entityUuid={uuid!} />
-          </Paper>
-        )}
-
-        {/* ================= FOOTER ================= */}
-
-        <Divider sx={{ my: 3 }} />
-
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Button
-            variant="outlined"
-            onClick={() => navigate("/app/crm/customers")}
-            size="large"
-          >
-            {t("common.back")}
+      onBack={() => navigate("/app/crm/customers")}
+      actions={
+        perms.can_edit && (
+          <Button variant="contained" size="large" onClick={() => navigate(`/app/crm/customers/${uuid}/edit`)}>
+            {t("common.edit")}
           </Button>
+        )
+      }
+    >
+      <DetailSection title={t("settings.personalDetails")}>
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <DetailField label={t("common.customerName")} value={customer.name} />
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <DetailField label={t("common.mobile")} value={customer.mobile} />
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <DetailField label={t("common.email")} value={customer.email} />
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <DetailField
+              label={t("settings.dateOfBirth")}
+              value={customer.dob ? formatDate(customer.dob, localizationProfile) : undefined}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <DetailField label={t("settings.gender")} value={customer.gender} />
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <DetailField label={t("customer.nationality")} value={customer.nationality} />
+          </Grid>
+        </Grid>
+      </DetailSection>
 
-          <Box display="flex" gap={2}>
-            {perms.can_edit && (
-              <Button
-                variant="contained"
-                size="large"
-                onClick={() => navigate(`/app/crm/customers/${uuid}/edit`)}
-              >
-                {t("common.edit")}
-              </Button>
-            )}
-          </Box>
-        </Box>
-    </FormPageLayout>
+      <DetailSection title={t("customer.passportDetails")}>
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, md: 3 }}>
+            <DetailField label={t("customer.passportNumber")} value={customer.passport_no} />
+          </Grid>
+          <Grid size={{ xs: 12, md: 3 }}>
+            <DetailField
+              label={t("customer.passportIssueDate")}
+              value={customer.passport_issue_date ? formatDate(customer.passport_issue_date, localizationProfile) : undefined}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, md: 3 }}>
+            <DetailField
+              label={t("customer.passportExpiryDate")}
+              value={customer.passport_expiry_date ? formatDate(customer.passport_expiry_date, localizationProfile) : undefined}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, md: 3 }}>
+            <DetailField label={t("customer.passportIssueCountry")} value={customer.passport_issue_country} />
+          </Grid>
+        </Grid>
+      </DetailSection>
+
+      <DetailSection title={t("customer.documents")}>
+        <Grid container spacing={3}>
+          <DocumentThumb label={t("customer.picture")} url={customer.picture_url} />
+          <DocumentThumb label={t("customer.passportFront")} url={customer.passport_front_url} />
+          <DocumentThumb label={t("customer.passportBack")} url={customer.passport_back_url} />
+          {(["doc1", "doc2", "doc3", "doc4"] as const).map((slot) => {
+            const url = customer[`${slot}_url`];
+            if (!url) return null;
+            return (
+              <DocumentThumb
+                key={slot}
+                label={customer[`${slot}_label`] || t("settings.documentFile")}
+                url={url}
+              />
+            );
+          })}
+        </Grid>
+      </DetailSection>
+
+      <DetailSection title={t("customer.businessDetails")}>
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <DetailField label={t("customer.taxId")} value={customer.gstin} />
+          </Grid>
+          <Grid size={{ xs: 12 }}>
+            <DetailField label={t("customer.billingAddress")} value={customer.billing_address} preserveWhitespace />
+          </Grid>
+        </Grid>
+      </DetailSection>
+
+      {!isTrash && (
+        <DetailSection title={t("menu.crm.enquiries")}>
+          {enquiriesLoading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}><CircularProgress size={24} /></Box>
+          ) : enquiries.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">{t("common.noRecordsFound")}</Typography>
+          ) : (
+            <Stack spacing={1.5} divider={<Box sx={{ borderBottom: "1px solid", borderColor: "divider" }} />}>
+              {enquiries.map((e) => (
+                <Box
+                  key={e.uuid}
+                  sx={{ cursor: "pointer" }}
+                  onClick={() => navigate(`/app/enquiries/${e.uuid}`)}
+                >
+                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" flexWrap="wrap" gap={1}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Typography variant="body2" fontWeight={600}>{e.enquiry_no}</Typography>
+                      <Typography variant="caption" color="text.secondary">{formatDate(e.created_at, localizationProfile)}</Typography>
+                    </Stack>
+                    <DropdownColorChip dropdownName="enquiry_status" value={e.conversion_status} />
+                  </Stack>
+                  <Typography variant="body2" color="text.secondary">{e.business_type}</Typography>
+                </Box>
+              ))}
+            </Stack>
+          )}
+        </DetailSection>
+      )}
+
+      {!isTrash && (
+        <DetailSection title={t("enquiry.quotations")}>
+          {quotationsLoading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}><CircularProgress size={24} /></Box>
+          ) : quotations.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">{t("common.noRecordsFound")}</Typography>
+          ) : (
+            <Stack spacing={1.5} divider={<Box sx={{ borderBottom: "1px solid", borderColor: "divider" }} />}>
+              {quotations.map((q) => (
+                <Box
+                  key={q.uuid}
+                  sx={{ cursor: "pointer" }}
+                  onClick={() => navigate(`/app/crm/quotations/${q.uuid}`)}
+                >
+                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" flexWrap="wrap" gap={1}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Typography variant="body2" fontWeight={600}>
+                        {q.quotation_no}{q.revision_no > 1 ? ` (Rev ${q.revision_no})` : ""}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">{formatDate(q.quotation_date, localizationProfile)}</Typography>
+                    </Stack>
+                    <Chip size="small" color={QUOTATION_STATUS_COLOR[q.status] ?? "default"} label={q.status} />
+                  </Stack>
+                  <Typography variant="body2" color="text.secondary">
+                    {q.currency_code} {q.net_amount.toFixed(2)}
+                  </Typography>
+                </Box>
+              ))}
+            </Stack>
+          )}
+        </DetailSection>
+      )}
+
+      {!isTrash && (
+        <DetailSection title={t("menu.packages.bookings")}>
+          {bookingsLoading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}><CircularProgress size={24} /></Box>
+          ) : bookings.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">{t("common.noRecordsFound")}</Typography>
+          ) : (
+            <Stack spacing={1.5} divider={<Box sx={{ borderBottom: "1px solid", borderColor: "divider" }} />}>
+              {bookings.map((b) => (
+                <Box
+                  key={b.uuid}
+                  sx={{ cursor: "pointer" }}
+                  onClick={() => navigate(`/app/bookings/list/${b.uuid}`)}
+                >
+                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" flexWrap="wrap" gap={1}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Typography variant="body2" fontWeight={600}>{b.booking_no}</Typography>
+                      <Typography variant="caption" color="text.secondary">{formatDate(b.booking_date, localizationProfile)}</Typography>
+                    </Stack>
+                    <Chip size="small" color={BOOKING_STATUS_COLOR[b.status] ?? "default"} label={b.status} />
+                  </Stack>
+                  <Typography variant="body2" color="text.secondary">
+                    {b.business_type} · {b.currency_code} {b.net_amount.toFixed(2)}
+                  </Typography>
+                </Box>
+              ))}
+            </Stack>
+          )}
+        </DetailSection>
+      )}
+
+      {!isTrash && (
+        <DetailSection title={t("common.attachments")}>
+          <AttachmentList entityType="customer" entityUuid={uuid!} menuKey="crm.customers" canEdit={perms.can_edit} />
+        </DetailSection>
+      )}
+
+      {!isTrash && (
+        <DetailSection title={t("menu.tasks")}>
+          <TaskList linkedEntityType="customer" linkedEntityUuid={uuid!} />
+        </DetailSection>
+      )}
+
+      {!isTrash && (
+        <DetailSection title={t("common.notes")}>
+          <NoteList entityType="customer" entityUuid={uuid!} canEdit={perms.can_edit} />
+        </DetailSection>
+      )}
+
+      {!isTrash && (
+        <DetailSection title={t("communicationHistory.title")}>
+          <CommunicationHistory entityType="customer" entityUuid={uuid!} />
+        </DetailSection>
+      )}
+
+      {!isTrash && (
+        <DetailSection title={t("common.activity")}>
+          <ActivityTimeline entityType="customer" entityUuid={uuid!} />
+        </DetailSection>
+      )}
+    </DetailPageLayout>
   );
 }
