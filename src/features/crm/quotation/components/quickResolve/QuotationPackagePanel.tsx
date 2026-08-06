@@ -98,7 +98,12 @@ export default function QuotationPackagePanel({
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         initialValues={
-          enquiry
+          // Only pre-fill from the Enquiry's package snapshot before a real
+          // Package is linked — once pkg_uuid is set (existing link or a
+          // prior "Create New"), that snapshot text is stale and re-showing
+          // it here (with everything else blank) reads as a broken form
+          // rather than a fresh "create another package" dialog.
+          enquiry && !enquiry.pkg_uuid
             ? { name: enquiry.package_name || "", code: suggestPackageCode(enquiry.package_name || "") }
             : undefined
         }

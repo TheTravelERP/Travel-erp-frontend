@@ -46,8 +46,6 @@ export default function ResolvePackageLink({ enquiry, onResolved, disabled }: Re
       name: enquiry.package_name || "",
       code: suggestPackageCode(enquiry.package_name || ""),
       package_type_uuid: null,
-      duration_days: undefined,
-      duration_nights: undefined,
       currency_code: "",
     },
   });
@@ -77,8 +75,6 @@ export default function ResolvePackageLink({ enquiry, onResolved, disabled }: Re
         name: values.name,
         code: values.code,
         package_type_uuid: values.package_type_uuid || undefined,
-        duration_days: values.duration_days,
-        duration_nights: values.duration_nights,
         currency_code: values.currency_code,
       });
       const updated = await linkExistingPackageForEnquiry(enquiry.uuid, pkg.uuid);

@@ -335,6 +335,7 @@ export default function QuotationForm({
           setValue("enquiry_uuid", targetUuid);
           setValue("business_type", detail.business_type);
           if (detail.pkg_uuid) setValue("pkg_uuid", detail.pkg_uuid);
+          if (detail.cust_uuid) setValue("cust_uuid", detail.cust_uuid);
         }
       } catch {
         if (!cancelled) showSnackbar({ message: t("common.loadUnable"), severity: "error" });
@@ -359,6 +360,7 @@ export default function QuotationForm({
       setEnquiry(detail);
       setValue("business_type", detail.business_type);
       if (detail.pkg_uuid) setValue("pkg_uuid", detail.pkg_uuid);
+      if (detail.cust_uuid) setValue("cust_uuid", detail.cust_uuid);
     } catch {
       setEnquiry(null);
       showSnackbar({ message: t("common.loadUnable"), severity: "error" });
@@ -368,6 +370,7 @@ export default function QuotationForm({
   function handleEnquiryLinkResolved(updated: EnquiryDetail) {
     setEnquiry(updated);
     if (updated.pkg_uuid) setValue("pkg_uuid", updated.pkg_uuid);
+    if (updated.cust_uuid) setValue("cust_uuid", updated.cust_uuid);
   }
 
   // pkg_uuid only means anything for business_type "Package". cust_uuid is

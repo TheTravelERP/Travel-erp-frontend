@@ -2,8 +2,8 @@
 //
 // Shared "bare Package" quick-create form — schema, code-suggestion helper,
 // and the field layout itself. Deliberately narrow: it may only ever
-// produce a bare Package row (name/type/duration/currency). It must never
-// touch PackageService, PackageDetail, inclusions/exclusions, or supplier
+// produce a bare Package row (name/code/type/currency). It must never touch
+// PackageService, PackageDetail, inclusions/exclusions, or supplier
 // mapping — a package created here has zero PackageService rows by design,
 // which is exactly what routes a quotation built against it onto the Flat
 // Package Pricing fallback (Occupancy Group UI) instead of the normal
@@ -16,8 +16,7 @@
 // *after* a package is created (link to Enquiry vs. select directly onto a
 // form field), not in how the package itself is captured/validated.
 
-import { useState, type Dispatch, type SetStateAction } from "react";
-import { Grid, Link, TextField } from "@mui/material";
+import { Grid, TextField } from "@mui/material";
 import { Controller, type Control, type FieldErrors } from "react-hook-form";
 import * as z from "zod";
 import { useTranslation } from "react-i18next";
@@ -29,8 +28,6 @@ export const getPackageQuickCreateSchema = (t: (key: string) => string) =>
     name: z.string().trim().min(1, t("validation.nameRequired")),
     code: z.string().trim().min(1, t("validation.codeRequired")),
     package_type_uuid: z.string().nullable().optional(),
-    duration_days: z.coerce.number().int().min(0).optional(),
-    duration_nights: z.coerce.number().int().min(0).optional(),
     currency_code: z.string().trim().length(3, t("quotation.validation.currencyCode3")),
   });
 
@@ -62,7 +59,6 @@ export default function PackageQuickCreateFields({
   codeManuallyEditedRef,
 }: PackageQuickCreateFieldsProps) {
   const { t } = useTranslation();
-  const [codeVisible, setCodeVisible] = useState(false);
 
   return (
     <Grid container spacing={1.5}>
@@ -76,6 +72,7 @@ export default function PackageQuickCreateFields({
               label={t("quotation.package")}
               size="small"
               fullWidth
+              required
               error={!!errors.name}
               helperText={errors.name?.message}
               onChange={(e) => {
@@ -89,34 +86,27 @@ export default function PackageQuickCreateFields({
         />
       </Grid>
 
-      {codeVisible ? (
-        <Grid size={{ xs: 12 }}>
-          <Controller
-            name="code"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label={t("common.code")}
-                size="small"
-                fullWidth
-                error={!!errors.code}
-                helperText={errors.code?.message}
-                onChange={(e) => {
-                  codeManuallyEditedRef.current = true;
-                  field.onChange(e);
-                }}
-              />
-            )}
-          />
-        </Grid>
-      ) : (
-        <Grid size={{ xs: 12 }}>
-          <Link component="button" type="button" variant="caption" onClick={() => setCodeVisible(true)}>
-            {t("common.edit")} {t("common.code")}
-          </Link>
-        </Grid>
-      )}
+      <Grid size={{ xs: 12 }}>
+        <Controller
+          name="code"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label={t("common.code")}
+              size="small"
+              fullWidth
+              required
+              error={!!errors.code}
+              helperText={errors.code?.message}
+              onChange={(e) => {
+                codeManuallyEditedRef.current = true;
+                field.onChange(e);
+              }}
+            />
+          )}
+        />
+      </Grid>
 
       <Grid size={{ xs: 12, sm: 6 }}>
         <EntityAutocomplete
@@ -128,25 +118,7 @@ export default function PackageQuickCreateFields({
           onAddNew={onPackageTypeAddNew}
         />
       </Grid>
-      <Grid size={{ xs: 6, sm: 3 }}>
-        <Controller
-          name="duration_days"
-          control={control}
-          render={({ field }) => (
-            <TextField {...field} type="number" label={t("package.durationDays")} size="small" fullWidth />
-          )}
-        />
-      </Grid>
-      <Grid size={{ xs: 6, sm: 3 }}>
-        <Controller
-          name="duration_nights"
-          control={control}
-          render={({ field }) => (
-            <TextField {...field} type="number" label={t("package.durationNights")} size="small" fullWidth />
-          )}
-        />
-      </Grid>
-      <Grid size={{ xs: 12, sm: 4 }}>
+      <Grid size={{ xs: 12, sm: 6 }}>
         <Controller
           name="currency_code"
           control={control}

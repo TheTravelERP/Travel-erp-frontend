@@ -105,7 +105,12 @@ export default function QuotationCustomerPanel({
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         initialValues={
-          enquiry
+          // Only pre-fill from the Enquiry's customer snapshot before a real
+          // Customer is linked — once cust_uuid is set (existing link or a
+          // prior "Create New"), that snapshot text is stale and re-showing
+          // it here reads as a broken form rather than a fresh "create
+          // another customer" dialog. Mirrors QuotationPackagePanel.tsx.
+          enquiry && !enquiry.cust_uuid
             ? {
                 name: enquiry.customer_name || "",
                 mobile: enquiry.customer_mobile || "",

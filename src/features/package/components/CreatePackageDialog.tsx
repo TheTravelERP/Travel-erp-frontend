@@ -28,8 +28,6 @@ const blankValues: PackageQuickCreateValues = {
   name: "",
   code: "",
   package_type_uuid: null,
-  duration_days: undefined,
-  duration_nights: undefined,
   currency_code: "",
 };
 
@@ -82,8 +80,6 @@ export default function CreatePackageDialog({ open, onClose, onCreated, initialV
         name: values.name,
         code: values.code,
         package_type_uuid: values.package_type_uuid || undefined,
-        duration_days: values.duration_days,
-        duration_nights: values.duration_nights,
         currency_code: values.currency_code,
       });
       onCreated({ uuid: pkg.uuid, name: pkg.name });
