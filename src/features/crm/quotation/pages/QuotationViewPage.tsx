@@ -230,6 +230,40 @@ export default function QuotationViewPage() {
             </Grid>
           </Paper>
 
+          {/* Package quotations flatten Occupancy Pricing into ordinary
+              service lines server-side so they price/tax correctly (see
+              _build_flat_package_pricing_lines on the backend) — the GET
+              response splits them back out into occupancy_groups (see
+              get_quotation_detail) so this view doesn't have to guess which
+              service_lines rows are really occupancy data. */}
+          {!!quotation.occupancy_groups?.length && (
+            <Paper sx={{ p: 2, mb: 2 }}>
+              <Typography variant="h6" color="primary" mb={2}>{t("quotation.occupancyGroups")}</Typography>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>{t("packagePricing.occupancyType")}</TableCell>
+                      <TableCell>{t("packagePricing.passengerType")}</TableCell>
+                      <TableCell align="right">{t("quotation.quantity")}</TableCell>
+                      <TableCell align="right">{t("quotation.sellingPrice")}</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {quotation.occupancy_groups.map((group, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{group.occupancy_type}</TableCell>
+                        <TableCell>{group.passenger_type}</TableCell>
+                        <TableCell align="right">{group.quantity}</TableCell>
+                        <TableCell align="right">{(group.selling_price ?? 0).toFixed(2)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
+          )}
+
           <Paper sx={{ p: 2, mb: 2 }}>
             <Typography variant="h6" color="primary" mb={2}>{t("quotation.serviceLines")}</Typography>
             <TableContainer>

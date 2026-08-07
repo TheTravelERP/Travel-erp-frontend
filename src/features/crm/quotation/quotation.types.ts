@@ -1,5 +1,7 @@
 // src/features/crm/quotation/quotation.types.ts
 
+import type { DiscountType } from "./pricing";
+
 export interface QuotationServiceLineInput {
   uuid?: string;
   service_type: string;
@@ -12,8 +14,16 @@ export interface QuotationServiceLineInput {
   unit?: string;
   cost_price: number;
   selling_price: number;
+  // Wire fields the backend actually consumes (discount_percent wins
+  // whenever >0, discount_amount is the fallback) — derived from
+  // discount_type/discount_value below at submit time, never edited
+  // directly. See submitCleaned in QuotationForm.tsx.
   discount_percent?: number;
   discount_amount?: number;
+  // UI-only pricing-engine fields (see pricing.ts) — stripped before
+  // submit, mapped onto discount_percent/discount_amount instead.
+  discount_type?: DiscountType;
+  discount_value?: number;
   remarks?: string;
 }
 
@@ -26,10 +36,21 @@ export interface QuotationOccupancyGroupInput {
   occupancy_type: string;
   passenger_type: string;
   quantity: number;
-  // Row-level commercial override of the resolved per-unit Package Price.
-  // Defaults to the resolved price and is user-editable; Package Pricing
-  // master data itself is never modified by editing this.
+  // Row-level commercial override of the resolved per-unit Package Price —
+  // always the raw, undiscounted price; Package Pricing master data itself
+  // is never modified by editing this, and discount below is never baked
+  // into it. Defaults to the resolved price when absent.
   selling_price?: number;
+  // Wire fields the backend actually stores (discount_percent wins
+  // whenever >0, discount_amount is the fallback — same _compute_line_
+  // amounts rule as service_lines) — derived from discount_type/
+  // discount_value below at submit time, never edited directly. See
+  // submitCleaned in QuotationForm.tsx.
+  discount_percent?: number;
+  discount_amount?: number;
+  // Pricing-engine fields the row's inputs actually bind to.
+  discount_type?: DiscountType;
+  discount_value?: number;
 }
 
 export interface QuotationServiceLineDetail extends QuotationServiceLineInput {

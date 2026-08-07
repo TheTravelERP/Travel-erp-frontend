@@ -8,7 +8,7 @@
 
 import { useState } from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { useWatch, type Control, type UseFormSetValue } from "react-hook-form";
+import type { Control, UseFormSetValue } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import EntityAutocomplete from "../../../../../components/common/EntityAutocomplete";
@@ -30,6 +30,11 @@ interface QuotationPackagePanelProps {
   /** Only ever invoked when `enquiry` is set. */
   onEnquiryUpdated: (updated: EnquiryDetail) => void;
   disabled?: boolean;
+  /** Quotation Edit screen only — Package is part of the quotation's
+   *  locked Sales Context (see QuotationForm.tsx); the field and the
+   *  "Create New Package" shortcut both go read-only, independent of
+   *  `isResolved`. A new quotation is required to change the package. */
+  salesContextLocked?: boolean;
 }
 
 export default function QuotationPackagePanel({
@@ -38,17 +43,18 @@ export default function QuotationPackagePanel({
   enquiry,
   onEnquiryUpdated,
   disabled,
+  salesContextLocked,
 }: QuotationPackagePanelProps) {
   const { t } = useTranslation();
   const { showSnackbar } = useSnackbar();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [linking, setLinking] = useState(false);
 
-  // A Package is "linked" once the Enquiry carries a pkg_uuid (Quotation-
-  // from-Enquiry) or, absent an Enquiry, once the Quotation's own pkg_uuid
-  // field is set (Direct Quotation). Mirrors QuotationCustomerPanel.tsx.
-  const pkgUuidWatched = useWatch({ control, name: "pkg_uuid" });
-  const isResolved = enquiry ? !!enquiry.pkg_uuid : !!pkgUuidWatched;
+  // "Resolved" means a real backend link exists — the Enquiry itself
+  // already carries a pkg_uuid, persisted via resolvePackage() below. A
+  // Direct Quotation's pkg_uuid is just live, unsaved form state and must
+  // stay freely editable up to Save. Mirrors QuotationCustomerPanel.tsx.
+  const isResolved = !!enquiry?.pkg_uuid;
 
   async function resolvePackage(pkgUuid: string) {
     if (!enquiry) return;
@@ -66,7 +72,13 @@ export default function QuotationPackagePanel({
 
   return (
     <Stack spacing={1.5}>
-      {enquiry && !isResolved && (
+      {/* Mirrors QuotationCustomerPanel.tsx: the snapshot card exists to
+          help decide whether to link/create a Package from the enquiry's
+          raw text — moot once edit mode has already locked that decision,
+          and confusing here in particular since a Direct Quotation's
+          bookkeeping enquiry never carries a package link at all, so this
+          card would show "-" even when the field below has a real package. */}
+      {enquiry && !isResolved && !salesContextLocked && (
         <Box>
           <Typography variant="subtitle2" color="text.secondary" mb={0.5}>
             {t("quotation.packageSnapshotTitle")}
@@ -88,14 +100,14 @@ export default function QuotationPackagePanel({
             control={control}
             setValue={setValue}
             dropdownName="packages"
-            disabled={disabled || linking || isResolved}
+            disabled={disabled || linking || isResolved || salesContextLocked}
             initialInputValue={enquiry?.package_name || undefined}
             onOptionSelected={(option) => {
               if (option) resolvePackage(option.value);
             }}
           />
         </Box>
-        {!isResolved && (
+        {!isResolved && !salesContextLocked && (
           <Button size="small" variant="outlined" disabled={disabled || linking} onClick={() => setDialogOpen(true)}>
             {t("quotation.createNew")} {t("quotation.package")}
           </Button>

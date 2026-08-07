@@ -1,6 +1,34 @@
 // src/features/crm/quotation/quotation.schema.ts
 import * as z from 'zod';
 import type { TFunction } from 'i18next';
+import { validateDiscountValue } from './pricing';
+
+// Shared by both row schemas below (Occupancy Pricing and Service Lines) —
+// the unified pricing engine's one validation rule: Percentage caps at 100,
+// Amount caps at the row's own Sell Price. Defined once, applied via
+// superRefine on each row object so it never drifts between the two forms.
+function checkDiscount(t: TFunction) {
+  return (
+    row: { discount_type?: string; discount_value?: number; selling_price?: number },
+    ctx: z.RefinementCtx,
+  ) => {
+    const type = row.discount_type === 'Amount' ? 'Amount' : 'Percentage';
+    const error = validateDiscountValue(type, row.discount_value ?? 0, row.selling_price ?? 0);
+    if (error === 'exceeds100') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: t('quotation.validation.discountPercentMax100'),
+        path: ['discount_value'],
+      });
+    } else if (error === 'exceedsSellPrice') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: t('quotation.validation.discountExceedsSellPrice'),
+        path: ['discount_value'],
+      });
+    }
+  };
+}
 
 const serviceLineSchema = (t: TFunction) =>
   z.object({
@@ -15,10 +43,15 @@ const serviceLineSchema = (t: TFunction) =>
     unit: z.string().nullish(),
     cost_price: z.coerce.number().min(0),
     selling_price: z.coerce.number().min(0),
+    // Wire fields — derived from discount_type/discount_value at submit
+    // time (see submitCleaned in QuotationForm.tsx), not edited directly.
     discount_percent: z.coerce.number().min(0).max(100).optional(),
     discount_amount: z.coerce.number().min(0).optional(),
+    // Pricing-engine fields the row's inputs actually bind to.
+    discount_type: z.enum(['Percentage', 'Amount']).default('Percentage'),
+    discount_value: z.coerce.number().min(0).optional().default(0),
     remarks: z.string().nullish(),
-  });
+  }).superRefine(checkDiscount(t));
 
 // LOCKED: one row = one pricing rule (Occupancy Type + Passenger Type +
 // Quantity) — no more mixed Adult/Child/Infant counts within a single row.
@@ -33,7 +66,17 @@ const occupancyGroupSchema = (t: TFunction) =>
       .max(999, t('quotation.validation.paxMax999'))
       .default(1),
     selling_price: z.coerce.number().min(0).optional(),
-  });
+    // Wire fields — derived from discount_type/discount_value at submit
+    // time (see submitCleaned in QuotationForm.tsx), not edited directly.
+    // Stored the same way service_lines' are (see occupancy_groups on the
+    // backend's QuotationOccupancyGroup schema).
+    discount_percent: z.coerce.number().min(0).max(100).optional(),
+    discount_amount: z.coerce.number().min(0).optional(),
+    // Pricing-engine fields the row's inputs actually bind to — see
+    // serviceLineSchema above for the shared shape/validation.
+    discount_type: z.enum(['Percentage', 'Amount']).default('Percentage'),
+    discount_value: z.coerce.number().min(0).optional().default(0),
+  }).superRefine(checkDiscount(t));
 
 // `isPackageBusiness` mirrors business_type === "Package" — Occupancy
 // Groups and Service Lines coexist for Package (Occupancy mandatory,

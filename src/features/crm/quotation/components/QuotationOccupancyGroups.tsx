@@ -1,5 +1,5 @@
 // src/features/crm/quotation/components/QuotationOccupancyGroups.tsx
-import { Alert, Box, Button, Grid, IconButton, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, Grid, IconButton, MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { Controller, useFieldArray, useWatch, type Control, type UseFormSetValue } from "react-hook-form";
 import { useRef, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,16 +14,24 @@ import FormSection from "../../../../components/forms/FormSection";
 import { resolvePackagePricing } from "../../../package/packagePricing/packagePricing.api";
 import type { PackagePricingResolveResult } from "../../../package/packagePricing/packagePricing.types";
 import type { QuotationFormInput } from "../quotation.types";
+import { DISCOUNT_TYPES, calculateRowLineTotal, calculateSectionTotal } from "../pricing";
 import CreatePackagePricingDialog from "./CreatePackagePricingDialog";
 
 // LOCKED architecture: each row is exactly one pricing rule — Occupancy
 // Type + Passenger Type + Quantity — resolved 1:1 against PackagePricing.
 // No mixing of Adult/Child/Infant counts within a single row.
-const emptyGroup = { occupancy_type: "", passenger_type: "", quantity: 1, selling_price: undefined };
+const emptyGroup = {
+  occupancy_type: "",
+  passenger_type: "",
+  quantity: 1,
+  selling_price: undefined,
+  discount_type: "Percentage" as const,
+  discount_value: 0,
+};
 
 // LOCKED: the Quotation Header (pax_adult/pax_child/pax_infant) is the only
 // source of truth for passenger counts. This list only drives the read-only
-// Passenger Allocation summary below — it never writes back to the header.
+// allocation summary below — it never writes back to the header.
 const PASSENGER_ALLOCATION_TYPES = [
   { type: "Adult", labelKey: "quotation.paxAdult" },
   { type: "Child", labelKey: "quotation.paxChild" },
@@ -89,11 +97,12 @@ export default function QuotationOccupancyGroups({
   const [dialogTarget, setDialogTarget] = useState<{ index: number; occupancyType: string; passengerType: string } | null>(null);
 
   // Sell Price defaults to (and stays in sync with) the row's resolved
-  // Package Price until the user directly edits it (via Sell Price or
-  // Discount) — same "toggling/typing doesn't erase what's already there,
-  // but auto-sync stops once the user has acted" convention used by
-  // CustomerSelector/BookingForm elsewhere in this app. A ref (not state)
-  // because it must never itself trigger a re-render/effect loop.
+  // Package Price until the user directly edits it — same "typing doesn't
+  // erase what's already there, but auto-sync stops once the user has
+  // acted" convention used by CustomerSelector/BookingForm elsewhere in
+  // this app. A ref (not state) because it must never itself trigger a
+  // re-render/effect loop. Discount Type/Value are downstream of Sell
+  // Price now (unified pricing engine, see pricing.ts) and never touch it.
   const manuallyEditedRef = useRef<Record<number, boolean>>({});
 
   async function resolveOne(index: number, occupancyType: string, passengerType: string) {
@@ -123,6 +132,38 @@ export default function QuotationOccupancyGroups({
     return !!resolution && resolution !== "loading" && !resolution.resolved;
   }
 
+  // resolveOne only ever fired from the Occupancy Type/Passenger Type
+  // dropdowns' onChange — never for rows that already had both values set
+  // when the form loaded (editing an existing quotation, or defaultValues
+  // arriving async). Those rows would show "—" in Package Price forever
+  // unless the user happened to re-touch a dropdown. Runs once per row the
+  // first time it has both values but no resolution yet; deliberately
+  // excludes `groups`/`resolutions` from deps (they change on every
+  // keystroke) so this only re-fires when a row is added/removed or the
+  // package itself changes, not on every render.
+  //
+  // A loaded row's Sell Price already reflects whatever was actually saved
+  // (including any discount baked into it at submit time — see
+  // submitCleaned in QuotationForm.tsx) and must never be silently
+  // recomputed from today's master Package Price just because this
+  // resolution happens to be landing for the first time. manuallyEditedRef
+  // starts empty on every fresh mount, so without seeding it here the sync
+  // effect right below would treat every freshly-loaded row as
+  // "un-overridden" and stomp its real, already-saved price the instant
+  // its resolution arrives.
+  useEffect(() => {
+    fields.forEach((_, index) => {
+      const g = groups[index];
+      if (g?.selling_price !== undefined && g?.selling_price !== null) {
+        manuallyEditedRef.current[index] = true;
+      }
+      if (g?.occupancy_type && g?.passenger_type && !(index in resolutions)) {
+        void resolveOne(index, g.occupancy_type, g.passenger_type);
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fields.length, packageUuid]);
+
   // Keeps Sell Price synced to Package Price for every row the user hasn't
   // manually overridden — fires whenever a resolution lands, from whichever
   // trigger caused it (dropdown change or the pricing dialog creating what
@@ -140,76 +181,37 @@ export default function QuotationOccupancyGroups({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resolutions]);
 
-  const grandTotal = fields.reduce((sum, _, index) => {
-    const sellingPrice = groups[index]?.selling_price;
-    const quantity = groups[index]?.quantity ?? 0;
-    return sellingPrice !== undefined ? sum + sellingPrice * quantity : sum;
-  }, 0);
+  const occupancyTotal = calculateSectionTotal(groups);
 
   return (
-    <FormSection
-      title={t("quotation.occupancyGroups")}
-      titleAdornment={
-        !disabled && (
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<AddIcon />}
-            onClick={() => append({ ...emptyGroup })}
-            sx={{ ml: 2 }}
-          >
-            {t("quotation.addOccupancyGroup")}
-          </Button>
-        )
-      }
-    >
+    <FormSection title={t("quotation.occupancyGroups")}>
+      {/* Compact horizontal allocation summary — no card/border, just an
+          inline status row directly under the section header. */}
       <Grid size={{ xs: 12 }}>
-        <Typography variant="body2" color="text.secondary">
-          {t("quotation.noServiceLinesForPackage")}
-        </Typography>
-      </Grid>
-
-      <Grid size={{ xs: 12 }}>
-        <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1, p: 1.5 }}>
-          <Typography variant="subtitle2" gutterBottom>
-            {t("quotation.passengerAllocation")}
-          </Typography>
-          <Grid container spacing={2}>
-            {PASSENGER_ALLOCATION_TYPES.map(({ type, labelKey }) => {
-              const header = headerCounts[type];
-              const allocated = allocatedCounts[type];
-              const complete = allocated === header;
-              const exceeds = allocated > header;
-              return (
-                <Grid size={{ xs: 12, sm: 4 }} key={type}>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    {complete ? (
-                      <CheckCircleIcon color="success" fontSize="small" />
-                    ) : exceeds ? (
-                      <ErrorOutlineIcon color="error" fontSize="small" />
-                    ) : (
-                      <WarningAmberIcon color="warning" fontSize="small" />
-                    )}
-                    <Box>
-                      <Typography variant="body2" fontWeight={600}>
-                        {t(labelKey)}
-                      </Typography>
-                      <Typography
-                        variant="caption"
-                        color={complete ? "success.main" : exceeds ? "error.main" : "warning.main"}
-                      >
-                        {t("quotation.allocated")} {allocated} / {header}
-                        {complete && ` — ${t("quotation.allocationComplete")}`}
-                        {exceeds && ` — ${t("quotation.allocationExceedsQuantity", { type })}`}
-                        {!complete && !exceeds && ` — ${t("quotation.allocationIncomplete", { count: header - allocated, type })}`}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Grid>
-              );
-            })}
-          </Grid>
-        </Box>
+        <Stack
+          direction="row"
+          spacing={1.5}
+          alignItems="center"
+          flexWrap="wrap"
+          divider={<Typography color="text.disabled">•</Typography>}
+        >
+          {PASSENGER_ALLOCATION_TYPES.map(({ type, labelKey }) => {
+            const header = headerCounts[type];
+            const allocated = allocatedCounts[type];
+            const complete = allocated === header;
+            const exceeds = allocated > header;
+            const color = complete ? "success.main" : exceeds ? "error.main" : "warning.main";
+            const StatusIcon = complete ? CheckCircleIcon : exceeds ? ErrorOutlineIcon : WarningAmberIcon;
+            return (
+              <Stack direction="row" spacing={0.5} alignItems="center" key={type}>
+                <StatusIcon fontSize="small" sx={{ color }} />
+                <Typography variant="body2" fontWeight={600} sx={{ color }}>
+                  {t(labelKey)} {allocated}/{header}
+                </Typography>
+              </Stack>
+            );
+          })}
+        </Stack>
       </Grid>
 
       {errorMessage && (
@@ -220,7 +222,7 @@ export default function QuotationOccupancyGroups({
 
       {fields.length === 0 && (
         <Grid size={{ xs: 12 }}>
-          <Typography variant="body2" color="text.secondary">{t("quotation.noOccupancyGroupsYet")}</Typography>
+          <Alert severity="info" sx={{ py: 0 }}>{t("quotation.noServiceLinesForPackage")}</Alert>
         </Grid>
       )}
 
@@ -229,221 +231,281 @@ export default function QuotationOccupancyGroups({
           {fields.map((field, index) => {
             const occupancyType = groups[index]?.occupancy_type;
             const passengerType = groups[index]?.passenger_type;
-            const quantity = groups[index]?.quantity ?? 0;
             const packagePrice = packagePriceFor(index);
             const missing = isMissingFor(index);
             const sellingPrice = groups[index]?.selling_price;
-            const finalAmount = sellingPrice !== undefined ? sellingPrice * quantity : undefined;
+            const discountType = groups[index]?.discount_type ?? "Percentage";
+            const discountValue = groups[index]?.discount_value ?? 0;
+            const quantity = groups[index]?.quantity;
+            const finalPrice = calculateRowLineTotal({
+              selling_price: sellingPrice,
+              discount_type: discountType,
+              discount_value: discountValue,
+              quantity,
+            });
             const isOverridden =
               packagePrice !== null &&
               sellingPrice !== undefined &&
               Math.abs(sellingPrice - packagePrice) > 0.005;
-            const discountAmount =
-              packagePrice !== null && sellingPrice !== undefined ? packagePrice - sellingPrice : undefined;
-            // Caps this row's Qty input at the Header's count for the
-            // selected Passenger Type — e.g. Header Adults = 3 means no
-            // single row can type more than 3. Purely a native-input-level
-            // cap; the real Save-blocking enforcement is still the zod
-            // superRefine (exact-match) and the backend allocation check.
-            const quantityMax = passengerType && passengerType in headerCounts ? headerCounts[passengerType] : 999;
+            // Caps this row's Qty input at whatever's left of the Header's
+            // count for this Passenger Type after every OTHER row of the
+            // same Passenger Type is accounted for — e.g. Header
+            // Children=4, another Child row already has Qty=2 -> this row's
+            // cap is 2, not 4. Purely a native-input-level guard (no
+            // visible hint); the real Save-blocking enforcement is still
+            // the zod superRefine (exact-match) and the backend allocation
+            // check.
+            const allocatedByOtherRows = groups.reduce((sum, g, i) => {
+              if (i === index || g.passenger_type !== passengerType) return sum;
+              return sum + (Number(g.quantity) || 0);
+            }, 0);
+            const quantityMax =
+              passengerType && passengerType in headerCounts
+                ? Math.max(0, headerCounts[passengerType] - allocatedByOtherRows)
+                : 999;
 
             return (
-              <Box key={field.id} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1, p: 1.5 }}>
-                <Grid container spacing={1.5} alignItems="flex-start">
-                  <Grid size={{ xs: 6, sm: 2 }}>
-                    <Controller
-                      name={`occupancy_groups.${index}.occupancy_type`}
-                      control={control}
-                      render={({ field: f }) => (
-                        <DropdownAutocomplete
-                          name={`occupancy_groups.${index}.occupancy_type`}
-                          label={t("packagePricing.occupancyType")}
-                          dropdownName="occupancy_type"
-                          useForm={false}
-                          allowAdd={false}
-                          disabled={disabled}
-                          value={f.value}
-                          onChange={(value: string) => {
-                            f.onChange(value);
-                            if (passengerType) void resolveOne(index, value, passengerType);
-                          }}
-                        />
-                      )}
-                    />
-                  </Grid>
+              <Grid container spacing={1.5} key={field.id} alignItems="center">
+                <Grid size={{ xs: 6, sm: 1.7 }}>
+                  <Controller
+                    name={`occupancy_groups.${index}.occupancy_type`}
+                    control={control}
+                    render={({ field: f }) => (
+                      <DropdownAutocomplete
+                        name={`occupancy_groups.${index}.occupancy_type`}
+                        label={t("packagePricing.occupancyType")}
+                        dropdownName="occupancy_type"
+                        useForm={false}
+                        allowAdd={false}
+                        disabled={disabled}
+                        value={f.value}
+                        onChange={(value: string) => {
+                          f.onChange(value);
+                          if (passengerType) void resolveOne(index, value, passengerType);
+                        }}
+                      />
+                    )}
+                  />
+                </Grid>
 
-                  <Grid size={{ xs: 6, sm: 2 }}>
-                    <Controller
-                      name={`occupancy_groups.${index}.passenger_type`}
-                      control={control}
-                      render={({ field: f }) => (
-                        <DropdownAutocomplete
-                          name={`occupancy_groups.${index}.passenger_type`}
-                          label={t("packagePricing.passengerType")}
-                          dropdownName="passenger_type"
-                          useForm={false}
-                          allowAdd={false}
-                          disabled={disabled}
-                          value={f.value}
-                          onChange={(value: string) => {
-                            f.onChange(value);
-                            if (occupancyType) void resolveOne(index, occupancyType, value);
-                          }}
-                        />
-                      )}
-                    />
-                  </Grid>
+                <Grid size={{ xs: 6, sm: 1.7 }}>
+                  <Controller
+                    name={`occupancy_groups.${index}.passenger_type`}
+                    control={control}
+                    render={({ field: f }) => (
+                      <DropdownAutocomplete
+                        name={`occupancy_groups.${index}.passenger_type`}
+                        label={t("packagePricing.passengerType")}
+                        dropdownName="passenger_type"
+                        useForm={false}
+                        allowAdd={false}
+                        disabled={disabled}
+                        value={f.value}
+                        onChange={(value: string) => {
+                          f.onChange(value);
+                          if (occupancyType) void resolveOne(index, occupancyType, value);
+                        }}
+                      />
+                    )}
+                  />
+                </Grid>
 
-                  <Grid size={{ xs: 4, sm: 1 }}>
-                    <Controller
-                      name={`occupancy_groups.${index}.quantity`}
-                      control={control}
-                      render={({ field: f, fieldState }) => (
+                <Grid size={{ xs: 4, sm: 0.8 }}>
+                  <Controller
+                    name={`occupancy_groups.${index}.quantity`}
+                    control={control}
+                    render={({ field: f, fieldState }) => (
+                      <TextField
+                        {...f}
+                        type="number"
+                        label={t("quotation.quantity")}
+                        fullWidth
+                        size="small"
+                        disabled={disabled}
+                        error={!!fieldState.error}
+                        helperText={fieldState.error?.message}
+                        slotProps={{ htmlInput: { min: 1, max: quantityMax } }}
+                        onChange={(e) => {
+                          // Hard clamp — the max attribute alone doesn't stop
+                          // a user from typing digits past it, only from
+                          // using the spinner/native validation. This makes
+                          // it physically impossible to exceed the Header's
+                          // count for this row's Passenger Type.
+                          const raw = e.target.value;
+                          if (raw === "") {
+                            f.onChange(raw);
+                            return;
+                          }
+                          const num = Number(raw);
+                          f.onChange(Number.isNaN(num) ? raw : Math.min(num, quantityMax));
+                        }}
+                      />
+                    )}
+                  />
+                </Grid>
+
+                <Grid size={{ xs: 4, sm: 1.4 }}>
+                  <TextField
+                    label={t("quotation.packagePrice")}
+                    fullWidth
+                    size="small"
+                    disabled
+                    value={packagePrice !== null ? `${packageCurrency} ${packagePrice.toLocaleString()}` : "—"}
+                  />
+                </Grid>
+
+                <Grid size={{ xs: 4, sm: 1.4 }}>
+                  <Controller
+                    name={`occupancy_groups.${index}.selling_price`}
+                    control={control}
+                    render={({ field: f, fieldState }) => (
+                      <TextField
+                        {...f}
+                        value={f.value ?? ""}
+                        type="number"
+                        label={t("quotation.sellingPrice")}
+                        fullWidth
+                        size="small"
+                        disabled={disabled}
+                        error={!!fieldState.error}
+                        helperText={
+                          fieldState.error?.message ||
+                          (isOverridden ? t("quotation.sellingPriceOverridden") : undefined)
+                        }
+                        slotProps={{ htmlInput: { min: 0 } }}
+                        onChange={(e) => {
+                          manuallyEditedRef.current[index] = true;
+                          f.onChange(e);
+                        }}
+                      />
+                    )}
+                  />
+                </Grid>
+
+                <Grid size={{ xs: 6, sm: 1.4 }}>
+                  <Controller
+                    name={`occupancy_groups.${index}.discount_type`}
+                    control={control}
+                    render={({ field: f }) => (
+                      <TextField
+                        {...f}
+                        select
+                        label={t("quotation.discountType")}
+                        fullWidth
+                        size="small"
+                        disabled={disabled}
+                      >
+                        {DISCOUNT_TYPES.map((opt) => (
+                          <MenuItem key={opt} value={opt}>
+                            {t(opt === "Percentage" ? "quotation.discountTypePercentage" : "quotation.discountTypeAmount")}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    )}
+                  />
+                </Grid>
+
+                <Grid size={{ xs: 6, sm: 1.2 }}>
+                  <Controller
+                    name={`occupancy_groups.${index}.discount_value`}
+                    control={control}
+                    render={({ field: f, fieldState }) => {
+                      const discountMax = discountType === "Percentage" ? 100 : sellingPrice ?? Infinity;
+                      return (
                         <TextField
                           {...f}
+                          value={f.value ?? 0}
                           type="number"
-                          label={t("quotation.quantity")}
+                          label={t("quotation.discountAmount")}
                           fullWidth
                           size="small"
                           disabled={disabled}
                           error={!!fieldState.error}
                           helperText={fieldState.error?.message}
-                          slotProps={{ htmlInput: { min: 1, max: quantityMax } }}
+                          slotProps={{ htmlInput: { min: 0, max: discountMax === Infinity ? undefined : discountMax } }}
                           onChange={(e) => {
                             // Hard clamp — the max attribute alone doesn't stop
-                            // a user from typing digits past it, only from
-                            // using the spinner/native validation. This makes
-                            // it physically impossible to exceed the Header's
-                            // count for this row's Passenger Type.
+                            // a user from typing digits past it (only the
+                            // spinner/native validation respects it). Mirrors
+                            // the Qty field's clamp above.
                             const raw = e.target.value;
                             if (raw === "") {
                               f.onChange(raw);
                               return;
                             }
                             const num = Number(raw);
-                            f.onChange(Number.isNaN(num) ? raw : Math.min(num, quantityMax));
+                            f.onChange(Number.isNaN(num) ? raw : Math.min(Math.max(num, 0), discountMax));
                           }}
                         />
-                      )}
-                    />
-                  </Grid>
+                      );
+                    }}
+                  />
+                </Grid>
 
-                  <Grid size={{ xs: 4, sm: 1.6 }}>
-                    <TextField
-                      label={t("quotation.packagePrice")}
-                      fullWidth
-                      size="small"
-                      disabled
-                      value={packagePrice !== null ? `${packageCurrency} ${packagePrice.toLocaleString()}` : "—"}
-                    />
-                  </Grid>
+                <Grid size={{ xs: 6, sm: 1.7 }}>
+                  <TextField
+                    label={t("quotation.finalPrice")}
+                    fullWidth
+                    size="small"
+                    disabled
+                    value={`${packageCurrency} ${finalPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
+                  />
+                </Grid>
 
-                  <Grid size={{ xs: 4, sm: 1.6 }}>
-                    <Controller
-                      name={`occupancy_groups.${index}.selling_price`}
-                      control={control}
-                      render={({ field: f, fieldState }) => (
-                        <TextField
-                          {...f}
-                          value={f.value ?? ""}
-                          type="number"
-                          label={t("quotation.sellingPrice")}
-                          fullWidth
-                          size="small"
-                          disabled={disabled}
-                          error={!!fieldState.error}
-                          helperText={
-                            fieldState.error?.message ||
-                            (isOverridden ? t("quotation.sellingPriceOverridden") : undefined)
-                          }
-                          slotProps={{ htmlInput: { min: 0 } }}
-                          onChange={(e) => {
-                            manuallyEditedRef.current[index] = true;
-                            f.onChange(e);
-                          }}
-                        />
-                      )}
-                    />
-                  </Grid>
-
-                  <Grid size={{ xs: 6, sm: 1.6 }}>
-                    <TextField
-                      label={t("quotation.discountAmount")}
-                      type="number"
-                      fullWidth
-                      size="small"
-                      disabled={disabled || packagePrice === null}
-                      value={discountAmount !== undefined ? Number(discountAmount.toFixed(2)) : ""}
-                      slotProps={{ htmlInput: { min: 0, max: packagePrice ?? undefined } }}
-                      onChange={(e) => {
-                        if (packagePrice === null) return;
-                        const typed = Number(e.target.value);
-                        const nextDiscount = Number.isFinite(typed) ? typed : 0;
-                        const nextSellingPrice = Math.max(0, packagePrice - nextDiscount);
-                        manuallyEditedRef.current[index] = true;
-                        setValue(`occupancy_groups.${index}.selling_price`, nextSellingPrice, { shouldValidate: true });
-                      }}
-                    />
-                  </Grid>
-
-                  <Grid size={{ xs: 6, sm: 1.6 }}>
-                    <TextField
-                      label={t("quotation.finalSellingPrice")}
-                      fullWidth
-                      size="small"
-                      disabled
-                      value={
-                        finalAmount !== undefined
-                          ? `${packageCurrency} ${finalAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-                          : "—"
-                      }
-                    />
-                  </Grid>
-
-                  <Grid size={{ xs: 12, sm: 0.6 }}>
-                    {!disabled && (
-                      <IconButton color="error" onClick={() => remove(index)}>
-                        <DeleteIcon />
-                      </IconButton>
-                    )}
-                  </Grid>
-
-                  {missing && (
-                    <Grid size={{ xs: 12 }}>
-                      <Alert
-                        severity="warning"
-                        icon={<WarningAmberIcon fontSize="small" />}
-                        action={
-                          !disabled && (
-                            <Button
-                              size="small"
-                              color="warning"
-                              variant="outlined"
-                              onClick={() =>
-                                setDialogTarget({ index, occupancyType: occupancyType!, passengerType: passengerType! })
-                              }
-                            >
-                              {t("quotation.createPricingButton")}
-                            </Button>
-                          )
-                        }
-                      >
-                        {t("quotation.packagePricingMissingForTypes", { types: `${occupancyType} / ${passengerType}` })}
-                      </Alert>
-                    </Grid>
+                <Grid size={{ xs: 12, sm: 0.6 }}>
+                  {!disabled && (
+                    <IconButton color="error" onClick={() => remove(index)}>
+                      <DeleteIcon />
+                    </IconButton>
                   )}
                 </Grid>
-              </Box>
+
+                {missing && (
+                  <Grid size={{ xs: 12 }}>
+                    <Alert
+                      severity="warning"
+                      icon={<WarningAmberIcon fontSize="small" />}
+                      action={
+                        !disabled && (
+                          <Button
+                            size="small"
+                            color="warning"
+                            variant="outlined"
+                            onClick={() =>
+                              setDialogTarget({ index, occupancyType: occupancyType!, passengerType: passengerType! })
+                            }
+                          >
+                            {t("quotation.createPricingButton")}
+                          </Button>
+                        )
+                      }
+                    >
+                      {t("quotation.packagePricingMissingForTypes", { types: `${occupancyType} / ${passengerType}` })}
+                    </Alert>
+                  </Grid>
+                )}
+              </Grid>
             );
           })}
         </Stack>
       </Grid>
 
+      {/* Left-aligned, directly below the last row — continues the list
+          top-to-bottom instead of forcing a trip back to the section
+          header for every addition. */}
+      {!disabled && (
+        <Grid size={{ xs: 12 }}>
+          <Button size="small" variant="outlined" startIcon={<AddIcon />} onClick={() => append({ ...emptyGroup })}>
+            {t("quotation.addOccupancyGroup")}
+          </Button>
+        </Grid>
+      )}
+
       {fields.length > 0 && (
         <Grid size={{ xs: 12 }}>
           <Box display="flex" justifyContent="flex-end">
             <Typography variant="subtitle1" fontWeight={600}>
-              {t("quotation.grandTotal")}: {packageCurrency} {grandTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+              {t("quotation.occupancyTotal")}: {packageCurrency} {occupancyTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })}
             </Typography>
           </Box>
         </Grid>

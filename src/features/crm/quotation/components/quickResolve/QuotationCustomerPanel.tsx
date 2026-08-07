@@ -10,7 +10,7 @@
 
 import { useState } from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { useWatch, type Control, type UseFormSetValue } from "react-hook-form";
+import type { Control, UseFormSetValue } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import EntityAutocomplete from "../../../../../components/common/EntityAutocomplete";
@@ -31,6 +31,11 @@ interface QuotationCustomerPanelProps {
   /** Only ever invoked when `enquiry` is set. */
   onEnquiryUpdated: (updated: EnquiryDetail) => void;
   disabled?: boolean;
+  /** Quotation Edit screen only — Customer is part of the quotation's
+   *  locked Sales Context (see QuotationForm.tsx); the field and the
+   *  "Create New Customer" shortcut both go read-only, independent of
+   *  `isResolved`. A new quotation is required to change the customer. */
+  salesContextLocked?: boolean;
 }
 
 export default function QuotationCustomerPanel({
@@ -39,19 +44,21 @@ export default function QuotationCustomerPanel({
   enquiry,
   onEnquiryUpdated,
   disabled,
+  salesContextLocked,
 }: QuotationCustomerPanelProps) {
   const { t } = useTranslation();
   const { showSnackbar } = useSnackbar();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [linking, setLinking] = useState(false);
 
-  // A Customer is "linked" once the Enquiry carries a cust_uuid (Quotation-
-  // from-Enquiry) or, absent an Enquiry, once the Quotation's own cust_uuid
-  // field is set (Direct Quotation). Once linked, the snapshot/Create-New
-  // shortcut are redundant and the field itself locks — relinking to a
-  // different customer isn't supported from this panel once resolved.
-  const custUuidWatched = useWatch({ control, name: "cust_uuid" });
-  const isResolved = enquiry ? !!enquiry.cust_uuid : !!custUuidWatched;
+  // "Resolved" means a real backend link exists — the Enquiry itself
+  // already carries a cust_uuid, persisted via resolveCustomer() below.
+  // Only then are the snapshot/Create-New shortcut redundant and the field
+  // safe to lock (the way back is "edit the enquiry"). A Direct Quotation's
+  // cust_uuid is just live, unsaved form state — same as any other field —
+  // so it must stay freely editable right up to Save; locking it here would
+  // trap a wrong pick with no persisted record to go fix.
+  const isResolved = !!enquiry?.cust_uuid;
 
   // Direct Quotation: the EntityAutocomplete's own Controller binding
   // already wrote cust_uuid — nothing else to persist. Quotation-from-
@@ -74,7 +81,12 @@ export default function QuotationCustomerPanel({
 
   return (
     <Stack spacing={1.5}>
-      {enquiry && !isResolved && (
+      {/* The snapshot card exists to help a user decide whether to link the
+          enquiry's raw customer text to an existing Customer or create a
+          new one — a decision that's already made and locked in edit mode,
+          so it would just be a second, possibly-stale copy of what the
+          (now-disabled) field below already shows. */}
+      {enquiry && !isResolved && !salesContextLocked && (
         <Box>
           <Typography variant="subtitle2" color="text.secondary" mb={0.5}>
             {t("quotation.customerSnapshotTitle")}
@@ -97,14 +109,14 @@ export default function QuotationCustomerPanel({
             control={control}
             setValue={setValue}
             dropdownName="customers"
-            disabled={disabled || linking || isResolved}
+            disabled={disabled || linking || isResolved || salesContextLocked}
             initialInputValue={enquiry?.customer_name || undefined}
             onOptionSelected={(option) => {
               if (option) resolveCustomer(option.value);
             }}
           />
         </Box>
-        {!isResolved && (
+        {!isResolved && !salesContextLocked && (
           <Button size="small" variant="outlined" disabled={disabled || linking} onClick={() => setDialogOpen(true)}>
             {t("quotation.createNew")} {t("common.customer")}
           </Button>

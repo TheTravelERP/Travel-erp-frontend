@@ -77,7 +77,7 @@ export default function QuotationEditPage() {
           <CircularProgress />
         </Box>
       ) : (
-        <QuotationForm defaultValues={defaultValues} onSubmit={handleUpdate} />
+        <QuotationForm defaultValues={defaultValues} onSubmit={handleUpdate} isEditMode />
       )}
     </FormPageLayout>
   );
