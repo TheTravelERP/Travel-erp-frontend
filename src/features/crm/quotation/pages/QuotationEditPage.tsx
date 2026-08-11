@@ -10,6 +10,7 @@ import { getQuotationByUuid, updateQuotationByUuid } from "../quotation.api";
 import { usePermission } from "../../../../hooks/usePermission";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { getErrorMessage } from "../../../../utils/errorMessage";
+import { parseLineTaxErrors, type LineTaxError } from "../lineErrorParser";
 import FormPageLayout from "../../../../components/forms/FormPageLayout";
 
 export default function QuotationEditPage() {
@@ -22,6 +23,7 @@ export default function QuotationEditPage() {
 
   const [loading, setLoading] = useState(true);
   const [defaultValues, setDefaultValues] = useState<QuotationDetail>();
+  const [lineTaxErrors, setLineTaxErrors] = useState<LineTaxError[] | undefined>();
 
   useEffect(() => {
     loadQuotation();
@@ -50,6 +52,7 @@ export default function QuotationEditPage() {
   }
 
   async function handleUpdate(data: QuotationFormInput) {
+    setLineTaxErrors(undefined);
     try {
       await updateQuotationByUuid(uuid!, { ...data, version_no: defaultValues!.version_no });
       showSnackbar({ message: t("common.updatedSuccess"), severity: "success" });
@@ -59,7 +62,14 @@ export default function QuotationEditPage() {
         showSnackbar({ message: getErrorMessage(err, t("common.updateConflict")), severity: "error" });
         return;
       }
-      showSnackbar({ message: getErrorMessage(err, t("common.updateFailed")), severity: "error" });
+      const message = getErrorMessage(err, t("common.updateFailed"));
+      const parsed = parseLineTaxErrors(message);
+      if (parsed) {
+        setLineTaxErrors(parsed);
+        showSnackbar({ message: t("quotation.taxConfigRequiredToast"), severity: "error" });
+      } else {
+        showSnackbar({ message, severity: "error" });
+      }
     }
   }
 
@@ -77,7 +87,7 @@ export default function QuotationEditPage() {
           <CircularProgress />
         </Box>
       ) : (
-        <QuotationForm defaultValues={defaultValues} onSubmit={handleUpdate} isEditMode />
+        <QuotationForm defaultValues={defaultValues} onSubmit={handleUpdate} isEditMode lineTaxErrors={lineTaxErrors} />
       )}
     </FormPageLayout>
   );

@@ -17,6 +17,11 @@ export const getLocalizationProfileSchema = (t: TFunction) =>
     round_off_method: z.enum(['nearest', 'up', 'down', 'none']),
     default_decimal_places: z.coerce.number().int().min(0).max(6),
     is_active: z.boolean().optional(),
+    // Layer 3 elections — genuinely optional (Task 2: never required).
+    supply_model: z.string().trim().optional().nullable(),
+    rent_a_cab_rate_election: z.string().trim().optional().nullable(),
+    forex_valuation_method: z.string().trim().optional().nullable(),
+    insurance_commercial_role: z.string().trim().optional().nullable(),
     tax_components: z
       .array(
         z.object({

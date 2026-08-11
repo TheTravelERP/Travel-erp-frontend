@@ -1,15 +1,27 @@
 // src/features/inventory/airline/components/AirlineForm.tsx
 
-import { Box, FormControlLabel, Grid, Switch, TextField } from "@mui/material";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  FormControlLabel,
+  Grid,
+  Switch,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 import { getAirlineSchema } from "../airline.schema";
 import type { AirlineFormInput } from "../airline.types";
 import MobileNumberField from "../../../../components/common/MobileNumberField";
+import DropdownAutocomplete from "../../../../components/common/DropdownAutocomplete";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
 import FormSection from "../../../../components/forms/FormSection";
@@ -32,6 +44,7 @@ const emptyValues = {
   email: "",
   remarks: "",
   is_active: true,
+  default_tax_treatment: null,
 };
 
 export default function AirlineForm({ defaultValues, onSubmit, loading = false }: AirlineFormProps) {
@@ -167,6 +180,35 @@ export default function AirlineForm({ defaultValues, onSubmit, loading = false }
             />
           </Grid>
         </FormSection>
+
+        {/* Optional, collapsed — a Flight line routed through an
+            unconfigured airline just resolves to undetermined (blocked at
+            quotation save time, never here). Same convention as
+            LocalizationProfileForm's Tax Configuration section. */}
+        <Grid size={{ xs: 12 }}>
+          <Accordion defaultExpanded={false}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography fontWeight={600}>{t("common.taxConfiguration")}</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                {t("airline.taxConfigurationHelp")}
+              </Typography>
+              <Grid container spacing={1.5}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                  <DropdownAutocomplete
+                    name="default_tax_treatment"
+                    dropdownName="airline_default_tax_treatment"
+                    label={t("common.defaultTaxTreatment")}
+                    control={control}
+                    useForm
+                    allowAdd={false}
+                  />
+                </Grid>
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
+        </Grid>
 
         <FormActions
           onBack={() => navigate("/app/inventory/airlines")}

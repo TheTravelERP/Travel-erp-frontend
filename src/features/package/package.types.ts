@@ -45,6 +45,13 @@ export interface PackageFormInput {
   // Optional visibility restriction — which branches may sell this
   // package. Empty/undefined = unrestricted (every branch can sell it).
   allowed_branch_uuids?: string[];
+
+  // Tax & Pricing Architecture — a candidate input to classify_tax_
+  // treatment() for this package's own base/Occupancy line only (itemized
+  // PackageService lines classify independently by their own service_type
+  // and never read this). Optional — unset resolves the Occupancy line to
+  // undetermined until configured.
+  default_tax_treatment?: string | null;
 }
 
 /* ==========================================================

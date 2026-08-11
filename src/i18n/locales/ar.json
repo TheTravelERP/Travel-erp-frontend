@@ -132,7 +132,9 @@
     "branch": "الفرع",
     "allowedBranchesHelper": "اتركه فارغًا للسماح لجميع الفروع.",
     "more": "More",
-    "notSet": "Not Set"
+    "notSet": "Not Set",
+    "taxConfiguration": "إعدادات الضريبة",
+    "defaultTaxTreatment": "المعاملة الضريبية الافتراضية"
   },
   "profile": {
     "home": "الرئيسية",
@@ -514,7 +516,8 @@
       "currencyCodeLength": "يجب أن يتكون رمز العملة من 3 أحرف بالضبط"
     },
     "allowedBranches": "الفروع المسموح بها",
-    "allowedBranchesSection": "الفروع المسموح بها"
+    "allowedBranchesSection": "الفروع المسموح بها",
+    "taxConfigurationHelp": "اختياري — يحل سطر الإقامة/الأساس الخاص بهذه الباقة معاملته الضريبية من هنا. اتركه فارغًا حتى تكون جاهزًا لتهيئته؛ يتم حظر الأسطر غير المُهيأة عند حفظ عرض الأسعار، وليس هنا."
   },
   "dropdown": {
     "enquiry_priority": {
@@ -794,7 +797,8 @@
       "codeRequired": "رمز شركة الطيران مطلوب",
       "codeTooLong": "لا يمكن أن يتجاوز الرمز 10 أحرف",
       "nameRequired": "اسم شركة الطيران مطلوب"
-    }
+    },
+    "taxConfigurationHelp": "اختياري — يحل سطر رحلة مرتبط بهذه شركة الطيران معاملته الضريبية من هنا. اتركه فارغًا حتى تكون جاهزًا لتهيئته؛ يتم حظر الأسطر غير المُهيأة عند حفظ عرض الأسعار، وليس هنا."
   },
   "vendor": {
     "title": "تفاصيل المورد",
@@ -1047,7 +1051,12 @@
       "taxNameRequired": "اسم الضريبة مطلوب",
       "taxPercentPositive": "يجب أن تكون نسبة الضريبة صفرًا أو أكثر",
       "duplicateTaxComponentName": "يجب أن تكون أسماء مكونات الضريبة فريدة ضمن الملف الشخصي"
-    }
+    },
+    "supplyModel": "نموذج التوريد",
+    "rentACabRateElection": "اختيار معدل تأجير السيارات",
+    "forexValuationMethod": "طريقة تقييم صرف العملات",
+    "insuranceCommercialRole": "الدور التجاري للتأمين",
+    "taxConfigurationHelp": "اختياري — اتركه فارغًا إذا كانت هذه المؤسسة لا تستخدم تأجير السيارات أو الصرف الأجنبي أو فوترة وسيط التأمين. يتم حظر سطر عرض الأسعار لخدمة غير مُهيأة عند الحفظ، وليس هنا."
   },
   "documentNumberSeries": {
     "seriesName": "اسم السلسلة",
@@ -1482,6 +1491,8 @@
     "discountTypePercentage": "نسبة مئوية",
     "discountTypeAmount": "مبلغ",
     "vendor": "المورد",
+    "airline": "شركة الطيران",
+    "hotel": "الفندق",
     "quotationNo": "رقم عرض السعر",
     "netAmount": "المبلغ الصافي",
     "revision": "مراجعة {{n}}",
@@ -1518,7 +1529,9 @@
       "atLeastOneOccupancyGroup": "أضف مجموعة إشغال واحدة على الأقل",
       "packageCountMin": "مطلوب باقة واحدة على الأقل",
       "discountPercentMax100": "لا يمكن أن تتجاوز نسبة الخصم 100",
-      "discountExceedsSellPrice": "لا يمكن أن يتجاوز مبلغ الخصم سعر البيع"
+      "discountExceedsSellPrice": "لا يمكن أن يتجاوز مبلغ الخصم سعر البيع",
+      "basicFareRequired": "الأجرة الأساسية مطلوبة لوكيل / عمولة",
+      "routeTypeRequired": "نوع المسار مطلوب لوكيل / عمولة"
     },
     "addFollowup": "إضافة متابعة",
     "followups": "المتابعات",
@@ -1532,7 +1545,56 @@
     "createPricingButton": "إنشاء التسعير",
     "missingPricingCombinations": "بعض المجموعات لا تحتوي على تسعير:",
     "fixPricingHere": "إصلاح",
-    "noServiceLinesForPackage": "لم يتم العثور على تسعير باقة محدد مسبقًا. أضف مجموعات إشغال لتحديد التسعير لهذا العرض."
+    "noServiceLinesForPackage": "لم يتم العثور على تسعير باقة محدد مسبقًا. أضف مجموعات إشغال لتحديد التسعير لهذا العرض.",
+    "taxableValue": "القيمة الخاضعة للضريبة",
+    "treatment": "المعاملة الضريبية",
+    "placeOfSupply": "مكان التوريد",
+    "taxCode": "رمز الضريبة",
+    "taxBreakdown": "تفصيل الضريبة",
+    "cgstTotal": "الضريبة المركزية (CGST)",
+    "sgstTotal": "ضريبة الولاية (SGST)",
+    "igstTotal": "الضريبة المتكاملة (IGST)",
+    "otherTaxTotal": "ضريبة أخرى",
+    "totalTax": "إجمالي الضريبة",
+    "tcsLabel": "TCS (ضريبة الدخل، وليست ضريبة السلع والخدمات)",
+    "taxConfigRequired": "إعداد الضريبة مطلوب",
+    "taxConfigRequiredToast": "تعذر تحديد الضريبة لسطر واحد أو أكثر — راجع السطر (الأسطر) المميز أدناه.",
+    "fixInAirlineMaster": "الإصلاح في بيانات شركة الطيران",
+    "fixInPackageMaster": "الإصلاح في بيانات الباقة",
+    "fixInLocalizationProfile": "الإصلاح في ملف التوطين",
+    "disbursementSectionTitle": "المصروفات النيابية (الوكيل الخالص)",
+    "disbursementHelp": "اختياري — املأ هذا فقط إذا كانت هذه الرسوم يتم تحصيلها بشكل خالص كمبلغ يُمرَّر نيابة عن العميل (مثل رسوم التأشيرة الحكومية أو قسط التأمين). ترك هذا فارغًا يفرض الضريبة على السطر بشكل طبيعي.",
+    "disbursementCandidateToggle": "هذا مبلغ مُمرَّر / مصروف نيابي",
+    "disbursementResultPassed": "تم استيفاء جميع الشروط — هذا المبلغ مستبعد من القيمة الخاضعة للضريبة",
+    "disbursementResultFailed": "لم يتم استيفاء جميع الشروط — هذا المبلغ خاضع للضريبة بالكامل",
+    "disbursementPureAgent": "تعمل المؤسسة كوكيل خالص لهذه الدفعة",
+    "disbursementThirdPartyContract": "العقد مع الطرف الثالث هو مع العميل، وليس مع المؤسسة",
+    "disbursementRecipientLiable": "العميل مسؤول فعليًا عن الدفع للطرف الثالث",
+    "disbursementRecipientAuthorized": "فوَّض العميل المؤسسة بسداد هذه الدفعة",
+    "disbursementAmountSeparate": "يُظهر المبلغ بشكل منفصل، ولم يُدرج ضمن رسوم المؤسسة الخاصة",
+    "disbursementNoMarkup": "يُسترد فقط المبلغ الفعلي المدفوع — دون أي هامش ربح",
+    "disbursementAdditionalService": "هذا بالإضافة إلى خدمة المؤسسة الخاصة، وليس إعادة تغليف لها",
+    "treatmentStandardAdValorem": "قياسي",
+    "treatmentAgentCommission": "وكيل / عمولة",
+    "treatmentPackageComposite": "باقة (مركّبة)",
+    "treatmentRentACabConcessional": "تأجير سيارات (بمعدل تفضيلي)",
+    "treatmentForexValuation": "تقييم الصرف الأجنبي",
+    "treatmentInsuranceCommissionOnly": "تأمين (عمولة فقط)",
+    "treatmentMarginScheme": "نظام الهامش",
+    "treatmentReverseCharge": "الرسوم العكسية",
+    "adHocTaxSectionTitle": "تفاصيل الضريبة",
+    "adHocTaxHelp": "لا حاجة إلى سجل رئيسي لهذا البند — حدد المعاملة الضريبية المطبقة.",
+    "adHocTaxHelpFlight": "لم يتم تحديد شركة طيران — حدد المعاملة الضريبية المطبقة لهذا البند، أو حدد شركة طيران أعلاه لاستخدام معاملتها المكوّنة.",
+    "adHocTreatmentPrincipal": "أصيل / موزّع",
+    "adHocTreatmentAgent": "وكيل / عمولة",
+    "basicFare": "الأجرة الأساسية",
+    "routeType": "نوع المسار",
+    "routeTypeDomestic": "محلي",
+    "routeTypeInternational": "دولي",
+    "adHocSourceLabel": "المصدر",
+    "adHocSourceMaster": "سجل رئيسي",
+    "adHocSourceLocalizationProfile": "إعدادات المؤسسة",
+    "adHocSourceManual": "يدوي"
   },
   "booking": {
     "sectionDetails": "تفاصيل الحجز",

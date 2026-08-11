@@ -1,17 +1,22 @@
 // src/features/package/components/PackageForm.tsx
 
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   FormControlLabel,
   Grid,
   Switch,
   TextField,
+  Typography,
 } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 import { getPackageSchema } from "../package.schema";
 import type { PackageFormInput } from "../package.types";
@@ -56,6 +61,7 @@ const emptyValues = {
   featured: false,
   is_active: true,
   allowed_branch_uuids: [],
+  default_tax_treatment: null,
 };
 
 export default function PackageForm({ defaultValues, onSubmit, loading = false }: PackageFormProps) {
@@ -391,6 +397,35 @@ export default function PackageForm({ defaultValues, onSubmit, loading = false }
             />
           </Grid>
         </FormSection>
+
+        {/* Optional, collapsed — this package's own base/Occupancy line
+            just resolves to undetermined (blocked at quotation save time,
+            never here) until configured. Same convention as
+            LocalizationProfileForm/AirlineForm's Tax Configuration section. */}
+        <Grid size={{ xs: 12 }}>
+          <Accordion defaultExpanded={false}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography fontWeight={600}>{t("common.taxConfiguration")}</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                {t("package.taxConfigurationHelp")}
+              </Typography>
+              <Grid container spacing={1.5}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                  <DropdownAutocomplete
+                    name="default_tax_treatment"
+                    dropdownName="package_default_tax_treatment"
+                    label={t("common.defaultTaxTreatment")}
+                    control={control}
+                    useForm
+                    allowAdd={false}
+                  />
+                </Grid>
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
+        </Grid>
 
         <FormActions
           onBack={() => navigate("/app/packages/list")}

@@ -1,16 +1,19 @@
 // src/features/crm/quotation/pages/QuotationViewPage.tsx
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import {
   Box,
   Breadcrumbs,
   Button,
   Chip,
   CircularProgress,
+  Collapse,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   Grid,
+  IconButton,
   Link,
   Paper,
   Stack,
@@ -21,8 +24,11 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -48,6 +54,7 @@ import { createFormatters } from "../../../../utils/formatters/localization";
 import { getFollowups } from "../../followup/followup.api";
 import type { FollowupListItem } from "../../followup/followup.types";
 import DropdownColorChip from "../../../../components/common/DropdownColorChip";
+import { TREATMENT_LABEL_KEYS, TREATMENT_SOURCE_LABEL_KEYS, groupLinesByTreatment } from "../taxDisplay";
 
 const STATUS_COLOR: Record<string, "default" | "primary" | "success" | "error" | "warning"> = {
   Draft: "default", Sent: "primary", Revised: "warning",
@@ -71,6 +78,19 @@ export default function QuotationViewPage() {
 
   const [followups, setFollowups] = useState<FollowupListItem[]>([]);
   const [followupsLoading, setFollowupsLoading] = useState(false);
+
+  // Per-line expand/collapse — taxable value, resolved treatment, and the
+  // itemized tax_breakdown stay out of the compact row (section 10) and
+  // only show once a line is expanded.
+  const [expandedLines, setExpandedLines] = useState<Set<string>>(new Set());
+  function toggleLineExpanded(uuid: string) {
+    setExpandedLines((prev) => {
+      const next = new Set(prev);
+      if (next.has(uuid)) next.delete(uuid);
+      else next.add(uuid);
+      return next;
+    });
+  }
 
   const load = async () => {
     if (!uuid) return;
@@ -247,6 +267,8 @@ export default function QuotationViewPage() {
                       <TableCell>{t("packagePricing.passengerType")}</TableCell>
                       <TableCell align="right">{t("quotation.quantity")}</TableCell>
                       <TableCell align="right">{t("quotation.sellingPrice")}</TableCell>
+                      <TableCell align="right">{t("quotation.discountPercent")}</TableCell>
+                      <TableCell align="right">{t("quotation.discountAmount")}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -256,6 +278,8 @@ export default function QuotationViewPage() {
                         <TableCell>{group.passenger_type}</TableCell>
                         <TableCell align="right">{group.quantity}</TableCell>
                         <TableCell align="right">{(group.selling_price ?? 0).toFixed(2)}</TableCell>
+                        <TableCell align="right">{(group.discount_percent ?? 0) > 0 ? `${(group.discount_percent ?? 0).toFixed(2)}%` : "-"}</TableCell>
+                        <TableCell align="right">{(group.discount_amount ?? 0).toFixed(2)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -264,37 +288,219 @@ export default function QuotationViewPage() {
             </Paper>
           )}
 
-          <Paper sx={{ p: 2, mb: 2 }}>
-            <Typography variant="h6" color="primary" mb={2}>{t("quotation.serviceLines")}</Typography>
-            <TableContainer>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t("quotation.serviceType")}</TableCell>
-                    <TableCell>{t("quotation.description")}</TableCell>
-                    <TableCell align="right">{t("quotation.quantity")}</TableCell>
-                    <TableCell align="right">{t("quotation.sellingPrice")}</TableCell>
-                    <TableCell align="right">{t("quotation.netAmount")}</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {quotation.service_lines.map((line) => (
-                    <TableRow key={line.uuid}>
-                      <TableCell>{line.service_type}</TableCell>
-                      <TableCell>{line.description}</TableCell>
-                      <TableCell align="right">{line.quantity}</TableCell>
-                      <TableCell align="right">{line.selling_price.toFixed(2)}</TableCell>
-                      <TableCell align="right">{line.net_amount.toFixed(2)}</TableCell>
+          {!!quotation.service_lines?.length && (
+            <Paper sx={{ p: 2, mb: 2 }}>
+              <Typography variant="h6" color="primary" mb={2}>{t("quotation.serviceLines")}</Typography>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ width: 40 }} />
+                      <TableCell>{t("quotation.serviceType")}</TableCell>
+                      <TableCell>{t("quotation.description")}</TableCell>
+                      <TableCell align="right">{t("quotation.quantity")}</TableCell>
+                      <TableCell align="right">{t("quotation.sellingPrice")}</TableCell>
+                      <TableCell align="right">{t("quotation.discountPercent")}</TableCell>
+                      <TableCell align="right">{t("quotation.discountAmount")}</TableCell>
+                      <TableCell align="right">{t("quotation.tax")}</TableCell>
+                      <TableCell align="right">{t("quotation.netAmount")}</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                  </TableHead>
+                  <TableBody>
+                    {quotation.service_lines.map((line) => {
+                      const isExpanded = expandedLines.has(line.uuid);
+                      const treatment = line.tax_context?.resolved_treatment;
+                      const treatmentLabel = treatment
+                        ? t(TREATMENT_LABEL_KEYS[treatment] ?? "", { defaultValue: treatment })
+                        : undefined;
+                      // Layer 3B, Task 16 — "master" | "localization_profile"
+                      // | "manual", absent for the unconditional-always-
+                      // standard service types (see taxDisplay.ts) — never
+                      // guessed when absent.
+                      const treatmentSource = line.tax_context?.resolved_treatment_source;
+                      const treatmentSourceLabel = treatmentSource
+                        ? t(TREATMENT_SOURCE_LABEL_KEYS[treatmentSource] ?? "", { defaultValue: treatmentSource })
+                        : undefined;
+                      const taxTooltip = [
+                        `${t("quotation.tax")}: ${(line.tax_percent ?? 0).toFixed(2)}%`,
+                        treatmentLabel ? `${t("quotation.treatment")}: ${treatmentLabel}` : null,
+                      ].filter(Boolean).join(" · ");
 
-            <Stack alignItems="flex-end" mt={2} spacing={0.5}>
-              <Typography variant="body2">{t("quotation.gross")}: {quotation.currency_code} {quotation.gross_amount.toFixed(2)}</Typography>
-              <Typography variant="body2">{t("quotation.tax")}: {quotation.currency_code} {quotation.tax_amount.toFixed(2)}</Typography>
-              <Typography variant="h6">{t("quotation.total")}: {quotation.currency_code} {quotation.net_amount.toFixed(2)}</Typography>
+                      return (
+                        <Fragment key={line.uuid}>
+                          <TableRow hover sx={{ cursor: "pointer" }} onClick={() => toggleLineExpanded(line.uuid)}>
+                            <TableCell>
+                              <IconButton size="small" onClick={(e) => { e.stopPropagation(); toggleLineExpanded(line.uuid); }}>
+                                {isExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                              </IconButton>
+                            </TableCell>
+                            <TableCell>{line.service_type}</TableCell>
+                            <TableCell>{line.description}</TableCell>
+                            <TableCell align="right">{line.quantity}</TableCell>
+                            <TableCell align="right">{line.selling_price.toFixed(2)}</TableCell>
+                            <TableCell align="right">{(line.discount_percent ?? 0) > 0 ? `${(line.discount_percent ?? 0).toFixed(2)}%` : "-"}</TableCell>
+                            <TableCell align="right">{(line.discount_amount ?? 0).toFixed(2)}</TableCell>
+                            <TableCell align="right">
+                              <Tooltip title={taxTooltip} arrow placement="top">
+                                <span>{line.tax_amount.toFixed(2)}</span>
+                              </Tooltip>
+                            </TableCell>
+                            <TableCell align="right">{line.net_amount.toFixed(2)}</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell colSpan={9} sx={{ py: 0, borderBottom: isExpanded ? undefined : "none" }}>
+                              <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                                <Box sx={{ py: 1.5, px: 2, bgcolor: "action.hover", borderRadius: 1, my: 1 }}>
+                                  <Grid container spacing={1.5}>
+                                    <Grid size={{ xs: 6, sm: 3 }}>
+                                      <Typography variant="caption" color="text.secondary">{t("quotation.taxableValue")}</Typography>
+                                      <Typography variant="body2">{quotation.currency_code} {line.taxable_amount.toFixed(2)}</Typography>
+                                    </Grid>
+                                    <Grid size={{ xs: 6, sm: 3 }}>
+                                      <Typography variant="caption" color="text.secondary">{t("quotation.treatment")}</Typography>
+                                      <Typography variant="body2">{treatmentLabel ?? "-"}</Typography>
+                                      {treatmentSourceLabel && (
+                                        <Typography variant="caption" color="text.secondary" display="block">
+                                          {t("quotation.adHocSourceLabel")}: {treatmentSourceLabel}
+                                        </Typography>
+                                      )}
+                                    </Grid>
+                                    <Grid size={{ xs: 6, sm: 3 }}>
+                                      <Typography variant="caption" color="text.secondary">{t("quotation.placeOfSupply")}</Typography>
+                                      <Typography variant="body2">{line.tax_context?.resolved_place_of_supply ?? "-"}</Typography>
+                                    </Grid>
+                                    <Grid size={{ xs: 6, sm: 3 }}>
+                                      <Typography variant="caption" color="text.secondary">{t("quotation.taxCode")}</Typography>
+                                      <Typography variant="body2">{line.tax_context?.resolved_tax_code ?? "-"}</Typography>
+                                    </Grid>
+                                    {line.disbursement_candidate && (
+                                      <Grid size={{ xs: 12, sm: 6 }}>
+                                        <Typography variant="caption" color="text.secondary">{t("quotation.disbursementSectionTitle")}</Typography>
+                                        <Typography variant="body2">
+                                          {line.tax_context?.disbursement_test_result === "passed"
+                                            ? t("quotation.disbursementResultPassed")
+                                            : t("quotation.disbursementResultFailed")}
+                                        </Typography>
+                                      </Grid>
+                                    )}
+                                    {!!line.tax_breakdown?.length && (
+                                      <Grid size={{ xs: 12 }}>
+                                        <Typography variant="caption" color="text.secondary">{t("quotation.taxBreakdown")}</Typography>
+                                        <Table size="small" sx={{ mt: 0.5, maxWidth: 360 }}>
+                                          <TableBody>
+                                            {line.tax_breakdown.map((component, idx) => (
+                                              <TableRow key={idx}>
+                                                <TableCell sx={{ border: 0, py: 0.25, pl: 0 }}>{component.tax_name}</TableCell>
+                                                <TableCell sx={{ border: 0, py: 0.25 }} align="right">{component.tax_percent}%</TableCell>
+                                                <TableCell sx={{ border: 0, py: 0.25 }} align="right">
+                                                  {quotation.currency_code} {component.tax_amount.toFixed(2)}
+                                                </TableCell>
+                                              </TableRow>
+                                            ))}
+                                          </TableBody>
+                                        </Table>
+                                      </Grid>
+                                    )}
+                                  </Grid>
+                                </Box>
+                              </Collapse>
+                            </TableCell>
+                          </TableRow>
+                        </Fragment>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
+          )}
+
+          <Paper sx={{ p: 2, mb: 2 }}>
+            <Typography variant="h6" color="primary" mb={2}>{t("common.summary")}</Typography>
+            <Stack spacing={0.5}>
+              {/* Grouping subtotals — flexible, derived from whichever
+                  distinct resolved treatments are actually present on this
+                  quotation (section 10), never hardcoded to exactly two
+                  categories. */}
+              {groupLinesByTreatment(quotation.service_lines ?? []).map(({ treatment, taxableTotal }) => (
+                <Stack key={treatment} direction="row" justifyContent="space-between">
+                  <Typography variant="body2" color="text.secondary">
+                    {t(TREATMENT_LABEL_KEYS[treatment] ?? "", { defaultValue: treatment })}
+                  </Typography>
+                  <Typography variant="body2">{quotation.currency_code} {taxableTotal.toFixed(2)}</Typography>
+                </Stack>
+              ))}
+
+              <Divider sx={{ my: 0.5 }} />
+
+              {quotation.cgst_total > 0 && (
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography variant="body2" color="text.secondary">{t("quotation.cgstTotal")}</Typography>
+                  <Typography variant="body2">{quotation.currency_code} {quotation.cgst_total.toFixed(2)}</Typography>
+                </Stack>
+              )}
+              {quotation.sgst_total > 0 && (
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography variant="body2" color="text.secondary">{t("quotation.sgstTotal")}</Typography>
+                  <Typography variant="body2">{quotation.currency_code} {quotation.sgst_total.toFixed(2)}</Typography>
+                </Stack>
+              )}
+              {quotation.igst_total > 0 && (
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography variant="body2" color="text.secondary">{t("quotation.igstTotal")}</Typography>
+                  <Typography variant="body2">{quotation.currency_code} {quotation.igst_total.toFixed(2)}</Typography>
+                </Stack>
+              )}
+              {quotation.other_tax_total > 0 && (
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography variant="body2" color="text.secondary">{t("quotation.otherTaxTotal")}</Typography>
+                  <Typography variant="body2">{quotation.currency_code} {quotation.other_tax_total.toFixed(2)}</Typography>
+                </Stack>
+              )}
+
+              <Divider sx={{ my: 0.5 }} />
+
+              {(quotation.discount_amount ?? 0) > 0 && (
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography variant="body2" color="text.secondary">{t("quotation.discountAmount")}</Typography>
+                  <Typography variant="body2">{quotation.currency_code} {(quotation.discount_amount ?? 0).toFixed(2)}</Typography>
+                </Stack>
+              )}
+              <Stack direction="row" justifyContent="space-between">
+                <Typography variant="body2" color="text.secondary">{t("quotation.gross")}</Typography>
+                <Typography variant="body2">{quotation.currency_code} {quotation.gross_amount.toFixed(2)}</Typography>
+              </Stack>
+              <Stack direction="row" justifyContent="space-between">
+                <Typography variant="body2" fontWeight={600}>{t("quotation.totalTax")}</Typography>
+                <Typography variant="body2" fontWeight={600}>{quotation.currency_code} {quotation.tax_amount.toFixed(2)}</Typography>
+              </Stack>
+              <Stack direction="row" justifyContent="space-between">
+                <Typography variant="h6">{t("quotation.total")}</Typography>
+                <Typography variant="h6">{quotation.currency_code} {quotation.net_amount.toFixed(2)}</Typography>
+              </Stack>
+
+              {/* TCS — a separate, non-GST statutory track (section 7).
+                  Never merged into the CGST/SGST/IGST breakdown above;
+                  distinctly labeled so it's never mistaken for a GST
+                  component. Review-only candidate value (Layer 3) — not an
+                  automatic charge, so it's shown, not folded into Total. */}
+              {quotation.tcs_applicable && (
+                <>
+                  <Divider sx={{ my: 0.5 }} />
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    sx={{ p: 1, borderRadius: 1, bgcolor: "warning.50", border: "1px dashed", borderColor: "warning.main" }}
+                  >
+                    <Typography variant="body2" fontWeight={600} color="warning.dark">
+                      {t("quotation.tcsLabel")} {quotation.tcs_rate_percent != null ? `@ ${quotation.tcs_rate_percent}%` : ""}
+                    </Typography>
+                    <Typography variant="body2" fontWeight={600} color="warning.dark">
+                      {quotation.currency_code} {(quotation.tcs_amount ?? 0).toFixed(2)}
+                    </Typography>
+                  </Stack>
+                </>
+              )}
             </Stack>
           </Paper>
 

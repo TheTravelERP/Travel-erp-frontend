@@ -11,6 +11,11 @@ export interface AirlineFormInput {
   email?: string;
   remarks?: string;
   is_active?: boolean;
+  // Tax & Pricing Architecture — a candidate input to classify_tax_
+  // treatment() for Flight lines routed through this airline (via
+  // InventoryStock.airline_id), never a shortcut around it. Optional —
+  // unset resolves any such line to undetermined until configured.
+  default_tax_treatment?: string | null;
 }
 
 export interface AirlineDetail extends AirlineFormInput {

@@ -74,6 +74,9 @@ export interface BookingServiceLineDetail extends BookingServiceLineFormInput {
   booking_uuid: string;
   line_no: number;
   provenance: string;
+  // 'MASTER_DRIVEN' | 'AD_HOC' — read-only, carried forward from the source
+  // quotation line at conversion (Quotation Line Foundation, Layer 1).
+  line_source: string;
   taxable_amount: number;
   tax_percent: number;
   tax_amount: number;

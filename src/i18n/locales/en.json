@@ -132,7 +132,9 @@
     "branch": "Branch",
     "allowedBranchesHelper": "Leave empty to allow all branches.",
     "more": "More",
-    "notSet": "Not Set"
+    "notSet": "Not Set",
+    "taxConfiguration": "Tax Configuration",
+    "defaultTaxTreatment": "Default Tax Treatment"
   },
   "profile": {
     "home": "Home",
@@ -514,7 +516,8 @@
       "currencyCodeLength": "Currency code must be exactly 3 characters"
     },
     "allowedBranches": "Allowed Branches",
-    "allowedBranchesSection": "Allowed Branches"
+    "allowedBranchesSection": "Allowed Branches",
+    "taxConfigurationHelp": "Optional — this package's own base/Occupancy line resolves its tax treatment from here. Leave unset until you're ready to configure it; unconfigured lines are blocked at quotation save time, not here."
   },
   "dropdown": {
     "enquiry_priority": {
@@ -794,7 +797,8 @@
       "codeRequired": "Airline code is required",
       "codeTooLong": "Code cannot exceed 10 characters",
       "nameRequired": "Airline name is required"
-    }
+    },
+    "taxConfigurationHelp": "Optional — a Flight line linked to this airline resolves its tax treatment from here. Leave unset until you're ready to configure it; unconfigured lines are blocked at quotation save time, not here."
   },
   "vendor": {
     "title": "Vendor Details",
@@ -1047,7 +1051,12 @@
       "taxNameRequired": "Tax name is required",
       "taxPercentPositive": "Tax % must be zero or greater",
       "duplicateTaxComponentName": "Tax component names must be unique within a profile"
-    }
+    },
+    "supplyModel": "Supply Model",
+    "rentACabRateElection": "Rent-a-cab Rate Election",
+    "forexValuationMethod": "Forex Valuation Method",
+    "insuranceCommercialRole": "Insurance Commercial Role",
+    "taxConfigurationHelp": "Optional — leave unset if this org doesn't use Rent-a-cab, Forex, or Insurance-intermediary billing. A quotation line for an unconfigured service is blocked at save time, not here."
   },
   "documentNumberSeries": {
     "seriesName": "Series Name",
@@ -1482,6 +1491,8 @@
     "discountTypePercentage": "Percentage",
     "discountTypeAmount": "Amount",
     "vendor": "Vendor",
+    "airline": "Airline",
+    "hotel": "Hotel",
     "quotationNo": "Quotation No",
     "netAmount": "Net Amount",
     "revision": "Rev {{n}}",
@@ -1518,7 +1529,9 @@
       "atLeastOneOccupancyGroup": "Add at least one occupancy group",
       "packageCountMin": "At least 1 package is required",
       "discountPercentMax100": "Discount percentage cannot exceed 100",
-      "discountExceedsSellPrice": "Discount amount cannot exceed Sell Price"
+      "discountExceedsSellPrice": "Discount amount cannot exceed Sell Price",
+      "basicFareRequired": "Basic Fare is required for Agent / Commission",
+      "routeTypeRequired": "Route Type is required for Agent / Commission"
     },
     "addFollowup": "Add Follow-up",
     "followups": "Follow-ups",
@@ -1532,7 +1545,56 @@
     "createPricingButton": "Create Pricing",
     "missingPricingCombinations": "Some combinations are missing pricing:",
     "fixPricingHere": "Fix",
-    "noServiceLinesForPackage": "No predefined package pricing found. Add occupancy groups to define pricing for this quotation."
+    "noServiceLinesForPackage": "No predefined package pricing found. Add occupancy groups to define pricing for this quotation.",
+    "taxableValue": "Taxable Value",
+    "treatment": "Tax Treatment",
+    "placeOfSupply": "Place of Supply",
+    "taxCode": "Tax Code",
+    "taxBreakdown": "Tax Breakdown",
+    "cgstTotal": "CGST",
+    "sgstTotal": "SGST",
+    "igstTotal": "IGST",
+    "otherTaxTotal": "Other Tax",
+    "totalTax": "Total Tax",
+    "tcsLabel": "TCS (Income Tax, not GST)",
+    "taxConfigRequired": "Tax configuration required",
+    "taxConfigRequiredToast": "Tax could not be determined for one or more lines — see the highlighted line(s) below.",
+    "fixInAirlineMaster": "Fix in Airline Master",
+    "fixInPackageMaster": "Fix in Package Master",
+    "fixInLocalizationProfile": "Fix in Localization Profile",
+    "disbursementSectionTitle": "Disbursement (Pure Agent)",
+    "disbursementHelp": "Optional — only fill this in if this fee is collected purely as a pass-through on the customer's behalf (e.g. a visa government fee or insurance premium). Leaving it blank taxes the line normally.",
+    "disbursementCandidateToggle": "This is a pass-through / disbursement",
+    "disbursementResultPassed": "All conditions met — this amount is excluded from taxable value",
+    "disbursementResultFailed": "Not all conditions met — this amount is fully taxable",
+    "disbursementPureAgent": "The org acts as a pure agent for this payment",
+    "disbursementThirdPartyContract": "The third-party contract is with the customer, not the org",
+    "disbursementRecipientLiable": "The customer is actually liable to pay the third party",
+    "disbursementRecipientAuthorized": "The customer authorized the org to make this payment",
+    "disbursementAmountSeparate": "The amount is shown separately, not folded into the org's own fee",
+    "disbursementNoMarkup": "Only the actual amount paid is recovered — no markup",
+    "disbursementAdditionalService": "This is in addition to the org's own service, not a repackaging of it",
+    "treatmentStandardAdValorem": "Standard",
+    "treatmentAgentCommission": "Agent / Commission",
+    "treatmentPackageComposite": "Package (Composite)",
+    "treatmentRentACabConcessional": "Rent-a-cab (Concessional)",
+    "treatmentForexValuation": "Forex Valuation",
+    "treatmentInsuranceCommissionOnly": "Insurance (Commission Only)",
+    "treatmentMarginScheme": "Margin Scheme",
+    "treatmentReverseCharge": "Reverse Charge",
+    "adHocTaxSectionTitle": "Tax Details",
+    "adHocTaxHelp": "No master record is required for this line — select the applicable tax treatment.",
+    "adHocTaxHelpFlight": "No Airline selected — select the applicable tax treatment for this line, or select an Airline above to use its configured treatment instead.",
+    "adHocTreatmentPrincipal": "Principal / Reseller",
+    "adHocTreatmentAgent": "Agent / Commission",
+    "basicFare": "Basic Fare",
+    "routeType": "Route Type",
+    "routeTypeDomestic": "Domestic",
+    "routeTypeInternational": "International",
+    "adHocSourceLabel": "Source",
+    "adHocSourceMaster": "Master",
+    "adHocSourceLocalizationProfile": "Organization Configuration",
+    "adHocSourceManual": "Manual"
   },
   "booking": {
     "sectionDetails": "Booking Details",

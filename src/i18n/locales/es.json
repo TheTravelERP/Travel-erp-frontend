@@ -132,7 +132,9 @@
     "branch": "Sucursal",
     "allowedBranchesHelper": "Déjelo vacío para permitir todas las sucursales.",
     "more": "More",
-    "notSet": "Not Set"
+    "notSet": "Not Set",
+    "taxConfiguration": "Configuración fiscal",
+    "defaultTaxTreatment": "Tratamiento fiscal predeterminado"
   },
   "profile": {
     "home": "Inicio",
@@ -514,7 +516,8 @@
       "currencyCodeLength": "El código de moneda debe tener exactamente 3 caracteres"
     },
     "allowedBranches": "Sucursales permitidas",
-    "allowedBranchesSection": "Sucursales permitidas"
+    "allowedBranchesSection": "Sucursales permitidas",
+    "taxConfigurationHelp": "Opcional — la línea base/de ocupación propia de este paquete resuelve su tratamiento fiscal desde aquí. Déjelo sin definir hasta que esté listo para configurarlo; las líneas no configuradas se bloquean al guardar la cotización, no aquí."
   },
   "dropdown": {
     "enquiry_priority": {
@@ -794,7 +797,8 @@
       "codeRequired": "El código de la aerolínea es obligatorio",
       "codeTooLong": "El código no puede superar 10 caracteres",
       "nameRequired": "El nombre de la aerolínea es obligatorio"
-    }
+    },
+    "taxConfigurationHelp": "Opcional — una línea de Vuelo vinculada a esta aerolínea resuelve su tratamiento fiscal desde aquí. Déjelo sin definir hasta que esté listo para configurarlo; las líneas no configuradas se bloquean al guardar la cotización, no aquí."
   },
   "vendor": {
     "title": "Detalles del proveedor",
@@ -1047,7 +1051,12 @@
       "taxNameRequired": "El nombre del impuesto es obligatorio",
       "taxPercentPositive": "El impuesto % debe ser cero o mayor",
       "duplicateTaxComponentName": "Los nombres de los componentes de impuestos deben ser únicos dentro de un perfil"
-    }
+    },
+    "supplyModel": "Modelo de suministro",
+    "rentACabRateElection": "Elección de tarifa de alquiler de coches",
+    "forexValuationMethod": "Método de valoración de divisas",
+    "insuranceCommercialRole": "Rol comercial de seguros",
+    "taxConfigurationHelp": "Opcional — déjelo sin definir si esta organización no utiliza alquiler de coches, divisas o facturación de intermediario de seguros. Una línea de cotización para un servicio no configurado se bloquea al guardar, no aquí."
   },
   "documentNumberSeries": {
     "seriesName": "Nombre de la serie",
@@ -1482,6 +1491,8 @@
     "discountTypePercentage": "Porcentaje",
     "discountTypeAmount": "Monto",
     "vendor": "Proveedor",
+    "airline": "Aerolínea",
+    "hotel": "Hotel",
     "quotationNo": "N.º de cotización",
     "netAmount": "Monto neto",
     "revision": "Rev {{n}}",
@@ -1518,7 +1529,9 @@
       "atLeastOneOccupancyGroup": "Añada al menos un grupo de ocupación",
       "packageCountMin": "Se requiere al menos 1 paquete",
       "discountPercentMax100": "El porcentaje de descuento no puede superar 100",
-      "discountExceedsSellPrice": "El monto del descuento no puede superar el precio de venta"
+      "discountExceedsSellPrice": "El monto del descuento no puede superar el precio de venta",
+      "basicFareRequired": "La Tarifa Base es obligatoria para Agente / Comisión",
+      "routeTypeRequired": "El Tipo de Ruta es obligatorio para Agente / Comisión"
     },
     "addFollowup": "Agregar seguimiento",
     "followups": "Seguimientos",
@@ -1532,7 +1545,56 @@
     "createPricingButton": "Crear tarifa",
     "missingPricingCombinations": "A algunas combinaciones les falta la tarifa:",
     "fixPricingHere": "Corregir",
-    "noServiceLinesForPackage": "No se encontró ningún precio de paquete predefinido. Añada grupos de ocupación para definir el precio de esta cotización."
+    "noServiceLinesForPackage": "No se encontró ningún precio de paquete predefinido. Añada grupos de ocupación para definir el precio de esta cotización.",
+    "taxableValue": "Valor imponible",
+    "treatment": "Tratamiento fiscal",
+    "placeOfSupply": "Lugar de suministro",
+    "taxCode": "Código fiscal",
+    "taxBreakdown": "Desglose de impuestos",
+    "cgstTotal": "CGST",
+    "sgstTotal": "SGST",
+    "igstTotal": "IGST",
+    "otherTaxTotal": "Otro impuesto",
+    "totalTax": "Impuesto total",
+    "tcsLabel": "TCS (impuesto sobre la renta, no GST)",
+    "taxConfigRequired": "Se requiere configuración fiscal",
+    "taxConfigRequiredToast": "No se pudo determinar el impuesto para una o más líneas — consulte la(s) línea(s) resaltada(s) abajo.",
+    "fixInAirlineMaster": "Corregir en Maestro de aerolíneas",
+    "fixInPackageMaster": "Corregir en Maestro de paquetes",
+    "fixInLocalizationProfile": "Corregir en Perfil de localización",
+    "disbursementSectionTitle": "Desembolso (agente puro)",
+    "disbursementHelp": "Opcional — complete esto solo si esta tarifa se cobra puramente como un traspaso en nombre del cliente (p. ej., una tasa gubernamental de visado o una prima de seguro). Dejarlo en blanco grava la línea normalmente.",
+    "disbursementCandidateToggle": "Esto es un traspaso / desembolso",
+    "disbursementResultPassed": "Se cumplen todas las condiciones — este monto está excluido del valor imponible",
+    "disbursementResultFailed": "No se cumplen todas las condiciones — este monto es totalmente imponible",
+    "disbursementPureAgent": "La organización actúa como agente puro para este pago",
+    "disbursementThirdPartyContract": "El contrato con el tercero es con el cliente, no con la organización",
+    "disbursementRecipientLiable": "El cliente es realmente responsable de pagar al tercero",
+    "disbursementRecipientAuthorized": "El cliente autorizó a la organización a realizar este pago",
+    "disbursementAmountSeparate": "El monto se muestra por separado, no incluido en la propia tarifa de la organización",
+    "disbursementNoMarkup": "Solo se recupera el monto realmente pagado — sin margen adicional",
+    "disbursementAdditionalService": "Esto es adicional al propio servicio de la organización, no una reempaquetación del mismo",
+    "treatmentStandardAdValorem": "Estándar",
+    "treatmentAgentCommission": "Agente / Comisión",
+    "treatmentPackageComposite": "Paquete (compuesto)",
+    "treatmentRentACabConcessional": "Alquiler de coches (tarifa concesional)",
+    "treatmentForexValuation": "Valoración de divisas",
+    "treatmentInsuranceCommissionOnly": "Seguro (solo comisión)",
+    "treatmentMarginScheme": "Régimen de margen",
+    "treatmentReverseCharge": "Inversión del sujeto pasivo",
+    "adHocTaxSectionTitle": "Detalles de Impuestos",
+    "adHocTaxHelp": "No se requiere ningún registro maestro para esta línea — seleccione el tratamiento fiscal aplicable.",
+    "adHocTaxHelpFlight": "No se seleccionó una Aerolínea — seleccione el tratamiento fiscal aplicable para esta línea, o seleccione una Aerolínea arriba para usar su tratamiento configurado.",
+    "adHocTreatmentPrincipal": "Principal / Revendedor",
+    "adHocTreatmentAgent": "Agente / Comisión",
+    "basicFare": "Tarifa Base",
+    "routeType": "Tipo de Ruta",
+    "routeTypeDomestic": "Nacional",
+    "routeTypeInternational": "Internacional",
+    "adHocSourceLabel": "Origen",
+    "adHocSourceMaster": "Maestro",
+    "adHocSourceLocalizationProfile": "Configuración de la Organización",
+    "adHocSourceManual": "Manual"
   },
   "booking": {
     "sectionDetails": "Detalles de la reserva",

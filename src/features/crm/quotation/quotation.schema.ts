@@ -30,11 +30,82 @@ function checkDiscount(t: TFunction) {
   };
 }
 
+// Rule 33 pure-agent disbursement conditions (Tax & Pricing Architecture
+// section 5) — every field optional/unset by default, matching the
+// Disbursement panel's opt-in behavior (Task 5: collapsed/unfilled always
+// defaults to standard taxation, never an assumed pass-through).
+const disbursementConditionsSchema = z.object({
+  pure_agent_for_payment: z.boolean().optional(),
+  third_party_contract_with_recipient: z.boolean().optional(),
+  recipient_liable_to_pay: z.boolean().optional(),
+  recipient_authorized_payment: z.boolean().optional(),
+  amount_shown_separately: z.boolean().optional(),
+  no_markup_recovered: z.boolean().optional(),
+  additional_to_own_service: z.boolean().optional(),
+}).optional();
+
+// Tax-only line data (section 2's tax_context rule) — kept loose (all
+// optional) since which keys matter depends entirely on the line's own
+// service_type/treatment, resolved server-side, never validated client-side.
+const taxContextSchema = z.object({
+  basic_fare: z.coerce.number().optional(),
+  route_type: z.enum(['domestic', 'international']).optional(),
+  property_state: z.string().optional(),
+  commission_amount: z.coerce.number().optional(),
+  gross_exchange_amount: z.coerce.number().optional(),
+  rbi_reference_rate: z.coerce.number().optional(),
+  actual_rate: z.coerce.number().optional(),
+  currency_units: z.coerce.number().optional(),
+  reverse_charge_eligible: z.boolean().optional(),
+  disbursement: disbursementConditionsSchema,
+  // Ad-Hoc / Quick Quotation Tax Source (Layer 3B) — an explicit manual
+  // classification candidate, only meaningful when no master/config source
+  // is available (see QuotationAdHocTaxPanel.tsx). Kept as a bare string
+  // here (not a z.enum) deliberately: the set of values the backend
+  // actually honors differs by service_type (validate_manual_tax_treatment
+  // on the backend is the real authority), so this stays loose like every
+  // other tax_context key — never validated client-side beyond the
+  // Agent/Commission-needs-basic_fare/route_type check below.
+  manual_tax_treatment: z.string().optional(),
+}).nullish();
+
+// Ad-Hoc / Quick Quotation Tax Source (Layer 3B, Task 17) — UX-only: when
+// the salesperson has picked "Agent / Commission" as the manual treatment,
+// catch a missing Basic Fare/Route Type before submit instead of only
+// after a round-trip 422. Deliberately narrow — this is the one case
+// obvious enough to check client-side without duplicating the backend's
+// real classification/validation logic (validate_manual_tax_treatment,
+// resolve_taxable_value's agent_deemed_value branch remain authoritative).
+function checkAdHocAgentFacts(t: TFunction) {
+  return (
+    row: { tax_context?: { manual_tax_treatment?: string; basic_fare?: number; route_type?: string } | null },
+    ctx: z.RefinementCtx,
+  ) => {
+    if (row.tax_context?.manual_tax_treatment !== 'agent_deemed_value') return;
+    if (row.tax_context.basic_fare === undefined || row.tax_context.basic_fare === null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: t('quotation.validation.basicFareRequired'),
+        path: ['tax_context', 'basic_fare'],
+      });
+    }
+    if (!row.tax_context.route_type) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: t('quotation.validation.routeTypeRequired'),
+        path: ['tax_context', 'route_type'],
+      });
+    }
+  };
+}
+
 const serviceLineSchema = (t: TFunction) =>
   z.object({
     uuid: z.string().optional(),
     service_type: z.string().trim().min(1, t('quotation.validation.serviceTypeRequired')),
     vendor_uuid: z.string().nullable().optional(),
+    airline_uuid: z.string().nullable().optional(),
+    hotel_uuid: z.string().nullable().optional(),
     description: z.string().nullish(),
     day_no: z.coerce.number().nullable().optional(),
     travel_date_from: z.string().nullish(),
@@ -51,7 +122,9 @@ const serviceLineSchema = (t: TFunction) =>
     discount_type: z.enum(['Percentage', 'Amount']).default('Percentage'),
     discount_value: z.coerce.number().min(0).optional().default(0),
     remarks: z.string().nullish(),
-  }).superRefine(checkDiscount(t));
+    tax_context: taxContextSchema,
+    disbursement_candidate: z.boolean().optional().default(false),
+  }).superRefine(checkDiscount(t)).superRefine(checkAdHocAgentFacts(t));
 
 // LOCKED: one row = one pricing rule (Occupancy Type + Passenger Type +
 // Quantity) — no more mixed Adult/Child/Infant counts within a single row.

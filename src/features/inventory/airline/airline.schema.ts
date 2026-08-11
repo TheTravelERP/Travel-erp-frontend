@@ -21,6 +21,7 @@ export const getAirlineSchema = (t: TFunction) =>
     email: z.string().trim().optional(),
     remarks: z.string().trim().optional(),
     is_active: z.boolean().optional(),
+    default_tax_treatment: z.string().trim().optional().nullable(),
   });
 
 export type AirlineSchema = ReturnType<typeof getAirlineSchema>;

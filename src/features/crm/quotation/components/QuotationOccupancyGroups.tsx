@@ -29,6 +29,38 @@ const emptyGroup = {
   discount_value: 0,
 };
 
+// Fixed per-column min-widths for the Occupancy Pricing row — same
+// horizontal-scroll pattern as QuotationForm.tsx's Service Lines rows (see
+// the comment on SERVICE_LINE_COLUMN_WIDTHS there for why fixed widths +
+// nowrap replace Grid's responsive sizing here).
+const OCCUPANCY_COLUMN_WIDTHS = {
+  occupancyType: 150,
+  passengerType: 150,
+  quantity: 90,
+  packagePrice: 140,
+  sellingPrice: 140,
+  discountType: 150,
+  discountValue: 120,
+  finalPrice: 170,
+  delete: 48,
+} as const;
+
+// Subtle, thin scrollbar for the horizontally-scrollable row area — no
+// outer card/border, just enough affordance to show more content exists.
+const SCROLLABLE_ROWS_SX = {
+  overflowX: "auto",
+  pb: 0.5,
+  "&::-webkit-scrollbar": { height: 6 },
+  "&::-webkit-scrollbar-thumb": { backgroundColor: "divider", borderRadius: 3 },
+  "&::-webkit-scrollbar-track": { backgroundColor: "transparent" },
+} as const;
+
+// Caps the "missing pricing" warning (which sits below a scrollable row) to
+// a readable width instead of stretching to the row's full scrollable
+// content width — see QuotationForm.tsx's ROW_EXPANSION_SX for the same
+// reasoning.
+const ROW_EXPANSION_SX = { maxWidth: "min(560px, 92vw)" } as const;
+
 // LOCKED: the Quotation Header (pax_adult/pax_child/pax_infant) is the only
 // source of truth for passenger counts. This list only drives the read-only
 // allocation summary below — it never writes back to the header.
@@ -227,267 +259,277 @@ export default function QuotationOccupancyGroups({
       )}
 
       <Grid size={{ xs: 12 }}>
-        <Stack spacing={2}>
-          {fields.map((field, index) => {
-            const occupancyType = groups[index]?.occupancy_type;
-            const passengerType = groups[index]?.passenger_type;
-            const packagePrice = packagePriceFor(index);
-            const missing = isMissingFor(index);
-            const sellingPrice = groups[index]?.selling_price;
-            const discountType = groups[index]?.discount_type ?? "Percentage";
-            const discountValue = groups[index]?.discount_value ?? 0;
-            const quantity = groups[index]?.quantity;
-            const finalPrice = calculateRowLineTotal({
-              selling_price: sellingPrice,
-              discount_type: discountType,
-              discount_value: discountValue,
-              quantity,
-            });
-            const isOverridden =
-              packagePrice !== null &&
-              sellingPrice !== undefined &&
-              Math.abs(sellingPrice - packagePrice) > 0.005;
-            // Caps this row's Qty input at whatever's left of the Header's
-            // count for this Passenger Type after every OTHER row of the
-            // same Passenger Type is accounted for — e.g. Header
-            // Children=4, another Child row already has Qty=2 -> this row's
-            // cap is 2, not 4. Purely a native-input-level guard (no
-            // visible hint); the real Save-blocking enforcement is still
-            // the zod superRefine (exact-match) and the backend allocation
-            // check.
-            const allocatedByOtherRows = groups.reduce((sum, g, i) => {
-              if (i === index || g.passenger_type !== passengerType) return sum;
-              return sum + (Number(g.quantity) || 0);
-            }, 0);
-            const quantityMax =
-              passengerType && passengerType in headerCounts
-                ? Math.max(0, headerCounts[passengerType] - allocatedByOtherRows)
-                : 999;
+        {/* Horizontally-scrollable row area — same pattern as
+            QuotationForm.tsx's Service Lines rows (MUI's standard
+            overflowX:auto, scoped to just this rows block so the page
+            itself never scrolls sideways). Each row is a nowrap flex row of
+            fixed-width columns (OCCUPANCY_COLUMN_WIDTHS) instead of a
+            responsive Grid, so it stays one intact horizontal line at every
+            viewport instead of wrapping. */}
+        <Box sx={SCROLLABLE_ROWS_SX}>
+          <Stack spacing={2} sx={{ minWidth: "fit-content" }}>
+            {fields.map((field, index) => {
+              const occupancyType = groups[index]?.occupancy_type;
+              const passengerType = groups[index]?.passenger_type;
+              const packagePrice = packagePriceFor(index);
+              const missing = isMissingFor(index);
+              const sellingPrice = groups[index]?.selling_price;
+              const discountType = groups[index]?.discount_type ?? "Percentage";
+              const discountValue = groups[index]?.discount_value ?? 0;
+              const quantity = groups[index]?.quantity;
+              const finalPrice = calculateRowLineTotal({
+                selling_price: sellingPrice,
+                discount_type: discountType,
+                discount_value: discountValue,
+                quantity,
+              });
+              const isOverridden =
+                packagePrice !== null &&
+                sellingPrice !== undefined &&
+                Math.abs(sellingPrice - packagePrice) > 0.005;
+              // Caps this row's Qty input at whatever's left of the Header's
+              // count for this Passenger Type after every OTHER row of the
+              // same Passenger Type is accounted for — e.g. Header
+              // Children=4, another Child row already has Qty=2 -> this row's
+              // cap is 2, not 4. Purely a native-input-level guard (no
+              // visible hint); the real Save-blocking enforcement is still
+              // the zod superRefine (exact-match) and the backend allocation
+              // check.
+              const allocatedByOtherRows = groups.reduce((sum, g, i) => {
+                if (i === index || g.passenger_type !== passengerType) return sum;
+                return sum + (Number(g.quantity) || 0);
+              }, 0);
+              const quantityMax =
+                passengerType && passengerType in headerCounts
+                  ? Math.max(0, headerCounts[passengerType] - allocatedByOtherRows)
+                  : 999;
 
-            return (
-              <Grid container spacing={1.5} key={field.id} alignItems="center">
-                <Grid size={{ xs: 6, sm: 1.7 }}>
-                  <Controller
-                    name={`occupancy_groups.${index}.occupancy_type`}
-                    control={control}
-                    render={({ field: f }) => (
-                      <DropdownAutocomplete
-                        name={`occupancy_groups.${index}.occupancy_type`}
-                        label={t("packagePricing.occupancyType")}
-                        dropdownName="occupancy_type"
-                        useForm={false}
-                        allowAdd={false}
-                        disabled={disabled}
-                        value={f.value}
-                        onChange={(value: string) => {
-                          f.onChange(value);
-                          if (passengerType) void resolveOne(index, value, passengerType);
-                        }}
-                      />
-                    )}
-                  />
-                </Grid>
+              return (
+                <Box key={field.id}>
+                <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flexWrap: "nowrap" }}>
+                  <Box sx={{ width: OCCUPANCY_COLUMN_WIDTHS.occupancyType, flexShrink: 0 }}>
+                    <Controller
+                      name={`occupancy_groups.${index}.occupancy_type`}
+                      control={control}
+                      render={({ field: f }) => (
+                        <DropdownAutocomplete
+                          name={`occupancy_groups.${index}.occupancy_type`}
+                          label={t("packagePricing.occupancyType")}
+                          dropdownName="occupancy_type"
+                          useForm={false}
+                          allowAdd={false}
+                          disabled={disabled}
+                          value={f.value}
+                          onChange={(value: string) => {
+                            f.onChange(value);
+                            if (passengerType) void resolveOne(index, value, passengerType);
+                          }}
+                        />
+                      )}
+                    />
+                  </Box>
 
-                <Grid size={{ xs: 6, sm: 1.7 }}>
-                  <Controller
-                    name={`occupancy_groups.${index}.passenger_type`}
-                    control={control}
-                    render={({ field: f }) => (
-                      <DropdownAutocomplete
-                        name={`occupancy_groups.${index}.passenger_type`}
-                        label={t("packagePricing.passengerType")}
-                        dropdownName="passenger_type"
-                        useForm={false}
-                        allowAdd={false}
-                        disabled={disabled}
-                        value={f.value}
-                        onChange={(value: string) => {
-                          f.onChange(value);
-                          if (occupancyType) void resolveOne(index, occupancyType, value);
-                        }}
-                      />
-                    )}
-                  />
-                </Grid>
+                  <Box sx={{ width: OCCUPANCY_COLUMN_WIDTHS.passengerType, flexShrink: 0 }}>
+                    <Controller
+                      name={`occupancy_groups.${index}.passenger_type`}
+                      control={control}
+                      render={({ field: f }) => (
+                        <DropdownAutocomplete
+                          name={`occupancy_groups.${index}.passenger_type`}
+                          label={t("packagePricing.passengerType")}
+                          dropdownName="passenger_type"
+                          useForm={false}
+                          allowAdd={false}
+                          disabled={disabled}
+                          value={f.value}
+                          onChange={(value: string) => {
+                            f.onChange(value);
+                            if (occupancyType) void resolveOne(index, occupancyType, value);
+                          }}
+                        />
+                      )}
+                    />
+                  </Box>
 
-                <Grid size={{ xs: 4, sm: 0.8 }}>
-                  <Controller
-                    name={`occupancy_groups.${index}.quantity`}
-                    control={control}
-                    render={({ field: f, fieldState }) => (
-                      <TextField
-                        {...f}
-                        type="number"
-                        label={t("quotation.quantity")}
-                        fullWidth
-                        size="small"
-                        disabled={disabled}
-                        error={!!fieldState.error}
-                        helperText={fieldState.error?.message}
-                        slotProps={{ htmlInput: { min: 1, max: quantityMax } }}
-                        onChange={(e) => {
-                          // Hard clamp — the max attribute alone doesn't stop
-                          // a user from typing digits past it, only from
-                          // using the spinner/native validation. This makes
-                          // it physically impossible to exceed the Header's
-                          // count for this row's Passenger Type.
-                          const raw = e.target.value;
-                          if (raw === "") {
-                            f.onChange(raw);
-                            return;
-                          }
-                          const num = Number(raw);
-                          f.onChange(Number.isNaN(num) ? raw : Math.min(num, quantityMax));
-                        }}
-                      />
-                    )}
-                  />
-                </Grid>
-
-                <Grid size={{ xs: 4, sm: 1.4 }}>
-                  <TextField
-                    label={t("quotation.packagePrice")}
-                    fullWidth
-                    size="small"
-                    disabled
-                    value={packagePrice !== null ? `${packageCurrency} ${packagePrice.toLocaleString()}` : "—"}
-                  />
-                </Grid>
-
-                <Grid size={{ xs: 4, sm: 1.4 }}>
-                  <Controller
-                    name={`occupancy_groups.${index}.selling_price`}
-                    control={control}
-                    render={({ field: f, fieldState }) => (
-                      <TextField
-                        {...f}
-                        value={f.value ?? ""}
-                        type="number"
-                        label={t("quotation.sellingPrice")}
-                        fullWidth
-                        size="small"
-                        disabled={disabled}
-                        error={!!fieldState.error}
-                        helperText={
-                          fieldState.error?.message ||
-                          (isOverridden ? t("quotation.sellingPriceOverridden") : undefined)
-                        }
-                        slotProps={{ htmlInput: { min: 0 } }}
-                        onChange={(e) => {
-                          manuallyEditedRef.current[index] = true;
-                          f.onChange(e);
-                        }}
-                      />
-                    )}
-                  />
-                </Grid>
-
-                <Grid size={{ xs: 6, sm: 1.4 }}>
-                  <Controller
-                    name={`occupancy_groups.${index}.discount_type`}
-                    control={control}
-                    render={({ field: f }) => (
-                      <TextField
-                        {...f}
-                        select
-                        label={t("quotation.discountType")}
-                        fullWidth
-                        size="small"
-                        disabled={disabled}
-                      >
-                        {DISCOUNT_TYPES.map((opt) => (
-                          <MenuItem key={opt} value={opt}>
-                            {t(opt === "Percentage" ? "quotation.discountTypePercentage" : "quotation.discountTypeAmount")}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                    )}
-                  />
-                </Grid>
-
-                <Grid size={{ xs: 6, sm: 1.2 }}>
-                  <Controller
-                    name={`occupancy_groups.${index}.discount_value`}
-                    control={control}
-                    render={({ field: f, fieldState }) => {
-                      const discountMax = discountType === "Percentage" ? 100 : sellingPrice ?? Infinity;
-                      return (
+                  <Box sx={{ width: OCCUPANCY_COLUMN_WIDTHS.quantity, flexShrink: 0 }}>
+                    <Controller
+                      name={`occupancy_groups.${index}.quantity`}
+                      control={control}
+                      render={({ field: f, fieldState }) => (
                         <TextField
                           {...f}
-                          value={f.value ?? 0}
                           type="number"
-                          label={t("quotation.discountAmount")}
+                          label={t("quotation.quantity")}
                           fullWidth
                           size="small"
                           disabled={disabled}
                           error={!!fieldState.error}
                           helperText={fieldState.error?.message}
-                          slotProps={{ htmlInput: { min: 0, max: discountMax === Infinity ? undefined : discountMax } }}
+                          slotProps={{ htmlInput: { min: 1, max: quantityMax } }}
                           onChange={(e) => {
                             // Hard clamp — the max attribute alone doesn't stop
-                            // a user from typing digits past it (only the
-                            // spinner/native validation respects it). Mirrors
-                            // the Qty field's clamp above.
+                            // a user from typing digits past it, only from
+                            // using the spinner/native validation. This makes
+                            // it physically impossible to exceed the Header's
+                            // count for this row's Passenger Type.
                             const raw = e.target.value;
                             if (raw === "") {
                               f.onChange(raw);
                               return;
                             }
                             const num = Number(raw);
-                            f.onChange(Number.isNaN(num) ? raw : Math.min(Math.max(num, 0), discountMax));
+                            f.onChange(Number.isNaN(num) ? raw : Math.min(num, quantityMax));
                           }}
                         />
-                      );
-                    }}
-                  />
-                </Grid>
+                      )}
+                    />
+                  </Box>
 
-                <Grid size={{ xs: 6, sm: 1.7 }}>
-                  <TextField
-                    label={t("quotation.finalPrice")}
-                    fullWidth
-                    size="small"
-                    disabled
-                    value={`${packageCurrency} ${finalPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
-                  />
-                </Grid>
+                  <Box sx={{ width: OCCUPANCY_COLUMN_WIDTHS.packagePrice, flexShrink: 0 }}>
+                    <TextField
+                      label={t("quotation.packagePrice")}
+                      fullWidth
+                      size="small"
+                      disabled
+                      value={packagePrice !== null ? `${packageCurrency} ${packagePrice.toLocaleString()}` : "—"}
+                    />
+                  </Box>
 
-                <Grid size={{ xs: 12, sm: 0.6 }}>
-                  {!disabled && (
-                    <IconButton color="error" onClick={() => remove(index)}>
-                      <DeleteIcon />
-                    </IconButton>
-                  )}
-                </Grid>
+                  <Box sx={{ width: OCCUPANCY_COLUMN_WIDTHS.sellingPrice, flexShrink: 0 }}>
+                    <Controller
+                      name={`occupancy_groups.${index}.selling_price`}
+                      control={control}
+                      render={({ field: f, fieldState }) => (
+                        <TextField
+                          {...f}
+                          value={f.value ?? ""}
+                          type="number"
+                          label={t("quotation.sellingPrice")}
+                          fullWidth
+                          size="small"
+                          disabled={disabled}
+                          error={!!fieldState.error}
+                          helperText={
+                            fieldState.error?.message ||
+                            (isOverridden ? t("quotation.sellingPriceOverridden") : undefined)
+                          }
+                          slotProps={{ htmlInput: { min: 0 } }}
+                          onChange={(e) => {
+                            manuallyEditedRef.current[index] = true;
+                            f.onChange(e);
+                          }}
+                        />
+                      )}
+                    />
+                  </Box>
+
+                  <Box sx={{ width: OCCUPANCY_COLUMN_WIDTHS.discountType, flexShrink: 0 }}>
+                    <Controller
+                      name={`occupancy_groups.${index}.discount_type`}
+                      control={control}
+                      render={({ field: f }) => (
+                        <TextField
+                          {...f}
+                          select
+                          label={t("quotation.discountType")}
+                          fullWidth
+                          size="small"
+                          disabled={disabled}
+                        >
+                          {DISCOUNT_TYPES.map((opt) => (
+                            <MenuItem key={opt} value={opt}>
+                              {t(opt === "Percentage" ? "quotation.discountTypePercentage" : "quotation.discountTypeAmount")}
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                      )}
+                    />
+                  </Box>
+
+                  <Box sx={{ width: OCCUPANCY_COLUMN_WIDTHS.discountValue, flexShrink: 0 }}>
+                    <Controller
+                      name={`occupancy_groups.${index}.discount_value`}
+                      control={control}
+                      render={({ field: f, fieldState }) => {
+                        const discountMax = discountType === "Percentage" ? 100 : sellingPrice ?? Infinity;
+                        return (
+                          <TextField
+                            {...f}
+                            value={f.value ?? 0}
+                            type="number"
+                            label={t("quotation.discountAmount")}
+                            fullWidth
+                            size="small"
+                            disabled={disabled}
+                            error={!!fieldState.error}
+                            helperText={fieldState.error?.message}
+                            slotProps={{ htmlInput: { min: 0, max: discountMax === Infinity ? undefined : discountMax } }}
+                            onChange={(e) => {
+                              // Hard clamp — the max attribute alone doesn't stop
+                              // a user from typing digits past it (only the
+                              // spinner/native validation respects it). Mirrors
+                              // the Qty field's clamp above.
+                              const raw = e.target.value;
+                              if (raw === "") {
+                                f.onChange(raw);
+                                return;
+                              }
+                              const num = Number(raw);
+                              f.onChange(Number.isNaN(num) ? raw : Math.min(Math.max(num, 0), discountMax));
+                            }}
+                          />
+                        );
+                      }}
+                    />
+                  </Box>
+
+                  <Box sx={{ width: OCCUPANCY_COLUMN_WIDTHS.finalPrice, flexShrink: 0 }}>
+                    <TextField
+                      label={t("quotation.finalPrice")}
+                      fullWidth
+                      size="small"
+                      disabled
+                      value={`${packageCurrency} ${finalPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
+                    />
+                  </Box>
+
+                  <Box sx={{ width: OCCUPANCY_COLUMN_WIDTHS.delete, flexShrink: 0 }}>
+                    {!disabled && (
+                      <IconButton color="error" onClick={() => remove(index)}>
+                        <DeleteIcon />
+                      </IconButton>
+                    )}
+                  </Box>
+                </Stack>
 
                 {missing && (
-                  <Grid size={{ xs: 12 }}>
-                    <Alert
-                      severity="warning"
-                      icon={<WarningAmberIcon fontSize="small" />}
-                      action={
-                        !disabled && (
-                          <Button
-                            size="small"
-                            color="warning"
-                            variant="outlined"
-                            onClick={() =>
-                              setDialogTarget({ index, occupancyType: occupancyType!, passengerType: passengerType! })
-                            }
-                          >
-                            {t("quotation.createPricingButton")}
-                          </Button>
-                        )
-                      }
-                    >
-                      {t("quotation.packagePricingMissingForTypes", { types: `${occupancyType} / ${passengerType}` })}
-                    </Alert>
-                  </Grid>
+                  <Alert
+                    severity="warning"
+                    icon={<WarningAmberIcon fontSize="small" />}
+                    sx={{ mt: 1, ...ROW_EXPANSION_SX }}
+                    action={
+                      !disabled && (
+                        <Button
+                          size="small"
+                          color="warning"
+                          variant="outlined"
+                          onClick={() =>
+                            setDialogTarget({ index, occupancyType: occupancyType!, passengerType: passengerType! })
+                          }
+                        >
+                          {t("quotation.createPricingButton")}
+                        </Button>
+                      )
+                    }
+                  >
+                    {t("quotation.packagePricingMissingForTypes", { types: `${occupancyType} / ${passengerType}` })}
+                  </Alert>
                 )}
-              </Grid>
-            );
-          })}
-        </Stack>
+                </Box>
+              );
+            })}
+          </Stack>
+        </Box>
       </Grid>
 
       {/* Left-aligned, directly below the last row — continues the list

@@ -132,7 +132,9 @@
     "branch": "Succursale",
     "allowedBranchesHelper": "Laissez vide pour autoriser toutes les succursales.",
     "more": "More",
-    "notSet": "Not Set"
+    "notSet": "Not Set",
+    "taxConfiguration": "Configuration fiscale",
+    "defaultTaxTreatment": "Traitement fiscal par défaut"
   },
   "profile": {
     "home": "Accueil",
@@ -514,7 +516,8 @@
       "currencyCodeLength": "Le code devise doit comporter exactement 3 caractères"
     },
     "allowedBranches": "Succursales autorisées",
-    "allowedBranchesSection": "Succursales autorisées"
+    "allowedBranchesSection": "Succursales autorisées",
+    "taxConfigurationHelp": "Facultatif — la ligne de base/occupation de ce forfait résout son traitement fiscal à partir d'ici. Laissez vide tant que vous n'êtes pas prêt à le configurer ; les lignes non configurées sont bloquées lors de l'enregistrement du devis, pas ici."
   },
   "dropdown": {
     "enquiry_priority": {
@@ -794,7 +797,8 @@
       "codeRequired": "Le code de la compagnie est requis",
       "codeTooLong": "Le code ne peut pas dépasser 10 caractères",
       "nameRequired": "Le nom de la compagnie est requis"
-    }
+    },
+    "taxConfigurationHelp": "Facultatif — une ligne Vol liée à cette compagnie aérienne résout son traitement fiscal à partir d'ici. Laissez vide tant que vous n'êtes pas prêt à le configurer ; les lignes non configurées sont bloquées lors de l'enregistrement du devis, pas ici."
   },
   "vendor": {
     "title": "Détails du fournisseur",
@@ -1047,7 +1051,12 @@
       "taxNameRequired": "Le nom de la taxe est requis",
       "taxPercentPositive": "La taxe % doit être supérieure ou égale à zéro",
       "duplicateTaxComponentName": "Les noms des composants de taxe doivent être uniques dans un profil"
-    }
+    },
+    "supplyModel": "Modèle d'approvisionnement",
+    "rentACabRateElection": "Choix du taux de location de voiture",
+    "forexValuationMethod": "Méthode d'évaluation du change",
+    "insuranceCommercialRole": "Rôle commercial en assurance",
+    "taxConfigurationHelp": "Facultatif — laissez vide si cette organisation n'utilise pas la location de voiture, le change ou la facturation d'intermédiaire en assurance. Une ligne de devis pour un service non configuré est bloquée au moment de l'enregistrement, pas ici."
   },
   "documentNumberSeries": {
     "seriesName": "Nom de la série",
@@ -1482,6 +1491,8 @@
     "discountTypePercentage": "Pourcentage",
     "discountTypeAmount": "Montant",
     "vendor": "Fournisseur",
+    "airline": "Compagnie aérienne",
+    "hotel": "Hôtel",
     "quotationNo": "N° de devis",
     "netAmount": "Montant net",
     "revision": "Rév {{n}}",
@@ -1518,7 +1529,9 @@
       "atLeastOneOccupancyGroup": "Ajoutez au moins un groupe d'occupation",
       "packageCountMin": "Au moins 1 forfait est requis",
       "discountPercentMax100": "Le pourcentage de remise ne peut pas dépasser 100",
-      "discountExceedsSellPrice": "Le montant de la remise ne peut pas dépasser le prix de vente"
+      "discountExceedsSellPrice": "Le montant de la remise ne peut pas dépasser le prix de vente",
+      "basicFareRequired": "Le tarif de base est requis pour Agent / Commission",
+      "routeTypeRequired": "Le type de trajet est requis pour Agent / Commission"
     },
     "addFollowup": "Ajouter un suivi",
     "followups": "Suivis",
@@ -1532,7 +1545,56 @@
     "createPricingButton": "Créer le tarif",
     "missingPricingCombinations": "Certaines combinaisons n'ont pas de tarif :",
     "fixPricingHere": "Corriger",
-    "noServiceLinesForPackage": "Aucun tarif de forfait prédéfini trouvé. Ajoutez des groupes d'occupation pour définir la tarification de ce devis."
+    "noServiceLinesForPackage": "Aucun tarif de forfait prédéfini trouvé. Ajoutez des groupes d'occupation pour définir la tarification de ce devis.",
+    "taxableValue": "Valeur imposable",
+    "treatment": "Traitement fiscal",
+    "placeOfSupply": "Lieu de fourniture",
+    "taxCode": "Code fiscal",
+    "taxBreakdown": "Détail des taxes",
+    "cgstTotal": "CGST",
+    "sgstTotal": "SGST",
+    "igstTotal": "IGST",
+    "otherTaxTotal": "Autre taxe",
+    "totalTax": "Taxe totale",
+    "tcsLabel": "TCS (impôt sur le revenu, pas la TPS)",
+    "taxConfigRequired": "Configuration fiscale requise",
+    "taxConfigRequiredToast": "La taxe n'a pas pu être déterminée pour une ou plusieurs lignes — voir la/les ligne(s) surlignée(s) ci-dessous.",
+    "fixInAirlineMaster": "Corriger dans Compagnies aériennes",
+    "fixInPackageMaster": "Corriger dans Forfaits",
+    "fixInLocalizationProfile": "Corriger dans Profil de localisation",
+    "disbursementSectionTitle": "Débours (agent pur)",
+    "disbursementHelp": "Facultatif — à remplir uniquement si ces frais sont collectés purement en tant que débours pour le compte du client (ex. frais de visa gouvernementaux ou prime d'assurance). Laisser vide taxe la ligne normalement.",
+    "disbursementCandidateToggle": "Il s'agit d'un débours / transfert",
+    "disbursementResultPassed": "Toutes les conditions sont remplies — ce montant est exclu de la valeur imposable",
+    "disbursementResultFailed": "Toutes les conditions ne sont pas remplies — ce montant est entièrement imposable",
+    "disbursementPureAgent": "L'organisation agit en tant qu'agent pur pour ce paiement",
+    "disbursementThirdPartyContract": "Le contrat avec le tiers est avec le client, pas avec l'organisation",
+    "disbursementRecipientLiable": "Le client est réellement redevable envers le tiers",
+    "disbursementRecipientAuthorized": "Le client a autorisé l'organisation à effectuer ce paiement",
+    "disbursementAmountSeparate": "Le montant est indiqué séparément, non inclus dans les frais propres de l'organisation",
+    "disbursementNoMarkup": "Seul le montant réellement payé est récupéré — aucune marge",
+    "disbursementAdditionalService": "Ceci s'ajoute au service propre de l'organisation, ce n'est pas un reconditionnement",
+    "treatmentStandardAdValorem": "Standard",
+    "treatmentAgentCommission": "Agent / Commission",
+    "treatmentPackageComposite": "Forfait (composite)",
+    "treatmentRentACabConcessional": "Location de voiture (taux préférentiel)",
+    "treatmentForexValuation": "Évaluation du change",
+    "treatmentInsuranceCommissionOnly": "Assurance (commission uniquement)",
+    "treatmentMarginScheme": "Régime de la marge",
+    "treatmentReverseCharge": "Autoliquidation",
+    "adHocTaxSectionTitle": "Détails fiscaux",
+    "adHocTaxHelp": "Aucune fiche maîtresse n'est requise pour cette ligne — sélectionnez le régime fiscal applicable.",
+    "adHocTaxHelpFlight": "Aucune compagnie aérienne sélectionnée — sélectionnez le régime fiscal applicable pour cette ligne, ou sélectionnez une compagnie aérienne ci-dessus pour utiliser son régime configuré.",
+    "adHocTreatmentPrincipal": "Principal / Revendeur",
+    "adHocTreatmentAgent": "Agent / Commission",
+    "basicFare": "Tarif de base",
+    "routeType": "Type de trajet",
+    "routeTypeDomestic": "National",
+    "routeTypeInternational": "International",
+    "adHocSourceLabel": "Source",
+    "adHocSourceMaster": "Fiche maîtresse",
+    "adHocSourceLocalizationProfile": "Configuration de l'organisation",
+    "adHocSourceManual": "Manuel"
   },
   "booking": {
     "sectionDetails": "Détails de la réservation",

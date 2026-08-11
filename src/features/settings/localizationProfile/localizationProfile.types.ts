@@ -24,6 +24,15 @@ export interface LocalizationProfileFormInput {
   default_decimal_places: number;
   is_active?: boolean;
   tax_components: TaxComponentInput[];
+
+  // Tax & Pricing Architecture layer 3's org/branch-level elections — all
+  // optional. classify_tax_treatment() reads these directly; unset means
+  // any Rent-a-cab/Forex/Insurance line resolves to undetermined (blocked
+  // at quotation save time, never here) until explicitly configured.
+  supply_model?: string | null;
+  rent_a_cab_rate_election?: string | null;
+  forex_valuation_method?: string | null;
+  insurance_commercial_role?: string | null;
 }
 
 export interface LocalizationProfileDetail extends LocalizationProfileFormInput {

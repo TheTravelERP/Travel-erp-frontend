@@ -132,7 +132,9 @@
     "branch": "शाखा",
     "allowedBranchesHelper": "सभी शाखाओं को अनुमति देने के लिए खाली छोड़ें।",
     "more": "More",
-    "notSet": "Not Set"
+    "notSet": "Not Set",
+    "taxConfiguration": "कर कॉन्फ़िगरेशन",
+    "defaultTaxTreatment": "डिफ़ॉल्ट कर उपचार"
   },
   "profile": {
     "home": "होम",
@@ -514,7 +516,8 @@
       "currencyCodeLength": "मुद्रा कोड ठीक 3 अक्षरों का होना चाहिए"
     },
     "allowedBranches": "अनुमत शाखाएँ",
-    "allowedBranchesSection": "अनुमत शाखाएँ"
+    "allowedBranchesSection": "अनुमत शाखाएँ",
+    "taxConfigurationHelp": "वैकल्पिक — इस पैकेज की अपनी बेस/ऑक्यूपेंसी लाइन अपना कर उपचार यहीं से हल करती है। जब तक आप कॉन्फ़िगर करने के लिए तैयार न हों, इसे खाली छोड़ दें; अकॉन्फ़िगर्ड लाइनें कोटेशन सेव के समय ब्लॉक होती हैं, यहां नहीं।"
   },
   "dropdown": {
     "enquiry_priority": {
@@ -794,7 +797,8 @@
       "codeRequired": "एयरलाइन कोड आवश्यक है",
       "codeTooLong": "कोड 10 अक्षरों से अधिक नहीं हो सकता",
       "nameRequired": "एयरलाइन नाम आवश्यक है"
-    }
+    },
+    "taxConfigurationHelp": "वैकल्पिक — इस एयरलाइन से जुड़ी फ़्लाइट लाइन अपना कर उपचार यहीं से हल करती है। जब तक आप कॉन्फ़िगर करने के लिए तैयार न हों, इसे खाली छोड़ दें; अकॉन्फ़िगर्ड लाइनें कोटेशन सेव के समय ब्लॉक होती हैं, यहां नहीं।"
   },
   "vendor": {
     "title": "वेंडर विवरण",
@@ -1047,7 +1051,12 @@
       "taxNameRequired": "कर नाम आवश्यक है",
       "taxPercentPositive": "कर % शून्य या अधिक होना चाहिए",
       "duplicateTaxComponentName": "एक प्रोफ़ाइल में कर घटक के नाम अद्वितीय होने चाहिए"
-    }
+    },
+    "supplyModel": "आपूर्ति मॉडल",
+    "rentACabRateElection": "रेंट-ए-कैब दर चयन",
+    "forexValuationMethod": "विदेशी मुद्रा मूल्यांकन विधि",
+    "insuranceCommercialRole": "बीमा वाणिज्यिक भूमिका",
+    "taxConfigurationHelp": "वैकल्पिक — यदि यह संगठन रेंट-ए-कैब, फॉरेक्स या बीमा-मध्यस्थ बिलिंग का उपयोग नहीं करता है तो इसे खाली छोड़ दें। अकॉन्फ़िगर्ड सेवा के लिए कोटेशन लाइन सेव के समय ब्लॉक होती है, यहां नहीं।"
   },
   "documentNumberSeries": {
     "seriesName": "सीरीज़ का नाम",
@@ -1482,6 +1491,8 @@
     "discountTypePercentage": "प्रतिशत",
     "discountTypeAmount": "राशि",
     "vendor": "विक्रेता",
+    "airline": "एयरलाइन",
+    "hotel": "होटल",
     "quotationNo": "कोटेशन नंबर",
     "netAmount": "शुद्ध राशि",
     "revision": "संशोधन {{n}}",
@@ -1518,7 +1529,9 @@
       "atLeastOneOccupancyGroup": "कम से कम एक अधिभोग समूह जोड़ें",
       "packageCountMin": "कम से कम 1 पैकेज आवश्यक है",
       "discountPercentMax100": "छूट प्रतिशत 100 से अधिक नहीं हो सकता",
-      "discountExceedsSellPrice": "छूट राशि विक्रय मूल्य से अधिक नहीं हो सकती"
+      "discountExceedsSellPrice": "छूट राशि विक्रय मूल्य से अधिक नहीं हो सकती",
+      "basicFareRequired": "एजेंट / कमीशन के लिए बेसिक किराया आवश्यक है",
+      "routeTypeRequired": "एजेंट / कमीशन के लिए मार्ग प्रकार आवश्यक है"
     },
     "addFollowup": "फॉलो-अप जोड़ें",
     "followups": "फॉलो-अप",
@@ -1532,7 +1545,56 @@
     "createPricingButton": "मूल्य बनाएं",
     "missingPricingCombinations": "कुछ संयोजनों के लिए मूल्य उपलब्ध नहीं है:",
     "fixPricingHere": "ठीक करें",
-    "noServiceLinesForPackage": "कोई पूर्वनिर्धारित पैकेज मूल्य निर्धारण नहीं मिला। इस कोटेशन के लिए मूल्य निर्धारण परिभाषित करने हेतु अधिभोग समूह जोड़ें।"
+    "noServiceLinesForPackage": "कोई पूर्वनिर्धारित पैकेज मूल्य निर्धारण नहीं मिला। इस कोटेशन के लिए मूल्य निर्धारण परिभाषित करने हेतु अधिभोग समूह जोड़ें।",
+    "taxableValue": "कर योग्य मूल्य",
+    "treatment": "कर उपचार",
+    "placeOfSupply": "आपूर्ति का स्थान",
+    "taxCode": "कर कोड",
+    "taxBreakdown": "कर विवरण",
+    "cgstTotal": "सीजीएसटी",
+    "sgstTotal": "एसजीएसटी",
+    "igstTotal": "आईजीएसटी",
+    "otherTaxTotal": "अन्य कर",
+    "totalTax": "कुल कर",
+    "tcsLabel": "टीसीएस (आयकर, जीएसटी नहीं)",
+    "taxConfigRequired": "कर कॉन्फ़िगरेशन आवश्यक है",
+    "taxConfigRequiredToast": "एक या अधिक लाइनों के लिए कर निर्धारित नहीं किया जा सका — नीचे हाइलाइट की गई लाइन(एं) देखें।",
+    "fixInAirlineMaster": "एयरलाइन मास्टर में ठीक करें",
+    "fixInPackageMaster": "पैकेज मास्टर में ठीक करें",
+    "fixInLocalizationProfile": "लोकलाइजेशन प्रोफ़ाइल में ठीक करें",
+    "disbursementSectionTitle": "संवितरण (शुद्ध एजेंट)",
+    "disbursementHelp": "वैकल्पिक — इसे तभी भरें जब यह शुल्क विशुद्ध रूप से ग्राहक की ओर से पास-थ्रू के रूप में एकत्र किया गया हो (जैसे वीज़ा सरकारी शुल्क या बीमा प्रीमियम)। इसे खाली छोड़ने पर लाइन सामान्य रूप से कर योग्य होगी।",
+    "disbursementCandidateToggle": "यह एक पास-थ्रू / संवितरण है",
+    "disbursementResultPassed": "सभी शर्तें पूरी हुईं — यह राशि कर योग्य मूल्य से बाहर रखी गई है",
+    "disbursementResultFailed": "सभी शर्तें पूरी नहीं हुईं — यह राशि पूर्णतः कर योग्य है",
+    "disbursementPureAgent": "संगठन इस भुगतान के लिए शुद्ध एजेंट के रूप में कार्य करता है",
+    "disbursementThirdPartyContract": "तृतीय-पक्ष अनुबंध ग्राहक के साथ है, संगठन के साथ नहीं",
+    "disbursementRecipientAuthorized": "ग्राहक ने संगठन को यह भुगतान करने के लिए अधिकृत किया",
+    "disbursementRecipientLiable": "ग्राहक वास्तव में तृतीय पक्ष को भुगतान करने के लिए उत्तरदायी है",
+    "disbursementAmountSeparate": "राशि अलग से दिखाई गई है, संगठन के अपने शुल्क में शामिल नहीं की गई",
+    "disbursementNoMarkup": "केवल वास्तव में भुगतान की गई राशि ही वसूली जाती है — कोई मार्कअप नहीं",
+    "disbursementAdditionalService": "यह संगठन की अपनी सेवा के अतिरिक्त है, इसकी पुनर्पैकेजिंग नहीं",
+    "treatmentStandardAdValorem": "मानक",
+    "treatmentAgentCommission": "एजेंट / कमीशन",
+    "treatmentPackageComposite": "पैकेज (समग्र)",
+    "treatmentRentACabConcessional": "रेंट-ए-कैब (रियायती)",
+    "treatmentForexValuation": "फॉरेक्स मूल्यांकन",
+    "treatmentInsuranceCommissionOnly": "बीमा (केवल कमीशन)",
+    "treatmentMarginScheme": "मार्जिन स्कीम",
+    "treatmentReverseCharge": "रिवर्स चार्ज",
+    "adHocTaxSectionTitle": "टैक्स विवरण",
+    "adHocTaxHelp": "इस लाइन के लिए किसी मास्टर रिकॉर्ड की आवश्यकता नहीं है — लागू टैक्स व्यवहार चुनें।",
+    "adHocTaxHelpFlight": "कोई एयरलाइन चयनित नहीं है — इस लाइन के लिए लागू टैक्स व्यवहार चुनें, या इसके कॉन्फ़िगर किए गए व्यवहार का उपयोग करने के लिए ऊपर एक एयरलाइन चुनें।",
+    "adHocTreatmentPrincipal": "प्रिंसिपल / रीसेलर",
+    "adHocTreatmentAgent": "एजेंट / कमीशन",
+    "basicFare": "बेसिक किराया",
+    "routeType": "मार्ग प्रकार",
+    "routeTypeDomestic": "घरेलू",
+    "routeTypeInternational": "अंतरराष्ट्रीय",
+    "adHocSourceLabel": "स्रोत",
+    "adHocSourceMaster": "मास्टर",
+    "adHocSourceLocalizationProfile": "संगठन कॉन्फ़िगरेशन",
+    "adHocSourceManual": "मैनुअल"
   },
   "booking": {
     "sectionDetails": "बुकिंग विवरण",

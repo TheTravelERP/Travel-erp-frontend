@@ -1,6 +1,9 @@
 // src/features/settings/localizationProfile/components/LocalizationProfileForm.tsx
 
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   Button,
   FormControlLabel,
@@ -18,6 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 import { getLocalizationProfileSchema } from "../localizationProfile.schema";
 import type { LocalizationProfileFormInput } from "../localizationProfile.types";
@@ -49,6 +53,10 @@ const emptyValues: LocalizationProfileFormInput = {
   default_decimal_places: 2,
   is_active: true,
   tax_components: [],
+  supply_model: null,
+  rent_a_cab_rate_election: null,
+  forex_valuation_method: null,
+  insurance_commercial_role: null,
 };
 
 export default function LocalizationProfileForm({
@@ -355,6 +363,65 @@ export default function LocalizationProfileForm({
             </Stack>
           </Grid>
         </FormSection>
+
+        {/* Optional, collapsed — an org that doesn't use Rent-a-cab/Forex/
+            Insurance-intermediary billing just leaves these unset, which is
+            the correct, already-proven-safe state (unconfigured ->
+            undetermined -> blocked at quotation time, not here). Mirrors
+            the doc's own suggested "collapsed behind a disclosure" pattern
+            (Tax & Pricing Architecture, section 10) and this codebase's
+            existing Accordion convention (see BookingServiceFormDialog.tsx)
+            rather than a mandatory always-visible block. */}
+        <Grid size={{ xs: 12 }}>
+          <Accordion defaultExpanded={false}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography fontWeight={600}>{t("common.taxConfiguration")}</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                {t("localizationProfile.taxConfigurationHelp")}
+              </Typography>
+              <Grid container spacing={1.5}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <DropdownAutocomplete
+                    name="supply_model"
+                    label={t("localizationProfile.supplyModel")}
+                    control={control}
+                    useForm
+                    allowAdd={false}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <DropdownAutocomplete
+                    name="rent_a_cab_rate_election"
+                    label={t("localizationProfile.rentACabRateElection")}
+                    control={control}
+                    useForm
+                    allowAdd={false}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <DropdownAutocomplete
+                    name="forex_valuation_method"
+                    label={t("localizationProfile.forexValuationMethod")}
+                    control={control}
+                    useForm
+                    allowAdd={false}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <DropdownAutocomplete
+                    name="insurance_commercial_role"
+                    label={t("localizationProfile.insuranceCommercialRole")}
+                    control={control}
+                    useForm
+                    allowAdd={false}
+                  />
+                </Grid>
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
+        </Grid>
 
         <FormActions
           onBack={() => navigate("/app/settings/localization-profiles")}

@@ -2,10 +2,67 @@
 
 import type { DiscountType } from "./pricing";
 
+// Rule 33 pure-agent disbursement test (Tax & Pricing Architecture section 5,
+// layer 3's tax_context.disbursement fields, layer 4's UI for them). Every
+// condition must be explicitly true for the gate to pass — see
+// disbursement_test_passes() on the backend.
+export interface QuotationDisbursementConditions {
+  pure_agent_for_payment?: boolean;
+  third_party_contract_with_recipient?: boolean;
+  recipient_liable_to_pay?: boolean;
+  recipient_authorized_payment?: boolean;
+  amount_shown_separately?: boolean;
+  no_markup_recovered?: boolean;
+  additional_to_own_service?: boolean;
+}
+
+// Tax-only line data with no other authoritative column (the tax_context
+// rule, section 2) — a free-form bag the resolver reads specific keys from
+// depending on the line's service_type/treatment, and which the backend
+// also writes resolved_* metadata into after saving (see
+// QuotationServiceLineDetail.tax_context below).
+export interface QuotationLineTaxContext {
+  basic_fare?: number;
+  route_type?: "domestic" | "international";
+  property_state?: string;
+  commission_amount?: number;
+  gross_exchange_amount?: number;
+  rbi_reference_rate?: number;
+  actual_rate?: number;
+  currency_units?: number;
+  reverse_charge_eligible?: boolean;
+  disbursement?: QuotationDisbursementConditions;
+  // Ad-Hoc / Quick Quotation Tax Source (Layer 3A/3B) — an explicit,
+  // user-supplied classification candidate for a line with no master or
+  // org-level configuration fact available. Only ever "standard_ad_valorem"
+  // | "agent_deemed_value" (the same two values AirlineMaster.default_tax_
+  // treatment already accepts) — never a shortcut around the resolver, and
+  // never consulted at all while a master/config value already resolved
+  // something (see classify_tax_treatment() on the backend).
+  manual_tax_treatment?: string;
+  // Written by the backend after resolution — read-only from the UI's side.
+  resolved_treatment?: string;
+  resolved_place_of_supply?: string;
+  resolved_tax_code?: string;
+  // "master" | "localization_profile" | "manual" | absent (the
+  // unconditional-always-standard service types and reverse_charge, where
+  // none of the three would be an honest label — see Layer 3A's report).
+  resolved_treatment_source?: string;
+  disbursement_test_result?: "passed" | "failed";
+}
+
 export interface QuotationServiceLineInput {
   uuid?: string;
   service_type: string;
   vendor_uuid?: string | null;
+  // Master/Vendor/Inventory review: direct product-identity bridge, decoupled
+  // from InventoryStock/sourcing — for a Flight line, this is how
+  // classify_tax_treatment() reaches AirlineMaster.default_tax_treatment;
+  // for a Hotel line, how resolve_place_of_supply() reaches HotelMaster
+  // .state. See classify_tax_treatment()/resolve_place_of_supply() on the
+  // backend. Never required to save a line.
+  airline_uuid?: string | null;
+  hotel_uuid?: string | null;
   description?: string;
   day_no?: number | null;
   travel_date_from?: string;
@@ -25,6 +82,10 @@ export interface QuotationServiceLineInput {
   discount_type?: DiscountType;
   discount_value?: number;
   remarks?: string;
+  tax_context?: QuotationLineTaxContext | null;
+  // Flags this line as a Rule 33 pure-agent disbursement candidate — see
+  // the Disbursement panel in QuotationForm.tsx. Opt-in, defaults false.
+  disbursement_candidate?: boolean;
 }
 
 // Flat Package Pricing fallback — only sent when business_type is "Package"
@@ -53,13 +114,30 @@ export interface QuotationOccupancyGroupInput {
   discount_value?: number;
 }
 
+// One itemized component within a line's tax_breakdown — tax_name is
+// free-text org-configured data (LocalizationProfileTaxComponent.tax_name),
+// never translated/relabeled by the UI, unlike tax_type (a fixed central/
+// state/integrated/other bucket).
+export interface QuotationTaxBreakdownItem {
+  tax_name: string;
+  tax_percent: number;
+  tax_amount: number;
+  tax_type?: string | null;
+}
+
 export interface QuotationServiceLineDetail extends QuotationServiceLineInput {
   uuid: string;
   line_no: number;
   provenance: string;
+  // 'MASTER_DRIVEN' | 'AD_HOC' — read-only, server-derived (Quotation Line
+  // Foundation, Layer 1). Whether this line's identity is backed by a
+  // product master (Airline/Hotel/Package) or was entered directly with no
+  // master required.
+  line_source: string;
   taxable_amount: number;
   tax_percent: number;
   tax_amount: number;
+  tax_breakdown?: QuotationTaxBreakdownItem[] | null;
   gross_amount: number;
   net_amount: number;
   margin_amount: number;
@@ -134,6 +212,18 @@ export interface QuotationDetail extends QuotationFormInput {
   gross_amount: number;
   taxable_amount: number;
   tax_amount: number;
+  // Per-component breakout of tax_amount above, summed from every line's
+  // own calculate_tax() result (Tax & Pricing Architecture section 2).
+  cgst_total: number;
+  sgst_total: number;
+  igst_total: number;
+  other_tax_total: number;
+  // A separate, non-GST statutory track (section 7) — a review-only
+  // candidate value, never wired into any charge/collection flow.
+  // Nullable: pre-Layer-3 quotations have tcs_applicable=null.
+  tcs_applicable?: boolean | null;
+  tcs_rate_percent?: number | null;
+  tcs_amount?: number | null;
   net_amount: number;
   total_cost_amount: number;
   total_margin_amount: number;
