@@ -6,9 +6,10 @@ import {
   Grid,
   Switch,
   TextField,
+  Typography,
 } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
@@ -16,14 +17,17 @@ import { useNavigate } from "react-router-dom";
 import { getVendorSchema } from "../vendor.schema";
 import type { VendorFormInput } from "../vendor.types";
 import DropdownAutocomplete from "../../../../components/common/DropdownAutocomplete";
+import EntityAutocomplete from "../../../../components/common/EntityAutocomplete";
 import MobileNumberField from "../../../../components/common/MobileNumberField";
+import AddStateProvinceDialog from "../../../settings/location/components/AddStateProvinceDialog";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
+import { useCodeUniquenessCheck } from "../../../../hooks/useCodeUniquenessCheck";
 import FormSection from "../../../../components/forms/FormSection";
 import FormActions from "../../../../components/forms/FormActions";
 
 interface VendorFormProps {
-  defaultValues?: Partial<VendorFormInput>;
+  defaultValues?: Partial<VendorFormInput> & { uuid?: string };
   onSubmit: (data: VendorFormInput) => Promise<void>;
   loading?: boolean;
 }
@@ -31,7 +35,6 @@ interface VendorFormProps {
 const emptyValues: VendorFormInput = {
   vendor_code: "",
   vendor_name: "",
-  vendor_type: "",
   contact_person: "",
   mobile: "",
   email: "",
@@ -40,8 +43,8 @@ const emptyValues: VendorFormInput = {
   pan: "",
   address: "",
   city: "",
-  state: "",
-  country: "",
+  country_code: "",
+  state_province_code: "",
   pincode: "",
   payment_terms: "",
   remarks: "",
@@ -63,6 +66,10 @@ export default function VendorForm({
     control,
     handleSubmit,
     reset,
+    setValue,
+    watch,
+    setError,
+    clearErrors,
     formState: { isSubmitting },
   } = useForm<VendorFormInput>({
     resolver: zodResolver(vendorSchema),
@@ -75,6 +82,18 @@ export default function VendorForm({
     }
   }, [defaultValues, reset]);
 
+  const { onCodeBlur } = useCodeUniquenessCheck<VendorFormInput>({
+    entity: "vendor",
+    fieldName: "vendor_code",
+    excludeUuid: defaultValues?.uuid,
+    setError,
+    clearErrors,
+    message: t("validation.codeAlreadyExists"),
+  });
+
+  const countryCode = watch("country_code");
+  const [addStateProvinceOpen, setAddStateProvinceOpen] = useState(false);
+
   return (
     <Box
       component="form"
@@ -84,7 +103,8 @@ export default function VendorForm({
       noValidate
     >
       <Grid container spacing={2}>
-        <FormSection title={t("vendor.title")}>
+        {/* ---------- Basic Information ---------- */}
+        <FormSection title={t("vendor.sectionBasic")}>
           <Grid size={{ xs: 12, sm: 4 }}>
             <Controller
               name="vendor_code"
@@ -92,6 +112,10 @@ export default function VendorForm({
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    onCodeBlur(e.target.value);
+                  }}
                   label={t("vendor.code")}
                   fullWidth
                   required
@@ -121,14 +145,34 @@ export default function VendorForm({
 
           <Grid size={{ xs: 12, sm: 4 }}>
             <DropdownAutocomplete
-              name="vendor_type"
-              label={t("vendor.type")}
+              name="status"
+              dropdownName="vendor_status"
+              label={t("vendor.status")}
               control={control}
               useForm
-              allowAdd
+              allowAdd={false}
             />
+            <Typography variant="caption" color="text.secondary">
+              {t("vendor.statusHelper")}
+            </Typography>
           </Grid>
 
+          <Grid size={{ xs: 12, sm: 4 }} sx={{ display: "flex", alignItems: "center" }}>
+            <Controller
+              name="is_active"
+              control={control}
+              render={({ field }) => (
+                <FormControlLabel
+                  control={<Switch checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} />}
+                  label={t("common.active")}
+                />
+              )}
+            />
+          </Grid>
+        </FormSection>
+
+        {/* ---------- Contact Information ---------- */}
+        <FormSection title={t("vendor.sectionContact")}>
           <Grid size={{ xs: 12, sm: 4 }}>
             <Controller
               name="contact_person"
@@ -156,23 +200,10 @@ export default function VendorForm({
               render={({ field }) => <TextField {...field} label={t("vendor.website")} fullWidth />}
             />
           </Grid>
+        </FormSection>
 
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <Controller
-              name="gstin"
-              control={control}
-              render={({ field }) => <TextField {...field} label={t("vendor.gstin")} fullWidth />}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <Controller
-              name="pan"
-              control={control}
-              render={({ field }) => <TextField {...field} label={t("vendor.pan")} fullWidth />}
-            />
-          </Grid>
-
+        {/* ---------- Address ---------- */}
+        <FormSection title={t("common.address")}>
           <Grid size={{ xs: 12 }}>
             <Controller
               name="address"
@@ -184,26 +215,43 @@ export default function VendorForm({
           </Grid>
 
           <Grid size={{ xs: 12, sm: 3 }}>
+            <EntityAutocomplete
+              name="country_code"
+              label={t("common.country")}
+              control={control}
+              dropdownName="country"
+              onOptionSelected={() => setValue("state_province_code", "")}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <EntityAutocomplete
+              name="state_province_code"
+              label={t("location.stateProvince")}
+              control={control}
+              dropdownName="city"
+              countryCode={countryCode || null}
+              disabled={!countryCode}
+              allowAdd
+              onAddNew={() => setAddStateProvinceOpen(true)}
+            />
+          </Grid>
+
+          <AddStateProvinceDialog
+            open={addStateProvinceOpen}
+            countryCode={countryCode || ""}
+            onClose={() => setAddStateProvinceOpen(false)}
+            onCreated={(stateProvince) => {
+              setValue("state_province_code", stateProvince.city_code);
+              setAddStateProvinceOpen(false);
+            }}
+          />
+
+          <Grid size={{ xs: 12, sm: 3 }}>
             <Controller
               name="city"
               control={control}
               render={({ field }) => <TextField {...field} label={t("vendor.city")} fullWidth />}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 3 }}>
-            <Controller
-              name="state"
-              control={control}
-              render={({ field }) => <TextField {...field} label={t("vendor.state")} fullWidth />}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 3 }}>
-            <Controller
-              name="country"
-              control={control}
-              render={({ field }) => <TextField {...field} label={t("vendor.country")} fullWidth />}
             />
           </Grid>
 
@@ -214,34 +262,39 @@ export default function VendorForm({
               render={({ field }) => <TextField {...field} label={t("vendor.pincode")} fullWidth />}
             />
           </Grid>
+        </FormSection>
 
-          <Grid size={{ xs: 12, sm: 4 }}>
+        {/* ---------- Tax / Registration ---------- */}
+        <FormSection title={t("vendor.sectionTax")}>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Controller
+              name="gstin"
+              control={control}
+              render={({ field }) => <TextField {...field} label={t("vendor.gstin")} fullWidth />}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Controller
+              name="pan"
+              control={control}
+              render={({ field }) => <TextField {...field} label={t("vendor.pan")} fullWidth />}
+            />
+          </Grid>
+        </FormSection>
+
+        {/* ---------- Additional Information ---------- */}
+        <FormSection title={t("vendor.sectionAdditional")}>
+          <Grid size={{ xs: 12 }}>
             <Controller
               name="payment_terms"
               control={control}
-              render={({ field }) => <TextField {...field} label={t("vendor.paymentTerms")} fullWidth />}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <DropdownAutocomplete
-              name="status"
-              dropdownName="vendor_status"
-              label={t("vendor.status")}
-              control={control}
-              useForm
-              allowAdd={false}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 4 }} sx={{ display: "flex", alignItems: "center" }}>
-            <Controller
-              name="is_active"
-              control={control}
               render={({ field }) => (
-                <FormControlLabel
-                  control={<Switch checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} />}
-                  label={t("common.active")}
+                <TextField
+                  {...field}
+                  label={t("vendor.paymentTermsDefault")}
+                  helperText={t("vendor.paymentTermsHelper")}
+                  fullWidth
                 />
               )}
             />

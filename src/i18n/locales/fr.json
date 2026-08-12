@@ -250,7 +250,7 @@
     "packages.pricing": "Tarification des forfaits",
     "packages.services": "Services du forfait",
     "inventory.ziyarat": "Ziyarat",
-    "inventory.vendor_master": "Fournisseurs",
+    "inventory.vendor_master": "Fournisseurs / Prestataires",
     "settings.branch_master": "Gestion des succursales",
     "settings.document_type_master": "Types de documents",
     "settings.terms_conditions_master": "Modèles de conditions générales",
@@ -258,7 +258,9 @@
     "settings.exchange_rate_master": "Référentiel des taux de change",
     "settings.currency_rate_policy": "Politique de taux de change",
     "settings.tax_registration": "Enregistrement fiscal",
-    "settings.localization_profile": "Profils de localisation"
+    "settings.localization_profile": "Profils de localisation",
+    "settings.location_master": "Référentiel des emplacements",
+    "settings.state_province_master": "Référentiel des États / Provinces"
   },
   "enquiry": {
     "notLinkedToCustomer": "Pas encore lié à une fiche client",
@@ -566,11 +568,13 @@
     "currentPasswordRequired": "Le mot de passe actuel est requis",
     "nameRequired": "Le nom est requis",
     "codeRequired": "Le code est requis",
+    "codeAlreadyExists": "Ce code existe déjà",
     "priorityRequired": "La priorité est requise",
     "statusRequired": "Le statut est requis",
     "endDateBeforeStartDate": "La date de fin ne peut pas être antérieure à la date de début",
     "roleRequired": "Veuillez sélectionner un rôle",
     "branchRequired": "Veuillez sélectionner une succursale",
+    "countryRequired": "Veuillez sélectionner un pays",
     "endTimeBeforeStartTime": "L'heure de fin ne peut pas être antérieure à l'heure de début"
   },
   "auth": {
@@ -800,11 +804,23 @@
     },
     "taxConfigurationHelp": "Facultatif — une ligne Vol liée à cette compagnie aérienne résout son traitement fiscal à partir d'ici. Laissez vide tant que vous n'êtes pas prêt à le configurer ; les lignes non configurées sont bloquées lors de l'enregistrement du devis, pas ici."
   },
+  "location": {
+    "title": "Détails de l'emplacement",
+    "stateProvince": "État / Province",
+    "addStateProvince": "Ajouter un État / une Province",
+    "remarks": "Remarques",
+    "colCode": "Code",
+    "colName": "Nom",
+    "colCountry": "Pays",
+    "colStateProvince": "État / Province"
+  },
   "vendor": {
-    "title": "Détails du fournisseur",
+    "sectionBasic": "Informations de base",
+    "sectionContact": "Coordonnées",
+    "sectionTax": "Fiscalité / Immatriculation",
+    "sectionAdditional": "Informations complémentaires",
     "code": "Code fournisseur",
     "name": "Nom du fournisseur",
-    "type": "Type de fournisseur",
     "contactPerson": "Personne à contacter",
     "mobile": "Mobile",
     "email": "E-mail",
@@ -813,19 +829,25 @@
     "pan": "PAN",
     "address": "Adresse",
     "city": "Ville",
-    "state": "État / Région",
-    "country": "Pays",
     "pincode": "Code postal",
-    "paymentTerms": "Conditions de paiement",
+    "paymentTermsDefault": "Conditions de paiement par défaut",
+    "paymentTermsHelper": "Préférence par défaut uniquement — les conditions commerciales réelles sont définies par contrat fournisseur.",
     "remarks": "Remarques",
     "status": "Statut",
+    "statusHelper": "Liste noire / En attente signale un fournisseur pour contrôle de conformité. Utilisez le bouton Actif ci-dessus pour l'affichage courant.",
     "colCode": "Code fournisseur",
     "colName": "Nom du fournisseur",
-    "colType": "Type",
     "colContactPerson": "Personne à contacter",
     "colMobile": "Mobile",
-    "colCity": "Ville",
-    "colStatus": "Statut"
+    "colEmail": "E-mail",
+    "colStatus": "Statut",
+    "documents": {
+      "Registration Certificate": "Certificat d'immatriculation",
+      "GST Certificate": "Certificat GST",
+      "PAN Document": "Document PAN",
+      "Agreement": "Accord",
+      "Other": "Autre"
+    }
   },
   "vendorContract": {
     "title": "Détails du contrat",

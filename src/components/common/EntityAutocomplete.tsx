@@ -28,6 +28,11 @@ interface EntityAutocompleteProps {
   // the backend, a no-op otherwise.
   pkgUuid?: string | null;
 
+  // Scopes the dropdown's rows to a specific Country (e.g. the Location
+  // form's State/Province picker) — only applies to entities that carry a
+  // country_code column on the backend, a no-op otherwise.
+  countryCode?: string | null;
+
   // React Hook Form mode (default) — requires `control`.
   control?: any;
   useForm?: boolean;
@@ -81,6 +86,7 @@ export default function EntityAutocomplete({
   disabled = false,
   documentTypeCode,
   pkgUuid,
+  countryCode,
   onAddNew,
   allowAdd = false,
   setValue,
@@ -98,6 +104,7 @@ export default function EntityAutocomplete({
     pageSize,
     documentTypeCode,
     pkgUuid,
+    countryCode,
     initialSearch: initialInputValue,
   });
 

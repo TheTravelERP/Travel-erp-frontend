@@ -1,4 +1,4 @@
-// src/features/inventory/vendor/components/VendorTable.tsx
+// src/features/settings/stateProvinceMaster/components/StateProvinceTable.tsx
 
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -24,28 +24,26 @@ import {
   Paper,
   IconButton,
   Button,
-  Chip,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import InboxIcon from "@mui/icons-material/Inbox";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
-import type { VendorListItem } from "../vendor.types";
+import type { StateProvinceListItem } from "../stateProvince.types";
 import ConfirmDialog from "../../../../components/common/ConfirmDialog";
 import SortableTableCell from "../../../../components/common/SortableTableCell";
 import {
-  bulkDeleteVendors,
-  bulkRestoreVendors,
-  deleteVendorByUuid,
-  restoreVendorByUuid,
-} from "../vendor.api";
+  bulkDeleteStateProvinces,
+  bulkRestoreStateProvinces,
+  deleteStateProvinceByUuid,
+  restoreStateProvinceByUuid,
+} from "../stateProvince.api";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { getErrorMessage } from "../../../../utils/errorMessage";
 
 interface Props {
-  rows: VendorListItem[];
+  rows: StateProvinceListItem[];
   loading: boolean;
   page: number;
   pageSize: number;
@@ -60,7 +58,7 @@ interface Props {
 }
 
 interface TableColumn {
-  id: keyof VendorListItem | string;
+  id: keyof StateProvinceListItem | string;
   label: string;
   sortable?: boolean;
   align?: "left" | "center" | "right";
@@ -69,16 +67,14 @@ interface TableColumn {
 
 function getColumns(t: TFunction): TableColumn[] {
   return [
-    { id: "vendor_code", label: t("vendor.colCode"), sortable: true, minWidth: 120 },
-    { id: "vendor_name", label: t("vendor.colName"), sortable: true, minWidth: 200 },
-    { id: "contact_person", label: t("vendor.colContactPerson"), minWidth: 150 },
-    { id: "mobile", label: t("vendor.colMobile"), minWidth: 130 },
-    { id: "email", label: t("vendor.colEmail"), minWidth: 180 },
-    { id: "status", label: t("vendor.colStatus"), sortable: true, minWidth: 110 },
+    { id: "country_code", label: t("common.country"), sortable: true, minWidth: 90 },
+    { id: "city_code", label: t("common.code"), sortable: true, minWidth: 90 },
+    { id: "name", label: t("common.name"), sortable: true, minWidth: 200 },
+    { id: "is_active", label: t("common.status"), sortable: true, minWidth: 90 },
   ];
 }
 
-export default function VendorTable({
+export default function StateProvinceTable({
   rows,
   loading,
   page,
@@ -132,8 +128,8 @@ export default function VendorTable({
       setBulkLoading(true);
 
       const result = isTrash
-        ? await bulkRestoreVendors(uuids)
-        : await bulkDeleteVendors(uuids);
+        ? await bulkRestoreStateProvinces(uuids)
+        : await bulkDeleteStateProvinces(uuids);
 
       showSnackbar({ message: result.message, severity: "success" });
       setSelected(new Set());
@@ -190,10 +186,10 @@ export default function VendorTable({
       setActionLoading(true);
 
       if (isTrash) {
-        await restoreVendorByUuid(actionUuid);
+        await restoreStateProvinceByUuid(actionUuid);
         showSnackbar({ message: t("common.restoredSuccess"), severity: "success" });
       } else {
-        await deleteVendorByUuid(actionUuid);
+        await deleteStateProvinceByUuid(actionUuid);
         showSnackbar({ message: t("common.deletedSuccess"), severity: "success" });
       }
 
@@ -211,14 +207,6 @@ export default function VendorTable({
       setActionUuid(null);
     }
   }
-
-  const renderStatusChip = (status?: string) => (
-    <Chip
-      size="small"
-      label={status || t("common.active")}
-      color={status === "Active" || !status ? "success" : status === "Blacklisted" ? "error" : "default"}
-    />
-  );
 
   if (isMobile) {
     return (
@@ -238,34 +226,21 @@ export default function VendorTable({
                       checked={selected.has(row.uuid)}
                       onChange={() => toggleRow(row.uuid)}
                     />
-                    <Typography fontWeight={600}>{row.vendor_name}</Typography>
+                    <Typography fontWeight={600}>{row.name}</Typography>
                   </Stack>
-                  {renderStatusChip(row.status)}
                 </Stack>
 
                 <Typography variant="caption">
-                  {row.vendor_code} &bull; {row.mobile} &bull; {row.email}
+                  {row.country_code} &bull; {row.city_code} &bull; {row.is_active ? t("common.active") : t("common.inactive")}
                 </Typography>
 
                 <Divider sx={{ my: 1 }} />
 
                 <Stack direction="row" justifyContent="flex-end" alignItems="center">
                   <Stack direction="row" spacing={0.5}>
-                    <IconButton
-                      size="small"
-                      onClick={() =>
-                        navigate(
-                          isTrash
-                            ? `/app/inventory/vendor-master/${row.uuid}?is_deleted=true`
-                            : `/app/inventory/vendor-master/${row.uuid}`,
-                        )
-                      }
-                    >
-                      <VisibilityIcon fontSize="small" />
-                    </IconButton>
                     {!isTrash && (
                       <>
-                        <IconButton size="small" onClick={() => navigate(`/app/inventory/vendor-master/${row.uuid}/edit`)}>
+                        <IconButton size="small" onClick={() => navigate(`/app/settings/state-province-master/${row.uuid}/edit`)}>
                           <EditIcon fontSize="small" />
                         </IconButton>
                         <IconButton size="small" color="error" onClick={() => setActionUuid(row.uuid)}>
@@ -363,7 +338,7 @@ export default function VendorTable({
             {loading &&
               [...Array(pageSize)].map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell colSpan={8}>
+                  <TableCell colSpan={6}>
                     <Skeleton height={40} />
                   </TableCell>
                 </TableRow>
@@ -371,7 +346,7 @@ export default function VendorTable({
 
             {!loading && rows.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8}>
+                <TableCell colSpan={6}>
                   <Box textAlign="center" py={5}>
                     <InboxIcon sx={{ fontSize: 48, opacity: 0.4 }} />
                     <Typography>{t("common.noRecordsFound")}</Typography>
@@ -386,29 +361,15 @@ export default function VendorTable({
                   <TableCell padding="checkbox">
                     <Checkbox checked={selected.has(row.uuid)} onChange={() => toggleRow(row.uuid)} />
                   </TableCell>
-                  <TableCell>{row.vendor_code}</TableCell>
-                  <TableCell>{row.vendor_name}</TableCell>
-                  <TableCell>{row.contact_person}</TableCell>
-                  <TableCell>{row.mobile}</TableCell>
-                  <TableCell>{row.email}</TableCell>
-                  <TableCell>{renderStatusChip(row.status)}</TableCell>
+                  <TableCell>{row.country_code}</TableCell>
+                  <TableCell>{row.city_code}</TableCell>
+                  <TableCell>{row.name}</TableCell>
+                  <TableCell>{row.is_active ? t("common.active") : t("common.inactive")}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                     <Stack direction="row" spacing={0.5} justifyContent="flex-end">
-                      <IconButton
-                        size="small"
-                        onClick={() =>
-                          navigate(
-                            isTrash
-                              ? `/app/inventory/vendor-master/${row.uuid}?is_deleted=true`
-                              : `/app/inventory/vendor-master/${row.uuid}`,
-                          )
-                        }
-                      >
-                        <VisibilityIcon fontSize="small" />
-                      </IconButton>
                       {!isTrash && (
                         <>
-                          <IconButton size="small" onClick={() => navigate(`/app/inventory/vendor-master/${row.uuid}/edit`)}>
+                          <IconButton size="small" onClick={() => navigate(`/app/settings/state-province-master/${row.uuid}/edit`)}>
                             <EditIcon fontSize="small" />
                           </IconButton>
                           <IconButton size="small" color="error" onClick={() => setActionUuid(row.uuid)}>

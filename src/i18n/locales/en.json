@@ -250,7 +250,7 @@
     "packages.pricing": "Package Pricing",
     "packages.services": "Package Services",
     "inventory.ziyarat": "Ziyarat",
-    "inventory.vendor_master": "Vendor Master",
+    "inventory.vendor_master": "Supplier / Vendor Master",
     "settings.branch_master": "Branch Master",
     "settings.document_type_master": "Document Type Master",
     "settings.terms_conditions_master": "Terms & Conditions Master",
@@ -258,7 +258,9 @@
     "settings.exchange_rate_master": "Exchange Rate Master",
     "settings.currency_rate_policy": "Currency Rate Policy",
     "settings.tax_registration": "Tax Registration",
-    "settings.localization_profile": "Localization Profiles"
+    "settings.localization_profile": "Localization Profiles",
+    "settings.location_master": "Location Master",
+    "settings.state_province_master": "State / Province Master"
   },
   "enquiry": {
     "notLinkedToCustomer": "Not linked to a customer record yet",
@@ -566,11 +568,13 @@
     "currentPasswordRequired": "Current password is required",
     "nameRequired": "Name is required",
     "codeRequired": "Code is required",
+    "codeAlreadyExists": "This code already exists",
     "priorityRequired": "Priority is required",
     "statusRequired": "Status is required",
     "endDateBeforeStartDate": "End date cannot be earlier than start date",
     "roleRequired": "Please select a Role",
     "branchRequired": "Please select a Branch",
+    "countryRequired": "Please select a Country",
     "endTimeBeforeStartTime": "End time cannot be earlier than start time"
   },
   "auth": {
@@ -800,11 +804,23 @@
     },
     "taxConfigurationHelp": "Optional — a Flight line linked to this airline resolves its tax treatment from here. Leave unset until you're ready to configure it; unconfigured lines are blocked at quotation save time, not here."
   },
+  "location": {
+    "title": "Location Details",
+    "stateProvince": "State / Province",
+    "addStateProvince": "Add State / Province",
+    "remarks": "Remarks",
+    "colCode": "Code",
+    "colName": "Name",
+    "colCountry": "Country",
+    "colStateProvince": "State / Province"
+  },
   "vendor": {
-    "title": "Vendor Details",
+    "sectionBasic": "Basic Information",
+    "sectionContact": "Contact Information",
+    "sectionTax": "Tax / Registration",
+    "sectionAdditional": "Additional Information",
     "code": "Vendor Code",
     "name": "Vendor Name",
-    "type": "Vendor Type",
     "contactPerson": "Contact Person",
     "mobile": "Mobile",
     "email": "Email",
@@ -813,19 +829,25 @@
     "pan": "PAN",
     "address": "Address",
     "city": "City",
-    "state": "State",
-    "country": "Country",
     "pincode": "Pincode",
-    "paymentTerms": "Payment Terms",
+    "paymentTermsDefault": "Default Payment Terms",
+    "paymentTermsHelper": "Default preference only — actual commercial terms are set per Vendor Contract.",
     "remarks": "Remarks",
     "status": "Status",
+    "statusHelper": "Blacklisted / On Hold flag a supplier for compliance review. Use the Active toggle for routine show/hide.",
     "colCode": "Vendor Code",
     "colName": "Vendor Name",
-    "colType": "Type",
     "colContactPerson": "Contact Person",
     "colMobile": "Mobile",
-    "colCity": "City",
-    "colStatus": "Status"
+    "colEmail": "Email",
+    "colStatus": "Status",
+    "documents": {
+      "Registration Certificate": "Registration Certificate",
+      "GST Certificate": "GST Certificate",
+      "PAN Document": "PAN Document",
+      "Agreement": "Agreement",
+      "Other": "Other"
+    }
   },
   "vendorContract": {
     "title": "Contract Details",

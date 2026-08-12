@@ -1,34 +1,28 @@
-// src/features/inventory/vendor/pages/VendorListPage.tsx
+// src/features/settings/location/pages/LocationListPage.tsx
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Box, Paper, Collapse } from "@mui/material";
+import { Box, Paper, Collapse, Grid } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
 import AddIcon from "@mui/icons-material/Add";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import ListAltIcon from "@mui/icons-material/ListAlt";
-import DownloadIcon from "@mui/icons-material/Download";
-import UploadIcon from "@mui/icons-material/Upload";
 
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { SearchInput } from "../../../../components/ui/SearchInput";
 import ListPageToolbar from "../../../../components/common/ListPageToolbar";
-import ImportResultDialog from "../../../../components/common/ImportResultDialog";
-import VendorTable from "../components/VendorTable";
-import VendorFilters, {
-  type VendorFilterValues,
-} from "../components/VendorFilters";
+import EntityAutocomplete from "../../../../components/common/EntityAutocomplete";
+import LocationTable from "../components/LocationTable";
 
 import { usePermission } from "../../../../hooks/usePermission";
-import { useCsvImport } from "../../../../hooks/useCsvImport";
-import { getVendors, importVendorsFromCsv } from "../vendor.api";
-import type { VendorListItem } from "../vendor.types";
+import { getLocations } from "../location.api";
+import type { LocationListItem } from "../location.types";
 
-export default function VendorListPage() {
+export default function LocationListPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const perms = usePermission("inventory.vendor_master");
+  const perms = usePermission("settings.location_master");
   const [searchParams, setSearchParams] = useSearchParams();
 
   /* ---------- UI ---------- */
@@ -48,35 +42,23 @@ export default function VendorListPage() {
   };
 
   /* ---------- APPLIED FILTERS (FROM URL) ---------- */
-  const appliedFilters: VendorFilterValues = {
-    search: searchParams.get("search") || "",
-    country_code: searchParams.get("country_code") || "",
-    status: searchParams.get("status") || "",
-    from_date: searchParams.get("from_date") || "",
-    to_date: searchParams.get("to_date") || "",
-  };
+  const appliedSearch = searchParams.get("search") || "";
+  const appliedCountryCode = searchParams.get("country_code") || "";
 
   /* ---------- DRAFT FILTERS (UI ONLY) ---------- */
-  const [draftFilters, setDraftFilters] =
-    useState<VendorFilterValues>(appliedFilters);
+  const [draftSearch, setDraftSearch] = useState(appliedSearch);
+  const [draftCountryCode, setDraftCountryCode] = useState(appliedCountryCode);
 
   const applyWildSearch = () => {
-    updateURL({
-      search: draftFilters.search,
-      page: 1,
-    });
+    updateURL({ search: draftSearch, page: 1 });
   };
 
   const clearWildSearch = () => {
-    setDraftFilters((prev) => ({ ...prev, search: "" }));
-
-    updateURL({
-      search: undefined,
-      page: 1,
-    });
+    setDraftSearch("");
+    updateURL({ search: undefined, page: 1 });
   };
 
-  const [rows, setRows] = useState<VendorListItem[]>([]);
+  const [rows, setRows] = useState<LocationListItem[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
 
@@ -84,14 +66,15 @@ export default function VendorListPage() {
     try {
       setLoading(true);
 
-      const res = await getVendors(
+      const res = await getLocations(
         {
           page,
           page_size: pageSize,
           is_deleted: isTrash,
           sort_by: sortBy,
           sort_order: sortOrder,
-          ...appliedFilters,
+          search: appliedSearch,
+          country_code: appliedCountryCode,
         },
         signal,
       );
@@ -111,27 +94,6 @@ export default function VendorListPage() {
     return () => controller.abort();
   }, [searchParams]);
 
-  /* ---------- EXPORT ---------- */
-  const handleExport = (format: "csv" | "excel" | "pdf") => {
-    const params = new URLSearchParams(location.search);
-    params.set("format", format);
-
-    window.open(
-      `${import.meta.env.VITE_API_BASE_URL}/api/v1/vendors/export?${params}`,
-      "_blank",
-    );
-  };
-
-  /* ---------- IMPORT ---------- */
-  const {
-    fileInputRef,
-    result: importResult,
-    dialogOpen: importDialogOpen,
-    closeDialog: closeImportDialog,
-    openFilePicker,
-    onFileInputChange,
-  } = useCsvImport(importVendorsFromCsv, fetchData);
-
   const updateURL = (params: Record<string, any>) => {
     const next = new URLSearchParams(searchParams);
 
@@ -146,16 +108,16 @@ export default function VendorListPage() {
   return (
     <Box sx={{ p: { xs: 1, md: 1 } }}>
       <ListPageToolbar
-        title={isTrash ? t("common.trash") : t("menu.inventory.vendor_master")}
+        title={isTrash ? t("common.trash") : t("menu.settings.location_master")}
         breadcrumbs={[
           { label: t("menu.dashboard"), href: "/app/dashboard" },
-          { label: isTrash ? t("common.trash") : t("menu.inventory.vendor_master") },
+          { label: isTrash ? t("common.trash") : t("menu.settings.location_master") },
         ]}
         primaryAction={
           isTrash
             ? {
                 key: "view",
-                label: t("menu.inventory.vendor_master"),
+                label: t("menu.settings.location_master"),
                 icon: <ListAltIcon />,
                 variant: "contained",
                 onClick: () => updateURL({ is_deleted: undefined, page: 1 }),
@@ -166,7 +128,7 @@ export default function VendorListPage() {
                 icon: <AddIcon />,
                 variant: "contained",
                 show: perms.can_create,
-                onClick: () => navigate("/app/inventory/vendor-master/create"),
+                onClick: () => navigate("/app/settings/location-master/create"),
               }
         }
         secondaryActions={[
@@ -185,63 +147,38 @@ export default function VendorListPage() {
             show: perms.can_delete && !isTrash,
             onClick: () => updateURL({ is_deleted: true, page: 1 }),
           },
-          {
-            key: "export",
-            label: t("common.export"),
-            icon: <DownloadIcon />,
-            show: perms.can_export && !isTrash,
-            menuItems: [
-              { label: t("common.exportCsv"), onClick: () => handleExport("csv") },
-              { label: t("common.exportExcel"), onClick: () => handleExport("excel") },
-              { label: t("common.exportPdf"), onClick: () => handleExport("pdf") },
-            ],
-          },
-          {
-            key: "import",
-            label: t("common.importCsv"),
-            icon: <UploadIcon />,
-            show: perms.can_import && !isTrash,
-            onClick: openFilePicker,
-          },
         ]}
       />
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".csv"
-        hidden
-        onChange={onFileInputChange}
-      />
-      <ImportResultDialog open={importDialogOpen} result={importResult} onClose={closeImportDialog} />
-
       <Paper sx={{ p: 2 }}>
         <Collapse in={showFilters}>
-          <VendorFilters
-            value={draftFilters}
-            onChange={(v) => setDraftFilters((prev) => ({ ...prev, ...v }))}
-            onApply={() => {
-              updateURL({ ...draftFilters, page: 1 });
-            }}
-            onReset={() => {
-              setDraftFilters({});
-              setSearchParams({ page: "1", page_size: String(pageSize) });
-            }}
-          />
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <EntityAutocomplete
+                name="country_code"
+                label={t("common.country")}
+                dropdownName="country"
+                useForm={false}
+                value={draftCountryCode || null}
+                onChange={(v) => {
+                  setDraftCountryCode(v || "");
+                  updateURL({ country_code: v || undefined, page: 1 });
+                }}
+              />
+            </Grid>
+          </Grid>
         </Collapse>
 
         <SearchInput
           placeholder={t("common.searchByCodeName")}
-          value={draftFilters.search || ""}
-          onChange={(e) =>
-            setDraftFilters({ ...draftFilters, search: e.target.value })
-          }
+          value={draftSearch}
+          onChange={(e) => setDraftSearch(e.target.value)}
           onSearch={applyWildSearch}
           onClear={clearWildSearch}
           sx={{ mb: 2 }}
         />
 
-        <VendorTable
+        <LocationTable
           rows={rows}
           loading={loading}
           page={page}

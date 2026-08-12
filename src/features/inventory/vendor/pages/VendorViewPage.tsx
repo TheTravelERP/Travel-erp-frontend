@@ -12,6 +12,7 @@ import { getVendorByUuid } from "../vendor.api";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { usePermission } from "../../../../hooks/usePermission";
 import FormPageLayout from "../../../../components/forms/FormPageLayout";
+import VendorDocumentsPanel from "../components/VendorDocumentsPanel";
 
 import type { VendorDetail } from "../vendor.types";
 
@@ -75,7 +76,7 @@ export default function VendorViewPage() {
     >
         <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
           <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-            {t("vendor.title")}
+            {t("vendor.sectionBasic")}
           </Typography>
 
           <Grid container spacing={3}>
@@ -87,53 +88,6 @@ export default function VendorViewPage() {
             <Grid size={{ xs: 12, md: 4 }}>
               <Typography variant="caption">{t("vendor.name")}</Typography>
               <Typography mt={0.5}>{vendor.vendor_name}</Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="caption">{t("vendor.contactPerson")}</Typography>
-              <Typography mt={0.5}>{vendor.contact_person || "-"}</Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="caption">{t("vendor.mobile")}</Typography>
-              <Typography mt={0.5}>{vendor.mobile || "-"}</Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="caption">{t("vendor.email")}</Typography>
-              <Typography mt={0.5}>{vendor.email || "-"}</Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="caption">{t("vendor.website")}</Typography>
-              <Typography mt={0.5}>{vendor.website || "-"}</Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 3 }}>
-              <Typography variant="caption">{t("vendor.city")}</Typography>
-              <Typography mt={0.5}>{vendor.city || "-"}</Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 3 }}>
-              <Typography variant="caption">{t("vendor.state")}</Typography>
-              <Typography mt={0.5}>{vendor.state || "-"}</Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 3 }}>
-              <Typography variant="caption">{t("vendor.country")}</Typography>
-              <Typography mt={0.5}>{vendor.country || "-"}</Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 3 }}>
-              <Typography variant="caption">{t("vendor.pincode")}</Typography>
-              <Typography mt={0.5}>{vendor.pincode || "-"}</Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <Typography variant="caption">{t("vendor.address")}</Typography>
-              <Typography mt={0.5} whiteSpace="pre-wrap">
-                {vendor.address || "-"}
-              </Typography>
             </Grid>
 
             <Grid size={{ xs: 12, md: 4 }}>
@@ -157,39 +111,116 @@ export default function VendorViewPage() {
 
         <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
           <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-            Business Details
+            {t("vendor.sectionContact")}
           </Typography>
 
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="caption">{t("vendor.type")}</Typography>
-              <Typography mt={0.5}>{vendor.vendor_type || "-"}</Typography>
+              <Typography variant="caption">{t("vendor.contactPerson")}</Typography>
+              <Typography mt={0.5}>{vendor.contact_person || "-"}</Typography>
             </Grid>
 
             <Grid size={{ xs: 12, md: 4 }}>
+              <Typography variant="caption">{t("vendor.mobile")}</Typography>
+              <Typography mt={0.5}>{vendor.mobile || "-"}</Typography>
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Typography variant="caption">{t("vendor.email")}</Typography>
+              <Typography mt={0.5}>{vendor.email || "-"}</Typography>
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Typography variant="caption">{t("vendor.website")}</Typography>
+              <Typography mt={0.5}>{vendor.website || "-"}</Typography>
+            </Grid>
+          </Grid>
+        </Paper>
+
+        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+          <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
+            {t("common.address")}
+          </Typography>
+
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12 }}>
+              <Typography variant="caption">{t("vendor.address")}</Typography>
+              <Typography mt={0.5} whiteSpace="pre-wrap">
+                {vendor.address || "-"}
+              </Typography>
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 3 }}>
+              <Typography variant="caption">{t("common.country")}</Typography>
+              <Typography mt={0.5}>{vendor.country_name || "-"}</Typography>
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 3 }}>
+              <Typography variant="caption">{t("location.stateProvince")}</Typography>
+              <Typography mt={0.5}>{vendor.state_province_name || "-"}</Typography>
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 3 }}>
+              <Typography variant="caption">{t("vendor.city")}</Typography>
+              <Typography mt={0.5}>{vendor.city || "-"}</Typography>
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 3 }}>
+              <Typography variant="caption">{t("vendor.pincode")}</Typography>
+              <Typography mt={0.5}>{vendor.pincode || "-"}</Typography>
+            </Grid>
+          </Grid>
+        </Paper>
+
+        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+          <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
+            {t("vendor.sectionTax")}
+          </Typography>
+
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Typography variant="caption">{t("vendor.gstin")}</Typography>
               <Typography mt={0.5}>{vendor.gstin || "-"}</Typography>
             </Grid>
 
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Typography variant="caption">{t("vendor.pan")}</Typography>
               <Typography mt={0.5}>{vendor.pan || "-"}</Typography>
             </Grid>
+          </Grid>
+        </Paper>
 
+        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+          <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
+            {t("vendor.sectionAdditional")}
+          </Typography>
+
+          <Grid container spacing={3}>
             <Grid size={{ xs: 12 }}>
-              <Typography variant="caption">{t("vendor.paymentTerms")}</Typography>
+              <Typography variant="caption">{t("vendor.paymentTermsDefault")}</Typography>
               <Typography mt={0.5} whiteSpace="pre-wrap">
                 {vendor.payment_terms || "-"}
+              </Typography>
+            </Grid>
+
+            <Grid size={{ xs: 12 }}>
+              <Typography variant="caption">{t("vendor.remarks")}</Typography>
+              <Typography mt={0.5} whiteSpace="pre-wrap">
+                {vendor.remarks || "-"}
               </Typography>
             </Grid>
           </Grid>
         </Paper>
 
-        <Paper variant="outlined" sx={{ p: 2 }}>
-          <Typography variant="caption">{t("vendor.remarks")}</Typography>
-          <Typography mt={0.5} whiteSpace="pre-wrap">
-            {vendor.remarks || "-"}
+        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+          <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
+            {t("common.attachments")}
           </Typography>
+
+          <VendorDocumentsPanel
+            vendorUuid={vendor.uuid}
+            canEdit={perms.can_edit && !isTrash}
+          />
         </Paper>
 
         <Divider sx={{ my: 3 }} />

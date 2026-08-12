@@ -13,6 +13,7 @@ import type { NotificationTemplateFormInput } from "../notificationTemplate.type
 import DropdownAutocomplete from "../../../../components/common/DropdownAutocomplete";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
+import { useCodeUniquenessCheck } from "../../../../hooks/useCodeUniquenessCheck";
 import FormSection from "../../../../components/forms/FormSection";
 import FormActions from "../../../../components/forms/FormActions";
 import RichTextEditor, { type RichTextEditorHandle } from "./RichTextEditor";
@@ -20,7 +21,7 @@ import PlaceholderHelperPanel from "./PlaceholderHelperPanel";
 import TemplatePreviewDialog from "./TemplatePreviewDialog";
 
 interface Props {
-  defaultValues?: Partial<NotificationTemplateFormInput>;
+  defaultValues?: Partial<NotificationTemplateFormInput> & { uuid?: string };
   onSubmit: (data: NotificationTemplateFormInput) => Promise<void>;
   loading?: boolean;
 }
@@ -68,10 +69,21 @@ export default function NotificationTemplateForm({ defaultValues, onSubmit, load
     reset,
     setValue,
     getValues,
+    setError,
+    clearErrors,
     formState: { isSubmitting },
   } = useForm<NotificationTemplateFormInput>({
     resolver: zodResolver(schema) as any,
     defaultValues: mergeFormDefaults(emptyValues, defaultValues),
+  });
+
+  const { onCodeBlur } = useCodeUniquenessCheck<NotificationTemplateFormInput>({
+    entity: "notification_template",
+    fieldName: "template_code",
+    excludeUuid: defaultValues?.uuid,
+    setError,
+    clearErrors,
+    message: t("validation.codeAlreadyExists"),
   });
 
   const channel = useWatch({ control, name: "channel" });
@@ -108,12 +120,16 @@ export default function NotificationTemplateForm({ defaultValues, onSubmit, load
         <FormSection title={t("notificationTemplate.title")}>
           <Grid size={{ xs: 12, sm: 4 }}>
             <Controller
-              name="template_name"
+              name="template_code"
               control={control}
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
-                  label={t("notificationTemplate.templateName")}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    onCodeBlur(e.target.value);
+                  }}
+                  label={t("notificationTemplate.templateCode")}
                   fullWidth
                   required
                   error={!!fieldState.error}
@@ -124,12 +140,12 @@ export default function NotificationTemplateForm({ defaultValues, onSubmit, load
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
             <Controller
-              name="template_code"
+              name="template_name"
               control={control}
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
-                  label={t("notificationTemplate.templateCode")}
+                  label={t("notificationTemplate.templateName")}
                   fullWidth
                   required
                   error={!!fieldState.error}

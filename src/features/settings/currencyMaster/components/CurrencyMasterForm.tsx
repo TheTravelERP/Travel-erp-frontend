@@ -17,11 +17,12 @@ import { getCurrencyMasterSchema } from "../currencyMaster.schema";
 import type { CurrencyMasterFormInput } from "../currencyMaster.types";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
+import { useCodeUniquenessCheck } from "../../../../hooks/useCodeUniquenessCheck";
 import FormSection from "../../../../components/forms/FormSection";
 import FormActions from "../../../../components/forms/FormActions";
 
 interface CurrencyMasterFormProps {
-  defaultValues?: Partial<CurrencyMasterFormInput>;
+  defaultValues?: Partial<CurrencyMasterFormInput> & { uuid?: string };
   onSubmit: (data: CurrencyMasterFormInput) => Promise<void>;
   loading?: boolean;
 }
@@ -48,6 +49,8 @@ export default function CurrencyMasterForm({
     control,
     handleSubmit,
     reset,
+    setError,
+    clearErrors,
     formState: { isSubmitting },
   } = useForm<CurrencyMasterFormInput>({
     resolver: zodResolver(currencyMasterSchema),
@@ -59,6 +62,15 @@ export default function CurrencyMasterForm({
       reset(mergeFormDefaults(emptyValues, defaultValues));
     }
   }, [defaultValues, reset]);
+
+  const { onCodeBlur } = useCodeUniquenessCheck<CurrencyMasterFormInput>({
+    entity: "currency_master",
+    fieldName: "code",
+    excludeUuid: defaultValues?.uuid,
+    setError,
+    clearErrors,
+    message: t("validation.codeAlreadyExists"),
+  });
 
   return (
     <Box
@@ -78,6 +90,10 @@ export default function CurrencyMasterForm({
                 <TextField
                   {...field}
                   onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    onCodeBlur(e.target.value);
+                  }}
                   label={t("currencyMaster.code")}
                   fullWidth
                   required

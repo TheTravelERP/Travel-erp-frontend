@@ -8,6 +8,7 @@ export const useEntityDropdown = ({
   pageSize = 20,
   documentTypeCode,
   pkgUuid,
+  countryCode,
   initialSearch,
 }: {
   dropdownName: string;
@@ -19,6 +20,10 @@ export const useEntityDropdown = ({
   /** Scopes the dropdown's rows to a specific Package — only applies to
    *  entities that carry a pkg_id FK (e.g. Departures), a no-op otherwise. */
   pkgUuid?: string | null;
+  /** Scopes the dropdown's rows to a specific Country (e.g. the Location
+   *  form's State/Province picker) — only applies to entities that carry a
+   *  country_code column, a no-op otherwise. */
+  countryCode?: string | null;
   /** Seeds the very first fetch with a search term (e.g. an Enquiry's
    *  customer-name snapshot) instead of the default empty/general listing.
    *  Only affects the initial state — omitted by every existing caller. */
@@ -54,6 +59,7 @@ export const useEntityDropdown = ({
           page_size: pageSize,
           document_type_code: documentTypeCode,
           pkg_uuid: pkgUuid ?? undefined,
+          country_code: countryCode ?? undefined,
         },
         signal,
       );
@@ -85,13 +91,31 @@ export const useEntityDropdown = ({
     }
   };
 
+  // Tracks the previous scoping key so a genuine scope change (e.g. the
+  // Location form's Country switching from India to Saudi Arabia) can be
+  // told apart from a plain search refetch, below.
+  const scopeKey = `${documentTypeCode ?? ""}|${pkgUuid ?? ""}|${countryCode ?? ""}`;
+  const prevScopeKeyRef = useRef(scopeKey);
+
   useEffect(() => {
     const controller = new AbortController();
+
+    // A resolved value only means "known-valid" within the scope it was
+    // resolved under. If the scope itself just changed, forget every prior
+    // resolution — otherwise the "preserve already-resolved entries" branch
+    // in fetchData (needed for the Edit-mode pre-fill race, see above) would
+    // keep leaking an old scope's option (e.g. Delhi) into the new scope's
+    // list (e.g. Saudi Arabia cities) even after it's no longer selected.
+    if (prevScopeKeyRef.current !== scopeKey) {
+      resolvedValuesRef.current.clear();
+      prevScopeKeyRef.current = scopeKey;
+    }
+
     setPage(1);
     fetchData(search, 1, true, controller.signal);
     return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, documentTypeCode, pkgUuid]);
+  }, [search, documentTypeCode, pkgUuid, countryCode]);
 
   const loadMore = () => {
     if (!hasMore || loading) return;

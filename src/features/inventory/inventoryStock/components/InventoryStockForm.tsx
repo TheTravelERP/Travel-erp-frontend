@@ -13,11 +13,12 @@ import EntityAutocomplete from "../../../../components/common/EntityAutocomplete
 import DropdownAutocomplete from "../../../../components/common/DropdownAutocomplete";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
+import { useCodeUniquenessCheck } from "../../../../hooks/useCodeUniquenessCheck";
 import FormSection from "../../../../components/forms/FormSection";
 import FormActions from "../../../../components/forms/FormActions";
 
 interface InventoryStockFormProps {
-  defaultValues?: Partial<InventoryStockFormInput>;
+  defaultValues?: Partial<InventoryStockFormInput> & { uuid?: string };
   onSubmit: (data: InventoryStockFormInput) => Promise<void>;
   loading?: boolean;
 }
@@ -78,6 +79,8 @@ export default function InventoryStockForm({
     reset,
     watch,
     setValue,
+    setError,
+    clearErrors,
     formState: { isSubmitting },
   } = useForm<InventoryStockFormInput>({
     resolver: zodResolver(inventoryStockSchema),
@@ -89,6 +92,15 @@ export default function InventoryStockForm({
       reset(mergeFormDefaults(emptyValues, defaultValues));
     }
   }, [defaultValues, reset]);
+
+  const { onCodeBlur } = useCodeUniquenessCheck<InventoryStockFormInput>({
+    entity: "inventory_stock",
+    fieldName: "inventory_code",
+    excludeUuid: defaultValues?.uuid,
+    setError,
+    clearErrors,
+    message: t("validation.codeAlreadyExists"),
+  });
 
   const serviceType = watch("service_type");
   const activeReference = serviceType ? SERVICE_REFERENCE_MAP[serviceType] : undefined;
@@ -110,15 +122,6 @@ export default function InventoryStockForm({
     >
       <Grid container spacing={2}>
         <FormSection title={t("common.generalInfo")}>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <EntityAutocomplete
-              name="contract_uuid"
-              label={t("inventoryStock.contract")}
-              control={control}
-              dropdownName="vendor_contracts"
-            />
-          </Grid>
-
           <Grid size={{ xs: 12, sm: 3 }}>
             <Controller
               name="inventory_code"
@@ -126,7 +129,28 @@ export default function InventoryStockForm({
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    onCodeBlur(e.target.value);
+                  }}
                   label={t("inventoryStock.code")}
+                  fullWidth
+                  required
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                />
+              )}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Controller
+              name="inventory_name"
+              control={control}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  label={t("inventoryStock.name")}
                   fullWidth
                   required
                   error={!!fieldState.error}
@@ -155,19 +179,11 @@ export default function InventoryStockForm({
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <Controller
-              name="inventory_name"
+            <EntityAutocomplete
+              name="contract_uuid"
+              label={t("inventoryStock.contract")}
               control={control}
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  label={t("inventoryStock.name")}
-                  fullWidth
-                  required
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                />
-              )}
+              dropdownName="vendor_contracts"
             />
           </Grid>
 

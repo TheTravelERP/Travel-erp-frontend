@@ -1,4 +1,4 @@
-// src/features/settings/termsCondition/components/TermsConditionForm.tsx
+// src/features/settings/stateProvinceMaster/components/StateProvinceForm.tsx
 
 import {
   Box,
@@ -13,8 +13,8 @@ import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 
-import { getTermsConditionSchema } from "../termsCondition.schema";
-import type { TermsConditionFormInput } from "../termsCondition.types";
+import { getStateProvinceSchema } from "../stateProvince.schema";
+import type { StateProvinceFormInput } from "../stateProvince.types";
 import EntityAutocomplete from "../../../../components/common/EntityAutocomplete";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
@@ -22,41 +22,39 @@ import { useCodeUniquenessCheck } from "../../../../hooks/useCodeUniquenessCheck
 import FormSection from "../../../../components/forms/FormSection";
 import FormActions from "../../../../components/forms/FormActions";
 
-interface TermsConditionFormProps {
-  defaultValues?: Partial<TermsConditionFormInput> & { uuid?: string };
-  onSubmit: (data: TermsConditionFormInput) => Promise<void>;
+interface StateProvinceFormProps {
+  defaultValues?: Partial<StateProvinceFormInput> & { uuid?: string };
+  onSubmit: (data: StateProvinceFormInput) => Promise<void>;
   loading?: boolean;
 }
 
-const emptyValues: TermsConditionFormInput = {
-  code: "",
-  title: "",
-  document_type_uuid: "",
-  terms_text: "",
-  is_default: false,
-  remarks: "",
+const emptyValues: StateProvinceFormInput = {
+  country_code: "",
+  city_code: "",
+  name: "",
   is_active: true,
 };
 
-export default function TermsConditionForm({
+export default function StateProvinceForm({
   defaultValues,
   onSubmit,
   loading = false,
-}: TermsConditionFormProps) {
+}: StateProvinceFormProps) {
   const { t } = useTranslation();
   const { showSnackbar } = useSnackbar();
   const navigate = useNavigate();
-  const termsConditionSchema = useMemo(() => getTermsConditionSchema(t), [t]);
+  const stateProvinceSchema = useMemo(() => getStateProvinceSchema(t), [t]);
 
   const {
     control,
     handleSubmit,
     reset,
+    watch,
     setError,
     clearErrors,
     formState: { isSubmitting },
-  } = useForm<TermsConditionFormInput>({
-    resolver: zodResolver(termsConditionSchema),
+  } = useForm<StateProvinceFormInput>({
+    resolver: zodResolver(stateProvinceSchema),
     defaultValues: mergeFormDefaults(emptyValues, defaultValues),
   });
 
@@ -66,12 +64,15 @@ export default function TermsConditionForm({
     }
   }, [defaultValues, reset]);
 
-  // Code is optional here (terms_condition_service.py's _assert_unique_code
-  // early-returns on a falsy code) — onCodeBlur already no-ops on an empty
-  // value, so this stays consistent with that.
-  const { onCodeBlur } = useCodeUniquenessCheck<TermsConditionFormInput>({
-    entity: "terms_condition",
-    fieldName: "code",
+  const countryCode = watch("country_code");
+
+  // Code is unique per-Country (composite scope, see city_master's
+  // uq_country_city_code constraint) — the on-blur check needs the
+  // currently-selected Country to check meaningfully.
+  const { onCodeBlur } = useCodeUniquenessCheck<StateProvinceFormInput>({
+    entity: "city_master",
+    fieldName: "city_code",
+    extraScopeValue: countryCode,
     excludeUuid: defaultValues?.uuid,
     setError,
     clearErrors,
@@ -87,20 +88,32 @@ export default function TermsConditionForm({
       noValidate
     >
       <Grid container spacing={2}>
-        <FormSection title={t("termsConditions.title")}>
-          <Grid size={{ xs: 12, sm: 4 }}>
+        <FormSection title={t("menu.settings.state_province_master")}>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <EntityAutocomplete
+              name="country_code"
+              label={t("common.country")}
+              control={control}
+              dropdownName="country"
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6 }}>
             <Controller
-              name="code"
+              name="city_code"
               control={control}
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                   onBlur={(e) => {
                     field.onBlur();
                     onCodeBlur(e.target.value);
                   }}
-                  label={t("termsConditions.code")}
+                  label={t("common.code")}
                   fullWidth
+                  required
+                  inputProps={{ maxLength: 10, style: { textTransform: "uppercase" } }}
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
                 />
@@ -110,12 +123,12 @@ export default function TermsConditionForm({
 
           <Grid size={{ xs: 12, sm: 8 }}>
             <Controller
-              name="title"
+              name="name"
               control={control}
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
-                  label={t("termsConditions.titleField")}
+                  label={t("common.name")}
                   fullWidth
                   required
                   error={!!fieldState.error}
@@ -125,29 +138,7 @@ export default function TermsConditionForm({
             />
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <EntityAutocomplete
-              name="document_type_uuid"
-              label={t("termsConditions.documentType")}
-              control={control}
-              dropdownName="document_type"
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 3 }} sx={{ display: "flex", alignItems: "center" }}>
-            <Controller
-              name="is_default"
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={<Switch checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} />}
-                  label={t("termsConditions.isDefault")}
-                />
-              )}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 3 }} sx={{ display: "flex", alignItems: "center" }}>
+          <Grid size={{ xs: 12, sm: 4 }} sx={{ display: "flex", alignItems: "center" }}>
             <Controller
               name="is_active"
               control={control}
@@ -159,39 +150,10 @@ export default function TermsConditionForm({
               )}
             />
           </Grid>
-
-          <Grid size={{ xs: 12 }}>
-            <Controller
-              name="terms_text"
-              control={control}
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  label={t("termsConditions.termsText")}
-                  fullWidth
-                  required
-                  multiline
-                  rows={8}
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                />
-              )}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12 }}>
-            <Controller
-              name="remarks"
-              control={control}
-              render={({ field }) => (
-                <TextField {...field} label={t("termsConditions.remarks")} fullWidth multiline rows={2} />
-              )}
-            />
-          </Grid>
         </FormSection>
 
         <FormActions
-          onBack={() => navigate("/app/settings/terms-conditions-master")}
+          onBack={() => navigate("/app/settings/state-province-master")}
           onDiscard={() => reset()}
           submitting={isSubmitting || loading}
         />

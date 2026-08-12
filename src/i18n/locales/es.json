@@ -250,7 +250,7 @@
     "packages.pricing": "Precios de paquetes",
     "packages.services": "Servicios del paquete",
     "inventory.ziyarat": "Ziyarat",
-    "inventory.vendor_master": "Proveedores",
+    "inventory.vendor_master": "Proveedores / Vendedores",
     "settings.branch_master": "Maestro de sucursales",
     "settings.document_type_master": "Maestro de tipos de documento",
     "settings.terms_conditions_master": "Maestro de términos y condiciones",
@@ -258,7 +258,9 @@
     "settings.exchange_rate_master": "Maestro de tipos de cambio",
     "settings.currency_rate_policy": "Política de tipo de cambio",
     "settings.tax_registration": "Registro fiscal",
-    "settings.localization_profile": "Perfiles de localización"
+    "settings.localization_profile": "Perfiles de localización",
+    "settings.location_master": "Maestro de ubicaciones",
+    "settings.state_province_master": "Maestro de Estados / Provincias"
   },
   "enquiry": {
     "notLinkedToCustomer": "Aún no vinculado a un registro de cliente",
@@ -566,11 +568,13 @@
     "currentPasswordRequired": "La contraseña actual es obligatoria",
     "nameRequired": "El nombre es obligatorio",
     "codeRequired": "El código es obligatorio",
+    "codeAlreadyExists": "Este código ya existe",
     "priorityRequired": "La prioridad es obligatoria",
     "statusRequired": "El estado es obligatorio",
     "endDateBeforeStartDate": "La fecha de fin no puede ser anterior a la fecha de inicio",
     "roleRequired": "Seleccione un rol",
     "branchRequired": "Seleccione una sucursal",
+    "countryRequired": "Seleccione un país",
     "endTimeBeforeStartTime": "La hora de fin no puede ser anterior a la hora de inicio"
   },
   "auth": {
@@ -800,11 +804,23 @@
     },
     "taxConfigurationHelp": "Opcional — una línea de Vuelo vinculada a esta aerolínea resuelve su tratamiento fiscal desde aquí. Déjelo sin definir hasta que esté listo para configurarlo; las líneas no configuradas se bloquean al guardar la cotización, no aquí."
   },
+  "location": {
+    "title": "Detalles de la ubicación",
+    "stateProvince": "Estado / Provincia",
+    "addStateProvince": "Agregar Estado / Provincia",
+    "remarks": "Observaciones",
+    "colCode": "Código",
+    "colName": "Nombre",
+    "colCountry": "País",
+    "colStateProvince": "Estado / Provincia"
+  },
   "vendor": {
-    "title": "Detalles del proveedor",
+    "sectionBasic": "Información básica",
+    "sectionContact": "Información de contacto",
+    "sectionTax": "Impuestos / Registro",
+    "sectionAdditional": "Información adicional",
     "code": "Código de proveedor",
     "name": "Nombre del proveedor",
-    "type": "Tipo de proveedor",
     "contactPerson": "Persona de contacto",
     "mobile": "Móvil",
     "email": "Correo electrónico",
@@ -813,19 +829,25 @@
     "pan": "PAN",
     "address": "Dirección",
     "city": "Ciudad",
-    "state": "Estado / Región",
-    "country": "País",
     "pincode": "Código postal",
-    "paymentTerms": "Condiciones de pago",
+    "paymentTermsDefault": "Condiciones de pago predeterminadas",
+    "paymentTermsHelper": "Solo una preferencia predeterminada — las condiciones comerciales reales se definen por contrato de proveedor.",
     "remarks": "Observaciones",
     "status": "Estado",
+    "statusHelper": "Lista negra / En espera marca al proveedor para revisión de cumplimiento. Use el interruptor Activo de arriba para la visibilidad habitual.",
     "colCode": "Código de proveedor",
     "colName": "Nombre del proveedor",
-    "colType": "Tipo",
     "colContactPerson": "Persona de contacto",
     "colMobile": "Móvil",
-    "colCity": "Ciudad",
-    "colStatus": "Estado"
+    "colEmail": "Correo electrónico",
+    "colStatus": "Estado",
+    "documents": {
+      "Registration Certificate": "Certificado de registro",
+      "GST Certificate": "Certificado GST",
+      "PAN Document": "Documento PAN",
+      "Agreement": "Acuerdo",
+      "Other": "Otro"
+    }
   },
   "vendorContract": {
     "title": "Detalles del contrato",

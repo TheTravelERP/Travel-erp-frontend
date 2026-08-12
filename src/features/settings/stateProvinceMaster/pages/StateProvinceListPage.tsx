@@ -1,4 +1,4 @@
-// src/features/inventory/vendor/pages/VendorListPage.tsx
+// src/features/settings/stateProvinceMaster/pages/StateProvinceListPage.tsx
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Box, Paper, Collapse } from "@mui/material";
@@ -15,23 +15,22 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { SearchInput } from "../../../../components/ui/SearchInput";
 import ListPageToolbar from "../../../../components/common/ListPageToolbar";
 import ImportResultDialog from "../../../../components/common/ImportResultDialog";
-import VendorTable from "../components/VendorTable";
-import VendorFilters, {
-  type VendorFilterValues,
-} from "../components/VendorFilters";
+import StateProvinceTable from "../components/StateProvinceTable";
+import StateProvinceFilters, {
+  type StateProvinceFilterValues,
+} from "../components/StateProvinceFilters";
 
 import { usePermission } from "../../../../hooks/usePermission";
 import { useCsvImport } from "../../../../hooks/useCsvImport";
-import { getVendors, importVendorsFromCsv } from "../vendor.api";
-import type { VendorListItem } from "../vendor.types";
+import { getStateProvinces, importStateProvincesFromCsv } from "../stateProvince.api";
+import type { StateProvinceListItem } from "../stateProvince.types";
 
-export default function VendorListPage() {
+export default function StateProvinceListPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const perms = usePermission("inventory.vendor_master");
+  const perms = usePermission("settings.state_province_master");
   const [searchParams, setSearchParams] = useSearchParams();
 
-  /* ---------- UI ---------- */
   const [showFilters, setShowFilters] = useState(false);
 
   const page = Number(searchParams.get("page") || 1);
@@ -48,35 +47,28 @@ export default function VendorListPage() {
   };
 
   /* ---------- APPLIED FILTERS (FROM URL) ---------- */
-  const appliedFilters: VendorFilterValues = {
+  const appliedFilters: StateProvinceFilterValues = {
     search: searchParams.get("search") || "",
-    country_code: searchParams.get("country_code") || "",
-    status: searchParams.get("status") || "",
     from_date: searchParams.get("from_date") || "",
     to_date: searchParams.get("to_date") || "",
+    is_active: searchParams.get("is_active") || "",
+    country_code: searchParams.get("country_code") || "",
   };
 
   /* ---------- DRAFT FILTERS (UI ONLY) ---------- */
   const [draftFilters, setDraftFilters] =
-    useState<VendorFilterValues>(appliedFilters);
+    useState<StateProvinceFilterValues>(appliedFilters);
 
   const applyWildSearch = () => {
-    updateURL({
-      search: draftFilters.search,
-      page: 1,
-    });
+    updateURL({ search: draftFilters.search, page: 1 });
   };
 
   const clearWildSearch = () => {
     setDraftFilters((prev) => ({ ...prev, search: "" }));
-
-    updateURL({
-      search: undefined,
-      page: 1,
-    });
+    updateURL({ search: undefined, page: 1 });
   };
 
-  const [rows, setRows] = useState<VendorListItem[]>([]);
+  const [rows, setRows] = useState<StateProvinceListItem[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
 
@@ -84,7 +76,7 @@ export default function VendorListPage() {
     try {
       setLoading(true);
 
-      const res = await getVendors(
+      const res = await getStateProvinces(
         {
           page,
           page_size: pageSize,
@@ -117,7 +109,7 @@ export default function VendorListPage() {
     params.set("format", format);
 
     window.open(
-      `${import.meta.env.VITE_API_BASE_URL}/api/v1/vendors/export?${params}`,
+      `${import.meta.env.VITE_API_BASE_URL}/api/v1/cities/export?${params}`,
       "_blank",
     );
   };
@@ -130,7 +122,7 @@ export default function VendorListPage() {
     closeDialog: closeImportDialog,
     openFilePicker,
     onFileInputChange,
-  } = useCsvImport(importVendorsFromCsv, fetchData);
+  } = useCsvImport(importStateProvincesFromCsv, fetchData);
 
   const updateURL = (params: Record<string, any>) => {
     const next = new URLSearchParams(searchParams);
@@ -146,16 +138,16 @@ export default function VendorListPage() {
   return (
     <Box sx={{ p: { xs: 1, md: 1 } }}>
       <ListPageToolbar
-        title={isTrash ? t("common.trash") : t("menu.inventory.vendor_master")}
+        title={isTrash ? t("common.trash") : t("menu.settings.state_province_master")}
         breadcrumbs={[
           { label: t("menu.dashboard"), href: "/app/dashboard" },
-          { label: isTrash ? t("common.trash") : t("menu.inventory.vendor_master") },
+          { label: isTrash ? t("common.trash") : t("menu.settings.state_province_master") },
         ]}
         primaryAction={
           isTrash
             ? {
                 key: "view",
-                label: t("menu.inventory.vendor_master"),
+                label: t("menu.settings.state_province_master"),
                 icon: <ListAltIcon />,
                 variant: "contained",
                 onClick: () => updateURL({ is_deleted: undefined, page: 1 }),
@@ -166,7 +158,7 @@ export default function VendorListPage() {
                 icon: <AddIcon />,
                 variant: "contained",
                 show: perms.can_create,
-                onClick: () => navigate("/app/inventory/vendor-master/create"),
+                onClick: () => navigate("/app/settings/state-province-master/create"),
               }
         }
         secondaryActions={[
@@ -217,7 +209,7 @@ export default function VendorListPage() {
 
       <Paper sx={{ p: 2 }}>
         <Collapse in={showFilters}>
-          <VendorFilters
+          <StateProvinceFilters
             value={draftFilters}
             onChange={(v) => setDraftFilters((prev) => ({ ...prev, ...v }))}
             onApply={() => {
@@ -241,7 +233,7 @@ export default function VendorListPage() {
           sx={{ mb: 2 }}
         />
 
-        <VendorTable
+        <StateProvinceTable
           rows={rows}
           loading={loading}
           page={page}

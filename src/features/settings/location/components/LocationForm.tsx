@@ -1,4 +1,4 @@
-// src/features/settings/termsCondition/components/TermsConditionForm.tsx
+// src/features/settings/location/components/LocationForm.tsx
 
 import {
   Box,
@@ -8,55 +8,57 @@ import {
   TextField,
 } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 
-import { getTermsConditionSchema } from "../termsCondition.schema";
-import type { TermsConditionFormInput } from "../termsCondition.types";
+import { getLocationSchema } from "../location.schema";
+import type { LocationFormInput } from "../location.types";
 import EntityAutocomplete from "../../../../components/common/EntityAutocomplete";
+import AddStateProvinceDialog from "./AddStateProvinceDialog";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
 import { useCodeUniquenessCheck } from "../../../../hooks/useCodeUniquenessCheck";
 import FormSection from "../../../../components/forms/FormSection";
 import FormActions from "../../../../components/forms/FormActions";
 
-interface TermsConditionFormProps {
-  defaultValues?: Partial<TermsConditionFormInput> & { uuid?: string };
-  onSubmit: (data: TermsConditionFormInput) => Promise<void>;
+interface LocationFormProps {
+  defaultValues?: Partial<LocationFormInput> & { uuid?: string };
+  onSubmit: (data: LocationFormInput) => Promise<void>;
   loading?: boolean;
 }
 
-const emptyValues: TermsConditionFormInput = {
+const emptyValues: LocationFormInput = {
   code: "",
-  title: "",
-  document_type_uuid: "",
-  terms_text: "",
-  is_default: false,
+  name: "",
+  country_code: "",
+  city_code: "",
   remarks: "",
   is_active: true,
 };
 
-export default function TermsConditionForm({
+export default function LocationForm({
   defaultValues,
   onSubmit,
   loading = false,
-}: TermsConditionFormProps) {
+}: LocationFormProps) {
   const { t } = useTranslation();
   const { showSnackbar } = useSnackbar();
   const navigate = useNavigate();
-  const termsConditionSchema = useMemo(() => getTermsConditionSchema(t), [t]);
+  const locationSchema = useMemo(() => getLocationSchema(t), [t]);
 
   const {
     control,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     setError,
     clearErrors,
     formState: { isSubmitting },
-  } = useForm<TermsConditionFormInput>({
-    resolver: zodResolver(termsConditionSchema),
+  } = useForm<LocationFormInput>({
+    resolver: zodResolver(locationSchema),
     defaultValues: mergeFormDefaults(emptyValues, defaultValues),
   });
 
@@ -66,11 +68,12 @@ export default function TermsConditionForm({
     }
   }, [defaultValues, reset]);
 
-  // Code is optional here (terms_condition_service.py's _assert_unique_code
-  // early-returns on a falsy code) — onCodeBlur already no-ops on an empty
-  // value, so this stays consistent with that.
-  const { onCodeBlur } = useCodeUniquenessCheck<TermsConditionFormInput>({
-    entity: "terms_condition",
+  const countryCode = watch("country_code");
+  const [addStateProvinceOpen, setAddStateProvinceOpen] = useState(false);
+
+  // Location's code is unique per-org (no extra scoping field needed).
+  const { onCodeBlur } = useCodeUniquenessCheck<LocationFormInput>({
+    entity: "location",
     fieldName: "code",
     excludeUuid: defaultValues?.uuid,
     setError,
@@ -87,7 +90,7 @@ export default function TermsConditionForm({
       noValidate
     >
       <Grid container spacing={2}>
-        <FormSection title={t("termsConditions.title")}>
+        <FormSection title={t("location.title")}>
           <Grid size={{ xs: 12, sm: 4 }}>
             <Controller
               name="code"
@@ -99,8 +102,9 @@ export default function TermsConditionForm({
                     field.onBlur();
                     onCodeBlur(e.target.value);
                   }}
-                  label={t("termsConditions.code")}
+                  label={t("common.code")}
                   fullWidth
+                  required
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
                 />
@@ -110,12 +114,12 @@ export default function TermsConditionForm({
 
           <Grid size={{ xs: 12, sm: 8 }}>
             <Controller
-              name="title"
+              name="name"
               control={control}
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
-                  label={t("termsConditions.titleField")}
+                  label={t("common.name")}
                   fullWidth
                   required
                   error={!!fieldState.error}
@@ -127,27 +131,51 @@ export default function TermsConditionForm({
 
           <Grid size={{ xs: 12, sm: 6 }}>
             <EntityAutocomplete
-              name="document_type_uuid"
-              label={t("termsConditions.documentType")}
+              name="country_code"
+              label={t("common.country")}
               control={control}
-              dropdownName="document_type"
+              dropdownName="country"
+              // Changing Country invalidates any previously-selected
+              // State/Province — fires only on an actual user selection
+              // (never on the reset() that loads defaultValues for Edit),
+              // so an existing Location's State/Province isn't wiped out
+              // just from opening the form.
+              onOptionSelected={() => setValue("city_code", "")}
             />
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 3 }} sx={{ display: "flex", alignItems: "center" }}>
-            <Controller
-              name="is_default"
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <EntityAutocomplete
+              name="city_code"
+              label={t("location.stateProvince")}
               control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={<Switch checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} />}
-                  label={t("termsConditions.isDefault")}
-                />
-              )}
+              // dropdownName/field name stay "city" — the underlying
+              // dropdown_config row and API field are unchanged by the
+              // Phase 4B City -> State/Province business rename (see
+              // city_routes.py's module docstring on the backend).
+              dropdownName="city"
+              // Scoped to the selected Country server-side (never just a
+              // frontend filter) — see dropdown_entity_service.py's
+              // country_code filter. Disabled until a Country is chosen,
+              // since "which State/Province" has no meaning before then.
+              countryCode={countryCode || null}
+              disabled={!countryCode}
+              allowAdd
+              onAddNew={() => setAddStateProvinceOpen(true)}
             />
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 3 }} sx={{ display: "flex", alignItems: "center" }}>
+          <AddStateProvinceDialog
+            open={addStateProvinceOpen}
+            countryCode={countryCode || ""}
+            onClose={() => setAddStateProvinceOpen(false)}
+            onCreated={(stateProvince) => {
+              setValue("city_code", stateProvince.city_code);
+              setAddStateProvinceOpen(false);
+            }}
+          />
+
+          <Grid size={{ xs: 12, sm: 4 }} sx={{ display: "flex", alignItems: "center" }}>
             <Controller
               name="is_active"
               control={control}
@@ -162,36 +190,17 @@ export default function TermsConditionForm({
 
           <Grid size={{ xs: 12 }}>
             <Controller
-              name="terms_text"
-              control={control}
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  label={t("termsConditions.termsText")}
-                  fullWidth
-                  required
-                  multiline
-                  rows={8}
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                />
-              )}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12 }}>
-            <Controller
               name="remarks"
               control={control}
               render={({ field }) => (
-                <TextField {...field} label={t("termsConditions.remarks")} fullWidth multiline rows={2} />
+                <TextField {...field} label={t("location.remarks")} fullWidth multiline rows={2} />
               )}
             />
           </Grid>
         </FormSection>
 
         <FormActions
-          onBack={() => navigate("/app/settings/terms-conditions-master")}
+          onBack={() => navigate("/app/settings/location-master")}
           onDiscard={() => reset()}
           submitting={isSubmitting || loading}
         />

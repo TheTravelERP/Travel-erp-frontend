@@ -18,11 +18,12 @@ import { getRoleSchema } from "../role.schema";
 import type { RoleFormInput } from "../role.types";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
+import { useCodeUniquenessCheck } from "../../../../hooks/useCodeUniquenessCheck";
 import FormSection from "../../../../components/forms/FormSection";
 import FormActions from "../../../../components/forms/FormActions";
 
 interface RoleFormProps {
-  defaultValues?: Partial<RoleFormInput>;
+  defaultValues?: Partial<RoleFormInput> & { uuid?: string };
   onSubmit: (data: RoleFormInput) => Promise<void>;
   loading?: boolean;
   isSystem?: boolean;
@@ -50,6 +51,8 @@ export default function RoleForm({
     control,
     handleSubmit,
     reset,
+    setError,
+    clearErrors,
     formState: { isSubmitting },
   } = useForm<RoleFormInput>({
     resolver: zodResolver(roleSchema),
@@ -61,6 +64,15 @@ export default function RoleForm({
       reset(mergeFormDefaults(emptyValues, defaultValues));
     }
   }, [defaultValues, reset]);
+
+  const { onCodeBlur } = useCodeUniquenessCheck<RoleFormInput>({
+    entity: "role",
+    fieldName: "role_code",
+    excludeUuid: defaultValues?.uuid,
+    setError,
+    clearErrors,
+    message: t("validation.codeAlreadyExists"),
+  });
 
   return (
     <Box
@@ -85,6 +97,10 @@ export default function RoleForm({
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    onCodeBlur(e.target.value);
+                  }}
                   label={t("role.code")}
                   fullWidth
                   required

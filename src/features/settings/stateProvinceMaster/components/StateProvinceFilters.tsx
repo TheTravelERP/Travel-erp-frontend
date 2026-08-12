@@ -1,42 +1,43 @@
-// src/features/inventory/vendor/components/VendorFilters.tsx
+// src/features/settings/stateProvinceMaster/components/StateProvinceFilters.tsx
 
 import {
   Box,
   Button,
   Grid,
+  MenuItem,
+  TextField,
   Typography,
   Stack,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import DropdownAutocomplete from "../../../../components/common/DropdownAutocomplete";
-import EntityAutocomplete from "../../../../components/common/EntityAutocomplete";
 import QuickDateRangeFilter from "../../../../components/common/QuickDateRangeFilter";
+import EntityAutocomplete from "../../../../components/common/EntityAutocomplete";
 
 /* ================= TYPES ================= */
 
-export interface VendorFilterValues {
+export interface StateProvinceFilterValues {
   search?: string;
-  country_code?: string;
-  status?: string;
   from_date?: string;
   to_date?: string;
+  is_active?: string;
+  country_code?: string;
 }
 
-interface VendorFiltersProps {
-  value: VendorFilterValues;
-  onChange: (v: Partial<VendorFilterValues>) => void;
+interface StateProvinceFiltersProps {
+  value: StateProvinceFilterValues;
+  onChange: (v: Partial<StateProvinceFilterValues>) => void;
   onApply: () => void;
   onReset: () => void;
 }
 
 /* ================= COMPONENT ================= */
 
-export default function VendorFilters({
+export default function StateProvinceFilters({
   value,
   onChange,
   onApply,
   onReset,
-}: VendorFiltersProps) {
+}: StateProvinceFiltersProps) {
   const { t } = useTranslation();
 
   return (
@@ -57,13 +58,7 @@ export default function VendorFilters({
       </Stack>
 
       <Grid container spacing={2}>
-        <QuickDateRangeFilter
-          fromDate={value.from_date}
-          toDate={value.to_date}
-          onChange={onChange}
-        />
-
-        <Grid size={{ xs: 12, md: 3 }}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <EntityAutocomplete
             name="country_code"
             label={t("common.country")}
@@ -74,17 +69,24 @@ export default function VendorFilters({
           />
         </Grid>
 
-        <Grid size={{ xs: 12, md: 2 }}>
-          <DropdownAutocomplete
-            name="status"
-            dropdownName="vendor_status"
-            label={t("vendor.status")}
-            value={value.status ?? null}
-            onChange={(val: string | null) => onChange({ status: val || undefined })}
-            useForm={false}
-            allowAdd={false}
-            pagination={false}
-          />
+        <QuickDateRangeFilter
+          fromDate={value.from_date}
+          toDate={value.to_date}
+          onChange={onChange}
+        />
+
+        <Grid size={{ xs: 12, md: 4 }}>
+          <TextField
+            select
+            fullWidth
+            label={t("common.status")}
+            value={value.is_active ?? ""}
+            onChange={(e) => onChange({ is_active: e.target.value || undefined })}
+          >
+            <MenuItem value="">{t("common.all")}</MenuItem>
+            <MenuItem value="true">{t("common.active")}</MenuItem>
+            <MenuItem value="false">{t("common.inactive")}</MenuItem>
+          </TextField>
         </Grid>
 
         <Grid size={12} display="flex" justifyContent="flex-end" gap={1} mt={1}>

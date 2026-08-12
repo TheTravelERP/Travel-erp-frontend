@@ -3,7 +3,6 @@
 export interface VendorFormInput {
   vendor_code: string;
   vendor_name: string;
-  vendor_type?: string;
   contact_person?: string;
   mobile?: string;
   email?: string;
@@ -12,8 +11,8 @@ export interface VendorFormInput {
   pan?: string;
   address?: string;
   city?: string;
-  state?: string;
-  country?: string;
+  country_code?: string;
+  state_province_code?: string;
   pincode?: string;
   payment_terms?: string;
   remarks?: string;
@@ -23,6 +22,8 @@ export interface VendorFormInput {
 
 export interface VendorDetail extends VendorFormInput {
   uuid: string;
+  country_name?: string;
+  state_province_name?: string;
   version_no: number;
 }
 
@@ -30,9 +31,9 @@ export interface VendorListItem {
   uuid: string;
   vendor_code: string;
   vendor_name: string;
-  vendor_type?: string;
   contact_person?: string;
   mobile?: string;
+  email?: string;
   city?: string;
   status?: string;
   is_active: boolean;
@@ -43,7 +44,7 @@ export interface GetVendorsParams {
   page?: number;
   page_size?: number;
   search?: string;
-  vendor_type?: string;
+  country_code?: string;
   status?: string;
   from_date?: string;
   to_date?: string;

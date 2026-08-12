@@ -20,11 +20,12 @@ import EntityAutocomplete from "../../../../components/common/EntityAutocomplete
 import DropdownAutocomplete from "../../../../components/common/DropdownAutocomplete";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
+import { useCodeUniquenessCheck } from "../../../../hooks/useCodeUniquenessCheck";
 import FormSection from "../../../../components/forms/FormSection";
 import FormActions from "../../../../components/forms/FormActions";
 
 interface VendorContractFormProps {
-  defaultValues?: Partial<VendorContractFormInput>;
+  defaultValues?: Partial<VendorContractFormInput> & { uuid?: string };
   onSubmit: (data: VendorContractFormInput) => Promise<void>;
   loading?: boolean;
 }
@@ -60,6 +61,8 @@ export default function VendorContractForm({
     control,
     handleSubmit,
     reset,
+    setError,
+    clearErrors,
     formState: { isSubmitting },
   } = useForm<VendorContractFormInput>({
     resolver: zodResolver(vendorContractSchema),
@@ -72,6 +75,15 @@ export default function VendorContractForm({
     }
   }, [defaultValues, reset]);
 
+  const { onCodeBlur } = useCodeUniquenessCheck<VendorContractFormInput>({
+    entity: "vendor_contract",
+    fieldName: "contract_code",
+    excludeUuid: defaultValues?.uuid,
+    setError,
+    clearErrors,
+    message: t("validation.codeAlreadyExists"),
+  });
+
   return (
     <Box
       component="form"
@@ -82,15 +94,6 @@ export default function VendorContractForm({
     >
       <Grid container spacing={2}>
         <FormSection title={t("vendorContract.title")}>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <EntityAutocomplete
-              name="vendor_uuid"
-              label={t("vendorContract.vendor")}
-              control={control}
-              dropdownName="vendors"
-            />
-          </Grid>
-
           <Grid size={{ xs: 12, sm: 3 }}>
             <Controller
               name="contract_code"
@@ -98,7 +101,28 @@ export default function VendorContractForm({
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    onCodeBlur(e.target.value);
+                  }}
                   label={t("vendorContract.code")}
+                  fullWidth
+                  required
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                />
+              )}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Controller
+              name="contract_name"
+              control={control}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  label={t("vendorContract.name")}
                   fullWidth
                   required
                   error={!!fieldState.error}
@@ -117,19 +141,11 @@ export default function VendorContractForm({
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <Controller
-              name="contract_name"
+            <EntityAutocomplete
+              name="vendor_uuid"
+              label={t("vendorContract.vendor")}
               control={control}
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  label={t("vendorContract.name")}
-                  fullWidth
-                  required
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                />
-              )}
+              dropdownName="vendors"
             />
           </Grid>
 

@@ -250,7 +250,7 @@
     "packages.pricing": "أسعار الباقات",
     "packages.services": "خدمات الباقة",
     "inventory.ziyarat": "الزيارة",
-    "inventory.vendor_master": "الموردون",
+    "inventory.vendor_master": "الموردون / البائعون",
     "settings.branch_master": "سجل الفروع",
     "settings.document_type_master": "سجل أنواع المستندات",
     "settings.terms_conditions_master": "سجل الشروط والأحكام",
@@ -258,7 +258,9 @@
     "settings.exchange_rate_master": "سجل أسعار الصرف",
     "settings.currency_rate_policy": "سياسة سعر الصرف",
     "settings.tax_registration": "التسجيل الضريبي",
-    "settings.localization_profile": "ملفات التوطين"
+    "settings.localization_profile": "ملفات التوطين",
+    "settings.location_master": "دليل المواقع",
+    "settings.state_province_master": "دليل الولايات / المقاطعات"
   },
   "enquiry": {
     "notLinkedToCustomer": "غير مرتبط بسجل عميل بعد",
@@ -566,11 +568,13 @@
     "currentPasswordRequired": "كلمة المرور الحالية مطلوبة",
     "nameRequired": "الاسم مطلوب",
     "codeRequired": "الرمز مطلوب",
+    "codeAlreadyExists": "هذا الرمز موجود بالفعل",
     "priorityRequired": "الأولوية مطلوبة",
     "statusRequired": "الحالة مطلوبة",
     "endDateBeforeStartDate": "لا يمكن أن يكون تاريخ الانتهاء أقدم من تاريخ البدء",
     "roleRequired": "يرجى اختيار دور",
     "branchRequired": "يرجى اختيار فرع",
+    "countryRequired": "يرجى اختيار دولة",
     "endTimeBeforeStartTime": "لا يمكن أن يكون وقت الانتهاء قبل وقت البدء"
   },
   "auth": {
@@ -800,11 +804,23 @@
     },
     "taxConfigurationHelp": "اختياري — يحل سطر رحلة مرتبط بهذه شركة الطيران معاملته الضريبية من هنا. اتركه فارغًا حتى تكون جاهزًا لتهيئته؛ يتم حظر الأسطر غير المُهيأة عند حفظ عرض الأسعار، وليس هنا."
   },
+  "location": {
+    "title": "تفاصيل الموقع",
+    "stateProvince": "الولاية / المقاطعة",
+    "addStateProvince": "إضافة ولاية / مقاطعة",
+    "remarks": "ملاحظات",
+    "colCode": "الرمز",
+    "colName": "الاسم",
+    "colCountry": "الدولة",
+    "colStateProvince": "الولاية / المقاطعة"
+  },
   "vendor": {
-    "title": "تفاصيل المورد",
+    "sectionBasic": "المعلومات الأساسية",
+    "sectionContact": "معلومات الاتصال",
+    "sectionTax": "الضريبة / التسجيل",
+    "sectionAdditional": "معلومات إضافية",
     "code": "رمز المورد",
     "name": "اسم المورد",
-    "type": "نوع المورد",
     "contactPerson": "الشخص المسؤول",
     "mobile": "الجوال",
     "email": "البريد الإلكتروني",
@@ -813,19 +829,25 @@
     "pan": "PAN",
     "address": "العنوان",
     "city": "المدينة",
-    "state": "المنطقة",
-    "country": "الدولة",
     "pincode": "الرمز البريدي",
-    "paymentTerms": "شروط الدفع",
+    "paymentTermsDefault": "شروط الدفع الافتراضية",
+    "paymentTermsHelper": "تفضيل افتراضي فقط — تُحدَّد الشروط التجارية الفعلية في عقد المورد.",
     "remarks": "ملاحظات",
     "status": "الحالة",
+    "statusHelper": "الحظر / التعليق يشير إلى ضرورة مراجعة الامتثال. استخدم مفتاح التفعيل أعلاه للعرض الاعتيادي.",
     "colCode": "رمز المورد",
     "colName": "اسم المورد",
-    "colType": "النوع",
     "colContactPerson": "الشخص المسؤول",
     "colMobile": "الجوال",
-    "colCity": "المدينة",
-    "colStatus": "الحالة"
+    "colEmail": "البريد الإلكتروني",
+    "colStatus": "الحالة",
+    "documents": {
+      "Registration Certificate": "شهادة التسجيل",
+      "GST Certificate": "شهادة GST",
+      "PAN Document": "مستند PAN",
+      "Agreement": "الاتفاقية",
+      "Other": "أخرى"
+    }
   },
   "vendorContract": {
     "title": "تفاصيل العقد",

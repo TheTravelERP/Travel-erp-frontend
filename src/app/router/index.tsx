@@ -43,6 +43,8 @@ import ExchangeRateRoutes from '../../features/settings/exchangeRate/exchangeRat
 import CurrencyRatePolicyRoutes from '../../features/settings/currencyRatePolicy/currencyRatePolicy.routes';
 import TaxRegistrationRoutes from '../../features/settings/taxRegistration/taxRegistration.routes';
 import LocalizationProfileRoutes from '../../features/settings/localizationProfile/localizationProfile.routes';
+import LocationRoutes from '../../features/settings/location/location.routes';
+import StateProvinceRoutes from '../../features/settings/stateProvinceMaster/stateProvince.routes';
 import DocumentNumberSeriesRoutes from '../../features/settings/documentNumberSeries/documentNumberSeries.routes';
 import AuditLogRoutes from '../../features/settings/auditLog/auditLog.routes';
 import CommunicationProviderRoutes from '../../features/settings/communicationProviders/communicationProvider.routes';
@@ -188,6 +190,8 @@ export default function AppRouter() {
         <Route path="/app/settings/currency-rate-policy/*" element={<CurrencyRatePolicyRoutes />} />
         <Route path="/app/settings/tax-registration/*" element={<TaxRegistrationRoutes />} />
         <Route path="/app/settings/localization-profiles/*" element={<LocalizationProfileRoutes />} />
+        <Route path="/app/settings/location-master/*" element={<LocationRoutes />} />
+        <Route path="/app/settings/state-province-master/*" element={<StateProvinceRoutes />} />
         <Route path="/app/settings/doc-numbering/*" element={<DocumentNumberSeriesRoutes />} />
         <Route path="/app/settings/audit-log/*" element={<AuditLogRoutes />} />
         <Route path="/app/settings/communication-settings/*" element={<CommunicationProviderRoutes />} />

@@ -21,11 +21,12 @@ import EntityAutocomplete from "../../../../components/common/EntityAutocomplete
 import MobileNumberField from "../../../../components/common/MobileNumberField";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { mergeFormDefaults } from "../../../../utils/mergeFormDefaults";
+import { useCodeUniquenessCheck } from "../../../../hooks/useCodeUniquenessCheck";
 import FormSection from "../../../../components/forms/FormSection";
 import FormActions from "../../../../components/forms/FormActions";
 
 interface BranchFormProps {
-  defaultValues?: Partial<BranchFormInput>;
+  defaultValues?: Partial<BranchFormInput> & { uuid?: string };
   onSubmit: (data: BranchFormInput) => Promise<void>;
   loading?: boolean;
   isHeadOffice?: boolean;
@@ -72,6 +73,8 @@ export default function BranchForm({
     control,
     handleSubmit,
     reset,
+    setError,
+    clearErrors,
     formState: { isSubmitting },
   } = useForm<BranchFormInput>({
     resolver: zodResolver(branchSchema),
@@ -83,6 +86,15 @@ export default function BranchForm({
       reset(mergeFormDefaults(emptyValues, defaultValues));
     }
   }, [defaultValues, reset]);
+
+  const { onCodeBlur } = useCodeUniquenessCheck<BranchFormInput>({
+    entity: "branch",
+    fieldName: "branch_code",
+    excludeUuid: defaultValues?.uuid,
+    setError,
+    clearErrors,
+    message: t("validation.codeAlreadyExists"),
+  });
 
   return (
     <Box
@@ -108,6 +120,10 @@ export default function BranchForm({
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    onCodeBlur(e.target.value);
+                  }}
                   label={t("branch.code")}
                   fullWidth
                   required
