@@ -44,6 +44,7 @@ const emptyValues = {
   departure_city: "",
   arrival_city: "",
   country: "",
+  is_domestic: true,
   departure_date: "",
   return_date: "",
   booking_start_date: "",
@@ -219,6 +220,19 @@ export default function PackageForm({ defaultValues, onSubmit, loading = false }
               name="country"
               control={control}
               render={({ field }) => <TextField {...field} label={t("package.country")} fullWidth />}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 4 }} sx={{ display: "flex", alignItems: "center" }}>
+            <Controller
+              name="is_domestic"
+              control={control}
+              render={({ field }) => (
+                <FormControlLabel
+                  control={<Switch checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} />}
+                  label={t("package.domesticPackage")}
+                />
+              )}
             />
           </Grid>
 

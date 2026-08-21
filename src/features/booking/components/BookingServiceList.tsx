@@ -22,13 +22,14 @@ interface Props {
   bookingUuid: string;
   canEdit: boolean;
   onChanged?: () => void;
+  onCountChange?: (count: number) => void;
 }
 
 const STATUS_COLOR: Record<string, "default" | "primary" | "success" | "error" | "warning"> = {
   Pending: "default", Confirmed: "success", Completed: "primary", Cancelled: "error",
 };
 
-export default function BookingServiceList({ bookingUuid, canEdit, onChanged }: Props) {
+export default function BookingServiceList({ bookingUuid, canEdit, onChanged, onCountChange }: Props) {
   const { t } = useTranslation();
   const { showSnackbar } = useSnackbar();
 
@@ -42,7 +43,9 @@ export default function BookingServiceList({ bookingUuid, canEdit, onChanged }: 
   const load = async () => {
     setLoading(true);
     try {
-      setRows(await getBookingServiceLines(bookingUuid));
+      const data = await getBookingServiceLines(bookingUuid);
+      setRows(data);
+      onCountChange?.(data.length);
     } catch {
       showSnackbar({ message: t("common.loadFailed"), severity: "error" });
     } finally {

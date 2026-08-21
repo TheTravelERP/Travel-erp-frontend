@@ -7,11 +7,13 @@ export interface BookingReminderFormInput {
   next_followup_datetime?: string;
   discussion_notes: string;
   priority: string;
+  status?: string;
+  outcome?: string;
 }
 
 export interface BookingReminderDetail extends BookingReminderFormInput {
   uuid: string;
   assigned_user_name?: string | null;
   status: string;
-  outcome?: string | null;
+  version_no: number;
 }

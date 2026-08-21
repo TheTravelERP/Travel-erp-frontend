@@ -16,8 +16,8 @@ import FormSection from "../../../components/forms/FormSection";
 import FormActions from "../../../components/forms/FormActions";
 import { getEnquiryByUuid } from "../../enquiry/enquiry.api";
 import type { EnquiryDetail } from "../../enquiry/enquiry.types";
-import CustomerSelector from "../../customer/components/CustomerSelector";
-import ResolveEnquiryLinksCard from "../../crm/quotation/components/resolveLinks/ResolveEnquiryLinksCard";
+import BookingCustomerPanel from "./quickResolve/BookingCustomerPanel";
+import BookingPackagePanel from "./quickResolve/BookingPackagePanel";
 
 interface Props {
   defaultValues?: Partial<BookingFormInput> & {
@@ -36,10 +36,6 @@ interface Props {
 const emptyValues: BookingFormInput = {
   enquiry_uuid: null,
   cust_uuid: null,
-  customer_mode: "new",
-  customer_name: "",
-  customer_mobile: "",
-  customer_email: "",
   business_type: "",
   pkg_uuid: null,
   pkg_count: 1,
@@ -85,12 +81,7 @@ export default function BookingForm({
   // already captured the correct values for the form's first render, so
   // re-running reset() again immediately after mount is pure redundancy in
   // every current call path (BookingCreatePage/BookingEditPage always pass
-  // a stable defaultValues by the time BookingForm first renders). That
-  // redundant reset previously clobbered customer_mode right after
-  // CustomerSelector's own mount effect set it (BookingDetail carries no
-  // customer_mode field, so the redundant reset always fell back to "new"),
-  // which corrupted both the Save-readiness check and the submit payload
-  // for an existing booking loaded in "existing" customer mode.
+  // a stable defaultValues by the time BookingForm first renders).
   const isInitialDefaultValuesRef = useRef(true);
   useEffect(() => {
     const isInitial = isInitialDefaultValuesRef.current;
@@ -109,7 +100,9 @@ export default function BookingForm({
      ENQUIRY-DRIVEN CUSTOMER RESOLUTION — mirrors QuotationForm.tsx. Once an
      Enquiry is attached, it (not a separately-picked Customer) is the
      source of truth for who the booking is for — Customer and Enquiry are
-     never simultaneously live input surfaces (see submitCleaned below).
+     never simultaneously live input surfaces (see create_booking/
+     update_booking on the backend, which ignore payload.cust_uuid whenever
+     enquiry_id is set).
   ========================================================== */
   const enquiryUuid = useWatch({ control, name: "enquiry_uuid" });
   const [enquiry, setEnquiry] = useState<EnquiryDetail | null>(null);
@@ -140,6 +133,9 @@ export default function BookingForm({
           if (detail.pkg_uuid) {
             setValue("pkg_uuid", detail.pkg_uuid, { shouldValidate: true });
           }
+          if (detail.cust_uuid) {
+            setValue("cust_uuid", detail.cust_uuid, { shouldValidate: true });
+          }
         }
       } catch {
         if (!cancelled) {
@@ -156,21 +152,23 @@ export default function BookingForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enquiryUuid]);
 
-  // Direct Booking (no enquiry) — "resolved" once either an existing
-  // customer is picked or enough info is present to create one. Gates Save
-  // exactly like Quotation's own linksResolved, minus the Package leg
-  // (Booking's own Package/Departure aren't inherited from the Enquiry).
-  // Derived from the actual field values, not the customer_mode flag — mode
-  // is a UI-only concern owned by CustomerSelector's own toggle rendering,
-  // and isn't reliable to gate logic on here (BookingDetail never carries a
-  // customer_mode field, so an edited booking loaded in "existing" mode has
-  // no reliable form-level mode value to read).
+  // Direct Booking (no enquiry) — "resolved" once cust_uuid is a real link,
+  // written directly by BookingCustomerPanel's EntityAutocomplete/Create-New
+  // flow (never deferred/inline text). Gates Save exactly like Quotation's
+  // own linksResolved, minus the Package leg (Booking's own
+  // Package/Departure aren't inherited from the Enquiry).
   const custUuidWatched = useWatch({ control, name: "cust_uuid" });
-  const customerNameWatched = useWatch({ control, name: "customer_name" });
-  const customerMobileWatched = useWatch({ control, name: "customer_mobile" });
-  const customerResolved = enquiry
-    ? !!enquiry.cust_uuid
-    : !!custUuidWatched || (!!customerNameWatched?.trim() && !!customerMobileWatched);
+  const customerResolved = enquiry ? !!enquiry.cust_uuid : !!custUuidWatched;
+
+  // Mirrors QuotationForm.tsx's handleEnquiryLinkResolved — keeps the local
+  // enquiry state and the form's own cust_uuid/pkg_uuid fields in sync the
+  // moment BookingCustomerPanel/BookingPackagePanel link the Enquiry to a
+  // real Customer/Package, without waiting for a full form submit.
+  function handleEnquiryLinkResolved(updated: EnquiryDetail) {
+    setEnquiry(updated);
+    if (updated.cust_uuid) setValue("cust_uuid", updated.cust_uuid);
+    if (updated.pkg_uuid) setValue("pkg_uuid", updated.pkg_uuid);
+  }
 
   // Business Type drives Travel Package's visibility — when it changes away
   // from "Package", clear pkg_uuid/departure_uuid AND any validation error
@@ -188,27 +186,6 @@ export default function BookingForm({
     }
   }, [businessType, setValue, clearErrors]);
 
-  // pkg_uuid/departure_uuid/customer_* only mean anything under the
-  // conditions checked here — never send stale values left over from a
-  // toggle/section the user isn't currently on. Mirrors QuotationForm's
-  // submitCleaned().
-  const submitCleaned = (data: BookingFormInput) => {
-    const payload = { ...data };
-    if (payload.enquiry_uuid) {
-      payload.cust_uuid = null;
-      payload.customer_name = "";
-      payload.customer_mobile = "";
-      payload.customer_email = "";
-    } else if (payload.customer_mode === "existing") {
-      payload.customer_name = "";
-      payload.customer_mobile = "";
-      payload.customer_email = "";
-    } else {
-      payload.cust_uuid = null;
-    }
-    return onSubmit(payload);
-  };
-
   const salesContextLockChip = !salesContextEditable ? (
     <Chip size="small" color="warning" label={t("booking.salesContextLocked")} />
   ) : undefined;
@@ -216,7 +193,7 @@ export default function BookingForm({
   return (
     <Box
       component="form"
-      onSubmit={handleSubmit(submitCleaned, () =>
+      onSubmit={handleSubmit(onSubmit, () =>
         showSnackbar({ message: t("validation.fixHighlightedFields"), severity: "error" }),
       )}
       noValidate
@@ -330,45 +307,50 @@ export default function BookingForm({
           )}
         </FormSection>
 
-        {!enquiry && !loadingEnquiry && (
-          <Grid size={{ xs: 12 }}>
-            <CustomerSelector control={control} setValue={setValue} disabled={salesContextDisabled} />
-          </Grid>
-        )}
-
-        {enquiry && !enquiry.cust_uuid && (
-          <ResolveEnquiryLinksCard
-            enquiry={enquiry}
-            onEnquiryUpdated={setEnquiry}
-            isPackageBusiness={isPackageBooking}
-            disabled={salesContextDisabled}
-          />
-        )}
-
-        {isPackageBooking && (
-          <FormSection title={t("booking.sectionTravelPackage")} titleAdornment={salesContextLockChip}>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <EntityAutocomplete
-                name="pkg_uuid"
-                label={t("booking.package")}
+        {/* Customer / Package resolution — same panels for Direct Booking
+            (enquiry null) and Booking-from-Enquiry (enquiry set, snapshot
+            card + pre-searched autocomplete). Mirrors QuotationForm.tsx's
+            unified pattern. Customer stays left/md:6 whether or not
+            Package renders, so its width never shifts. */}
+        {!loadingEnquiry && (
+          <>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <BookingCustomerPanel
                 control={control}
-                dropdownName="packages"
-                disabled={salesContextDisabled || !!enquiry}
+                setValue={setValue}
+                enquiry={enquiry}
+                onEnquiryUpdated={handleEnquiryLinkResolved}
+                disabled={salesContextDisabled}
+                salesContextLocked={!salesContextEditable}
               />
             </Grid>
-            {!!pkgUuid && (
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <EntityAutocomplete
-                  name="departure_uuid"
-                  label={t("booking.departure")}
+
+            {isPackageBooking && (
+              <Grid size={{ xs: 12, md: 6 }}>
+                <BookingPackagePanel
                   control={control}
-                  dropdownName="departures"
-                  pkgUuid={pkgUuid}
+                  setValue={setValue}
+                  enquiry={enquiry}
+                  onEnquiryUpdated={handleEnquiryLinkResolved}
                   disabled={salesContextDisabled}
+                  salesContextLocked={!salesContextEditable}
                 />
               </Grid>
             )}
-          </FormSection>
+          </>
+        )}
+
+        {isPackageBooking && !!pkgUuid && (
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <EntityAutocomplete
+              name="departure_uuid"
+              label={t("booking.departure")}
+              control={control}
+              dropdownName="departures"
+              pkgUuid={pkgUuid}
+              disabled={salesContextDisabled}
+            />
+          </Grid>
         )}
 
         <FormSection title={t("booking.sectionPassengers")}>

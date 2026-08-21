@@ -1,8 +1,9 @@
 // src/features/crm/quotation/components/QuotationOccupancyGroups.tsx
-import { Alert, Box, Button, Grid, IconButton, MenuItem, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, Grid, IconButton, Link, MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { Controller, useFieldArray, useWatch, type Control, type UseFormSetValue } from "react-hook-form";
 import { useRef, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { Link as RouterLink } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
@@ -15,6 +16,8 @@ import { resolvePackagePricing } from "../../../package/packagePricing/packagePr
 import type { PackagePricingResolveResult } from "../../../package/packagePricing/packagePricing.types";
 import type { QuotationFormInput } from "../quotation.types";
 import { DISCOUNT_TYPES, calculateRowLineTotal, calculateSectionTotal } from "../pricing";
+import type { LineTaxError } from "../lineErrorParser";
+import { suggestFixLink } from "../lineErrorParser";
 import CreatePackagePricingDialog from "./CreatePackagePricingDialog";
 
 // LOCKED architecture: each row is exactly one pricing rule — Occupancy
@@ -81,6 +84,14 @@ interface QuotationOccupancyGroupsProps {
   paxAdult: number;
   paxChild: number;
   paxInfant: number;
+  // Parsed from the backend's "Tax could not be determined..." 422 detail —
+  // see QuotationForm.tsx's own lineTaxErrors prop. The backend numbers
+  // every line in ONE shared sequence: service_lines first, then this
+  // section's occupancy/package rows appended after (see quotation_service.
+  // py's raw_lines assembly) — so an occupancy row's own line number is
+  // offset by however many service lines precede it, not its bare index.
+  lineTaxErrors?: LineTaxError[];
+  serviceLinesCount?: number;
 }
 
 type ResolutionState = PackagePricingResolveResult | "loading";
@@ -96,6 +107,8 @@ export default function QuotationOccupancyGroups({
   paxAdult,
   paxChild,
   paxInfant,
+  lineTaxErrors,
+  serviceLinesCount = 0,
 }: QuotationOccupancyGroupsProps) {
   const { t } = useTranslation();
   const { fields, append, remove } = useFieldArray({ control, name: "occupancy_groups" });
@@ -303,6 +316,11 @@ export default function QuotationOccupancyGroups({
                 passengerType && passengerType in headerCounts
                   ? Math.max(0, headerCounts[passengerType] - allocatedByOtherRows)
                   : 999;
+              // See lineTaxErrors' own docstring above for why the offset
+              // is needed — this row's backend line number is its position
+              // AFTER every service line, not its bare index in this array.
+              const lineError = lineTaxErrors?.find((e) => e.lineNo === serviceLinesCount + index + 1);
+              const fixLink = lineError ? suggestFixLink(lineError.reason) : null;
 
               return (
                 <Box key={field.id}>
@@ -523,6 +541,20 @@ export default function QuotationOccupancyGroups({
                     }
                   >
                     {t("quotation.packagePricingMissingForTypes", { types: `${occupancyType} / ${passengerType}` })}
+                  </Alert>
+                )}
+
+                {lineError && (
+                  <Alert severity="warning" sx={{ mt: 1, ...ROW_EXPANSION_SX }}>
+                    <Typography variant="body2" fontWeight={600}>
+                      {t("quotation.taxConfigRequired")}
+                    </Typography>
+                    <Typography variant="body2">{lineError.reason}</Typography>
+                    {fixLink && (
+                      <Link component={RouterLink} to={fixLink.href} target="_blank" rel="noopener noreferrer" variant="body2">
+                        {t(fixLink.labelKey)}
+                      </Link>
+                    )}
                   </Alert>
                 )}
                 </Box>

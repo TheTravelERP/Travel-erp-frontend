@@ -1,6 +1,7 @@
 // src/features/booking/booking.api.ts
 import api from "../../services/api";
 import type {
+  BookingBulkActionResult,
   BookingDetail,
   BookingFormInput,
   BookingListApiResponse,
@@ -46,6 +47,16 @@ export async function deleteBookingByUuid(uuid: string) {
 
 export async function restoreBookingByUuid(uuid: string) {
   const { data } = await api.put(`/api/v1/bookings/${uuid}/restore`);
+  return data;
+}
+
+export async function bulkDeleteBookings(booking_uuids: string[]): Promise<BookingBulkActionResult> {
+  const { data } = await api.post("/api/v1/bookings/bulk-delete", { booking_uuids });
+  return data;
+}
+
+export async function bulkRestoreBookings(booking_uuids: string[]): Promise<BookingBulkActionResult> {
+  const { data } = await api.post("/api/v1/bookings/bulk-restore", { booking_uuids });
   return data;
 }
 

@@ -164,7 +164,7 @@ export default function BookingViewPage() {
       </Stack>
 
       <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap mt={3}>
-        {perms.can_edit && booking.status === "Draft" && (
+        {perms.can_edit && !["Cancelled", "Closed"].includes(booking.status) && (
           <Button variant="outlined" onClick={() => navigate(`/app/bookings/list/${booking.uuid}/edit`)}>{t("common.edit")}</Button>
         )}
         {perms.can_edit && ["Draft", "Partially Confirmed"].includes(booking.status) && (
@@ -222,18 +222,34 @@ export default function BookingViewPage() {
                 perms={travellerPerms}
                 primaryCustomerUuid={booking.cust_uuid}
                 onCountChange={(count) => setTabCounts((prev) => ({ ...prev, travellers: count }))}
+                hidePassportVisa={booking.business_type === "Package" && booking.package_snapshot?.is_domestic === true}
               />
             ),
           },
           {
             key: "services",
             label: withCount(t("booking.services"), tabCounts.services),
-            content: <BookingServiceList bookingUuid={booking.uuid} canEdit={perms.can_edit} onChanged={load} />,
+            content: (
+              <BookingServiceList
+                bookingUuid={booking.uuid}
+                canEdit={perms.can_edit}
+                onChanged={load}
+                onCountChange={(count) => setTabCounts((prev) => ({ ...prev, services: count }))}
+              />
+            ),
           },
           {
             key: "attachments",
             label: withCount(t("common.attachments"), tabCounts.attachments),
-            content: <AttachmentList entityType="booking" entityUuid={booking.uuid} menuKey="packages.bookings" canEdit={perms.can_edit} />,
+            content: (
+              <AttachmentList
+                entityType="booking"
+                entityUuid={booking.uuid}
+                menuKey="packages.bookings"
+                canEdit={perms.can_edit}
+                onCountChange={(count) => setTabCounts((prev) => ({ ...prev, attachments: count }))}
+              />
+            ),
           },
           {
             key: "communication",
@@ -243,7 +259,13 @@ export default function BookingViewPage() {
           {
             key: "reminders",
             label: withCount(t("booking.reminders"), tabCounts.reminders),
-            content: <BookingReminderList bookingUuid={booking.uuid} canEdit={perms.can_edit} />,
+            content: (
+              <BookingReminderList
+                bookingUuid={booking.uuid}
+                canEdit={perms.can_edit}
+                onCountChange={(count) => setTabCounts((prev) => ({ ...prev, reminders: count }))}
+              />
+            ),
           },
           {
             key: "timeline",

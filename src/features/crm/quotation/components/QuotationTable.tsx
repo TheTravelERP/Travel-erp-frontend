@@ -129,7 +129,21 @@ export default function QuotationTable({
         ? await bulkRestoreQuotations(uuids)
         : await bulkDeleteQuotations(uuids);
 
-      showSnackbar({ message: result.message, severity: "success" });
+      // Delete silently skips locked quotations (Accepted/Converted/etc. —
+      // see bulk_delete_quotations' is_locked filter) rather than erroring,
+      // so a raw "0 quotations deleted successfully" would otherwise show as
+      // a green success toast even though nothing happened. Surface that
+      // distinction here instead of trusting the backend's message text.
+      if (!isTrash && result.count === 0) {
+        showSnackbar({ message: t("quotation.bulkDeleteNoneEligible"), severity: "warning" });
+      } else if (!isTrash && result.count < uuids.length) {
+        showSnackbar({
+          message: t("quotation.bulkDeletePartial", { count: result.count, total: uuids.length }),
+          severity: "warning",
+        });
+      } else {
+        showSnackbar({ message: result.message, severity: "success" });
+      }
       setSelected(new Set());
       onRefresh();
     } catch (err: any) {

@@ -8,13 +8,10 @@ export type BookingStatus = (typeof BOOKING_STATUSES)[number];
 
 export interface BookingFormInput {
   enquiry_uuid?: string | null;
-  // Only used when enquiry_uuid is unset — same shape/semantics as
-  // Enquiry/Quotation's own CustomerSelector-driven customer capture.
+  // Only used when enquiry_uuid is unset — resolved directly to a real
+  // Customer via BookingCustomerPanel's search-or-create-new UI (same
+  // pattern as Quotation's QuotationCustomerPanel), never deferred/inline.
   cust_uuid: string | null;
-  customer_mode?: 'new' | 'existing';
-  customer_name?: string;
-  customer_mobile?: string;
-  customer_email?: string;
   // Pre-filled from the linked Enquiry's business_type when enquiry_uuid is
   // set, editable. Required directly from the user for a fully Direct
   // Booking (no enquiry_uuid at all) — same mandatory-with-default rule as
@@ -45,7 +42,7 @@ export interface BookingDetail extends BookingFormInput {
   status: BookingStatus;
   branch_uuid?: string | null;
   departure_uuid?: string | null;
-  package_snapshot?: { pkg_code?: string; pkg_name?: string; [key: string]: any } | null;
+  package_snapshot?: { pkg_code?: string; pkg_name?: string; is_domestic?: boolean; [key: string]: any } | null;
   enquiry_no?: string | null;
   lead_source?: string | null;
   quotation_uuid?: string | null;
@@ -99,6 +96,7 @@ export interface GetBookingsParams {
   page_size?: number;
   search?: string;
   status?: string;
+  business_type?: string;
   enquiry_uuid?: string;
   cust_uuid?: string;
   departure_uuid?: string;
@@ -107,6 +105,7 @@ export interface GetBookingsParams {
   travel_to_date?: string;
   to_date?: string;
   is_active?: boolean;
+  is_deleted?: boolean;
   sort_by?: string;
   sort_order?: "asc" | "desc";
 }
@@ -121,4 +120,9 @@ export interface Pagination {
 export interface BookingListApiResponse {
   data: BookingListItem[];
   pagination: Pagination;
+}
+
+export interface BookingBulkActionResult {
+  message: string;
+  count: number;
 }

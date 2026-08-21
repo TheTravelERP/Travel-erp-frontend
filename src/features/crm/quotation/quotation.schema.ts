@@ -66,7 +66,7 @@ const taxContextSchema = z.object({
   // on the backend is the real authority), so this stays loose like every
   // other tax_context key — never validated client-side beyond the
   // Agent/Commission-needs-basic_fare/route_type check below.
-  manual_tax_treatment: z.string().optional(),
+  manual_tax_treatment: z.string().nullish(),
 }).nullish();
 
 // Ad-Hoc / Quick Quotation Tax Source (Layer 3B, Task 17) — UX-only: when
@@ -103,10 +103,11 @@ const serviceLineSchema = (t: TFunction) =>
   z.object({
     uuid: z.string().optional(),
     service_type: z.string().trim().min(1, t('quotation.validation.serviceTypeRequired')),
-    vendor_uuid: z.string().nullable().optional(),
     airline_uuid: z.string().nullable().optional(),
     hotel_uuid: z.string().nullable().optional(),
+    product_price_uuid: z.string().nullable().optional(),
     description: z.string().nullish(),
+    service_location: z.string().nullish(),
     day_no: z.coerce.number().nullable().optional(),
     travel_date_from: z.string().nullish(),
     travel_date_to: z.string().nullish(),

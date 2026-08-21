@@ -16,6 +16,7 @@ export const getPackageSchema = (t: TFunction) =>
     departure_city: z.string().trim().optional(),
     arrival_city: z.string().trim().optional(),
     country: z.string().trim().optional(),
+    is_domestic: z.boolean().optional(),
 
     departure_date: z.string().trim().optional(),
     return_date: z.string().trim().optional(),

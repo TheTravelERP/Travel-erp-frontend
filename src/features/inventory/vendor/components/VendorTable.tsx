@@ -74,6 +74,7 @@ function getColumns(t: TFunction): TableColumn[] {
     { id: "contact_person", label: t("vendor.colContactPerson"), minWidth: 150 },
     { id: "mobile", label: t("vendor.colMobile"), minWidth: 130 },
     { id: "email", label: t("vendor.colEmail"), minWidth: 180 },
+    { id: "physical_city", label: t("vendor.colCity"), sortable: true, minWidth: 130 },
     { id: "status", label: t("vendor.colStatus"), sortable: true, minWidth: 110 },
   ];
 }
@@ -363,7 +364,7 @@ export default function VendorTable({
             {loading &&
               [...Array(pageSize)].map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell colSpan={8}>
+                  <TableCell colSpan={9}>
                     <Skeleton height={40} />
                   </TableCell>
                 </TableRow>
@@ -371,7 +372,7 @@ export default function VendorTable({
 
             {!loading && rows.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8}>
+                <TableCell colSpan={9}>
                   <Box textAlign="center" py={5}>
                     <InboxIcon sx={{ fontSize: 48, opacity: 0.4 }} />
                     <Typography>{t("common.noRecordsFound")}</Typography>
@@ -391,6 +392,7 @@ export default function VendorTable({
                   <TableCell>{row.contact_person}</TableCell>
                   <TableCell>{row.mobile}</TableCell>
                   <TableCell>{row.email}</TableCell>
+                  <TableCell>{row.physical_city}</TableCell>
                   <TableCell>{renderStatusChip(row.status)}</TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                     <Stack direction="row" spacing={0.5} justifyContent="flex-end">

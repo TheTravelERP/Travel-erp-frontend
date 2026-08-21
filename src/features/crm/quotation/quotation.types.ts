@@ -54,7 +54,12 @@ export interface QuotationLineTaxContext {
 export interface QuotationServiceLineInput {
   uuid?: string;
   service_type: string;
-  vendor_uuid?: string | null;
+  // LOCKED RULE: no vendor_uuid field — Supplier/Vendor is never a separate
+  // quotation input any more. It's either inherited from the selected
+  // Product Price (see product_price_uuid below), or left unset on a
+  // manual/ad-hoc line. See vendor_name on QuotationServiceLineDetail below
+  // for the read-only display value.
+  //
   // Master/Vendor/Inventory review: direct product-identity bridge, decoupled
   // from InventoryStock/sourcing — for a Flight line, this is how
   // classify_tax_treatment() reaches AirlineMaster.default_tax_treatment;
@@ -63,7 +68,19 @@ export interface QuotationServiceLineInput {
   // backend. Never required to save a line.
   airline_uuid?: string | null;
   hotel_uuid?: string | null;
+  // Quotation -> Product/Product Price bridge: an optional reference to a
+  // priced, tax-configured commercial offering. When set, the backend
+  // server-derives vendor_uuid above and cost_price/selling_price below
+  // from this Product Price — never trusts whatever this form last showed
+  // for those fields (see product_price_uuid's docstring on the backend
+  // schema). product_uuid itself is never sent; it's always implied by
+  // product_price_uuid.
+  product_price_uuid?: string | null;
   description?: string;
+  // Free-text, quotation-line-specific service location/context — never a
+  // Location Master FK. Product's own Location stays master/product data,
+  // exposed read-only as location_name below.
+  service_location?: string | null;
   day_no?: number | null;
   travel_date_from?: string;
   travel_date_to?: string;
@@ -143,6 +160,13 @@ export interface QuotationServiceLineDetail extends QuotationServiceLineInput {
   margin_amount: number;
   currency_code?: string | null;
   vendor_name?: string | null;
+  // Read-only, server-derived — display/traceability only, never re-sent.
+  product_uuid?: string | null;
+  product_name?: string | null;
+  price_code?: string | null;
+  tax_code_code?: string | null;
+  tax_code_rate?: number | null;
+  location_name?: string | null;
 }
 
 export interface QuotationFormInput {
@@ -272,6 +296,7 @@ export interface GetQuotationsParams {
   page_size?: number;
   search?: string;
   status?: string;
+  business_type?: string;
   enquiry_uuid?: string;
   cust_uuid?: string;
   from_date?: string;

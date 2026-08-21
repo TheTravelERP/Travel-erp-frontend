@@ -16,7 +16,7 @@
 // *after* a package is created (link to Enquiry vs. select directly onto a
 // form field), not in how the package itself is captured/validated.
 
-import { Grid, TextField } from "@mui/material";
+import { FormControlLabel, Grid, Switch, TextField } from "@mui/material";
 import { Controller, type Control, type FieldErrors } from "react-hook-form";
 import * as z from "zod";
 import { useTranslation } from "react-i18next";
@@ -29,6 +29,7 @@ export const getPackageQuickCreateSchema = (t: (key: string) => string) =>
     code: z.string().trim().min(1, t("validation.codeRequired")),
     package_type_uuid: z.string().nullable().optional(),
     currency_code: z.string().trim().length(3, t("quotation.validation.currencyCode3")),
+    is_domestic: z.boolean().optional(),
   });
 
 export type PackageQuickCreateValues = z.infer<ReturnType<typeof getPackageQuickCreateSchema>>;
@@ -131,6 +132,18 @@ export default function PackageQuickCreateFields({
               required
               error={!!errors.currency_code}
               helperText={errors.currency_code?.message}
+            />
+          )}
+        />
+      </Grid>
+      <Grid size={{ xs: 12 }}>
+        <Controller
+          name="is_domestic"
+          control={control}
+          render={({ field }) => (
+            <FormControlLabel
+              control={<Switch checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} />}
+              label={t("package.domesticPackage")}
             />
           )}
         />

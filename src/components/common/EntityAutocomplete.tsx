@@ -1,6 +1,6 @@
 // src/components/common/EntityAutocomplete.tsx
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Autocomplete,
   TextField,
@@ -32,6 +32,24 @@ interface EntityAutocompleteProps {
   // form's State/Province picker) — only applies to entities that carry a
   // country_code column on the backend, a no-op otherwise.
   countryCode?: string | null;
+
+  // Scopes the dropdown's rows to a specific Product (the Quotation form's
+  // Product Price picker) — only applies to entities that carry a
+  // product_id column on the backend, a no-op otherwise.
+  productUuid?: string | null;
+
+  // Scopes the dropdown's rows to Products applicable to this quotation
+  // service type (the Quotation form's Product picker) — only applies to
+  // entities that carry a service_type relationship on the backend, a
+  // no-op otherwise.
+  quotationServiceType?: string | null;
+
+  // Static options always prepended ahead of the fetched list, unaffected
+  // by search text (this component's own filterOptions never client-side
+  // filters — see below) — used for a permanent synthetic first choice,
+  // e.g. the Quotation form's Product picker offering "Manual" as its
+  // first-ever option regardless of what's typed.
+  staticOptions?: { label: string; value: string }[];
 
   // React Hook Form mode (default) — requires `control`.
   control?: any;
@@ -87,6 +105,9 @@ export default function EntityAutocomplete({
   documentTypeCode,
   pkgUuid,
   countryCode,
+  productUuid,
+  quotationServiceType,
+  staticOptions,
   onAddNew,
   allowAdd = false,
   setValue,
@@ -105,6 +126,8 @@ export default function EntityAutocomplete({
     documentTypeCode,
     pkgUuid,
     countryCode,
+    productUuid,
+    quotationServiceType,
     initialSearch: initialInputValue,
   });
 
@@ -115,7 +138,22 @@ export default function EntityAutocomplete({
   // keeps today's exact uncontrolled behavior.
   const [inputValue, setInputValue] = useState(initialInputValue ?? "");
 
-  const options = filterOption ? rawOptions.filter(filterOption) : rawOptions;
+  const searchedOptions = filterOption ? rawOptions.filter(filterOption) : rawOptions;
+  const options = staticOptions?.length ? [...staticOptions, ...searchedOptions] : searchedOptions;
+
+  // Caches the resolved option object per value, keyed by value — MUI's
+  // Autocomplete resets its displayed input text back to getOptionLabel(value)
+  // whenever the `value` prop's object *reference* changes, even if it's the
+  // same logical selection. Recomputing `selected` as a fresh object literal
+  // every render (as this used to do) meant every keystroke — which refetches
+  // `options` via setSearch and produces a new array/object each time — handed
+  // Autocomplete a "changed" value and it stomped the user's in-progress edit,
+  // snapping the field back to the full original label. Backspacing into an
+  // already-selected value looked broken; only the Clear button (which nulls
+  // currentValue, so there's nothing to snap back to) reliably worked. Caching
+  // by value keeps the same reference across re-renders/refetches, so typing
+  // to search for something else no longer gets reverted mid-edit.
+  const resolvedOptionsRef = useRef<Record<string, { label: string; value: string }>>({});
 
   const renderAutocomplete = (
     currentValue: string | null | undefined,
@@ -123,11 +161,13 @@ export default function EntityAutocomplete({
     error?: boolean,
     helperText?: string,
   ) => {
-    const selected =
-      options.find((o) => o.value === currentValue) ||
-      (currentValue
-        ? { label: "Loading...", value: currentValue }
-        : null);
+    const found = options.find((o) => o.value === currentValue);
+    if (found && currentValue) {
+      resolvedOptionsRef.current[currentValue] = found;
+    }
+    const selected = currentValue
+      ? resolvedOptionsRef.current[currentValue] ?? { label: "Loading...", value: currentValue }
+      : null;
 
     // Fire-and-forget: resolves the currently selected value into `options`
     // when it falls outside the first unsearched page (e.g. editing a
@@ -135,7 +175,11 @@ export default function EntityAutocomplete({
     // list) — without this, `selected` above falls back to a permanent
     // "Loading..." placeholder that never resolves. Guarded internally
     // (resolvedValuesRef) so this is a no-op once the value is loaded.
-    void ensureOptionLoaded(currentValue);
+    // Skip entirely for a staticOptions value (e.g. the Quotation Product
+    // picker's "__manual__" sentinel) — it's never a real backend row, so
+    // ensureOptionLoaded's by-value lookup would just 404/500 every render.
+    const isStaticValue = staticOptions?.some((o) => o.value === currentValue);
+    if (!isStaticValue) void ensureOptionLoaded(currentValue);
 
     return (
       <Autocomplete
@@ -148,6 +192,13 @@ export default function EntityAutocomplete({
 
         /* ---------------- LABEL ---------------- */
         getOptionLabel={(option: any) => option?.label || ""}
+
+        // Rows key on their (unique) uuid, never the label — two unrelated
+        // records can legitimately share a display name (e.g. two Packages
+        // both named "Full Cycle Test Package"), which would otherwise
+        // collide as React keys in the dropdown list (MUI's default key
+        // falls back to the label when none is given).
+        getOptionKey={(option: any) => option?.value ?? ""}
 
         /* ---------------- EQUALITY ---------------- */
         isOptionEqualToValue={(opt: any, val: any) =>

@@ -3,6 +3,7 @@
 import { Box, Button, Grid, MenuItem, TextField, Typography, Stack } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import EntityAutocomplete from "../../../../components/common/EntityAutocomplete";
+import DropdownAutocomplete from "../../../../components/common/DropdownAutocomplete";
 import QuickDateRangeFilter from "../../../../components/common/QuickDateRangeFilter";
 
 const STATUSES = ["Draft", "Sent", "Revised", "Accepted", "Rejected", "Expired", "Converted"];
@@ -10,7 +11,9 @@ const STATUSES = ["Draft", "Sent", "Revised", "Accepted", "Rejected", "Expired",
 export interface QuotationFilterValues {
   search?: string;
   status?: string;
+  business_type?: string;
   enquiry_uuid?: string;
+  cust_uuid?: string;
   from_date?: string;
   to_date?: string;
   is_active?: string;
@@ -60,6 +63,18 @@ export default function QuotationFilters({ value, onChange, onApply, onReset }: 
         </Grid>
 
         <Grid size={{ xs: 12, md: 3 }}>
+          <DropdownAutocomplete
+            name="business_type"
+            label={t("quotation.businessType")}
+            value={value.business_type ?? null}
+            onChange={(val: string | null) => onChange({ business_type: val || undefined })}
+            useForm={false}
+            allowAdd={false}
+            pagination={false}
+          />
+        </Grid>
+
+        <Grid size={{ xs: 12, md: 3 }}>
           <EntityAutocomplete
             name="enquiry_uuid"
             label={t("quotation.enquiry")}
@@ -67,6 +82,17 @@ export default function QuotationFilters({ value, onChange, onApply, onReset }: 
             useForm={false}
             value={value.enquiry_uuid ?? null}
             onChange={(val) => onChange({ enquiry_uuid: val || undefined })}
+          />
+        </Grid>
+
+        <Grid size={{ xs: 12, md: 3 }}>
+          <EntityAutocomplete
+            name="cust_uuid"
+            label={t("common.customer")}
+            dropdownName="customers"
+            useForm={false}
+            value={value.cust_uuid ?? null}
+            onChange={(val) => onChange({ cust_uuid: val || undefined })}
           />
         </Grid>
 

@@ -19,6 +19,9 @@ export interface PackageFormInput {
   departure_city?: string;
   arrival_city?: string;
   country?: string;
+  // Drives Booking's Traveller Completion (passport/visa) UI — hidden
+  // entirely when a booking's package is domestic.
+  is_domestic?: boolean;
 
   departure_date?: string;
   return_date?: string;

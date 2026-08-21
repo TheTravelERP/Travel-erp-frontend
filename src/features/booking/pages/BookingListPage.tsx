@@ -4,6 +4,7 @@ import axios from "axios";
 import { Box, Collapse, Paper } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import AddIcon from "@mui/icons-material/Add";
+import ListAltIcon from "@mui/icons-material/ListAlt";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -29,10 +30,16 @@ export default function BookingListPage() {
   const sortOrder = (searchParams.get("sort_order") as "asc" | "desc") || undefined;
   const search = searchParams.get("search") || "";
 
+  const isTrash = searchParams.get("is_deleted") === "true";
+
   const appliedFilters: BookingFilterValues = {
     status: searchParams.get("status") || "",
+    business_type: searchParams.get("business_type") || "",
+    enquiry_uuid: searchParams.get("enquiry_uuid") || "",
+    cust_uuid: searchParams.get("cust_uuid") || "",
     travel_from_date: searchParams.get("travel_from_date") || "",
     travel_to_date: searchParams.get("travel_to_date") || "",
+    is_active: searchParams.get("is_active") || "",
   };
 
   const [draftFilters, setDraftFilters] = useState<BookingFilterValues>(appliedFilters);
@@ -61,10 +68,17 @@ export default function BookingListPage() {
       setLoading(true);
       const res = await getBookingsList(
         {
-          page, page_size: pageSize, sort_by: sortBy, sort_order: sortOrder, search,
+          page, page_size: pageSize, is_deleted: isTrash, sort_by: sortBy, sort_order: sortOrder, search,
           status: appliedFilters.status || undefined,
+          business_type: appliedFilters.business_type || undefined,
+          enquiry_uuid: appliedFilters.enquiry_uuid || undefined,
+          cust_uuid: appliedFilters.cust_uuid || undefined,
           travel_from_date: appliedFilters.travel_from_date || undefined,
           travel_to_date: appliedFilters.travel_to_date || undefined,
+          is_active:
+            appliedFilters.is_active === undefined || appliedFilters.is_active === ""
+              ? undefined
+              : appliedFilters.is_active === "true",
         },
         signal,
       );
@@ -87,19 +101,29 @@ export default function BookingListPage() {
   return (
     <Box sx={{ p: { xs: 1, md: 1 } }}>
       <ListPageToolbar
-        title={t("menu.packages.bookings")}
+        title={isTrash ? t("common.trash") : t("menu.packages.bookings")}
         breadcrumbs={[
           { label: t("menu.dashboard"), href: "/app/dashboard" },
-          { label: t("menu.packages.bookings") },
+          { label: isTrash ? t("common.trash") : t("menu.packages.bookings") },
         ]}
-        primaryAction={{
-          key: "add",
-          label: t("common.add"),
-          icon: <AddIcon />,
-          variant: "contained",
-          show: perms.can_create,
-          onClick: () => navigate("/app/bookings/list/create"),
-        }}
+        primaryAction={
+          isTrash
+            ? {
+                key: "view",
+                label: t("menu.packages.bookings"),
+                icon: <ListAltIcon />,
+                variant: "contained",
+                onClick: () => updateURL({ is_deleted: undefined, page: 1 }),
+              }
+            : {
+                key: "add",
+                label: t("common.add"),
+                icon: <AddIcon />,
+                variant: "contained",
+                show: perms.can_create,
+                onClick: () => navigate("/app/bookings/list/create"),
+              }
+        }
         secondaryActions={[
           {
             key: "filters",
@@ -107,6 +131,14 @@ export default function BookingListPage() {
             icon: <FilterListIcon />,
             variant: showFilters ? "contained" : "outlined",
             onClick: () => setShowFilters((v) => !v),
+          },
+        ]}
+        overflowActions={[
+          {
+            key: "view-trash",
+            label: t("common.viewTrash"),
+            show: perms.can_delete && !isTrash,
+            onClick: () => updateURL({ is_deleted: true, page: 1 }),
           },
         ]}
       />
@@ -135,6 +167,7 @@ export default function BookingListPage() {
 
         <BookingTable
           rows={rows} loading={loading} page={page} pageSize={pageSize} total={total}
+          isTrash={isTrash}
           sortBy={sortBy} sortOrder={sortOrder} onSortChange={handleSortChange}
           onPageChange={(p) => updateURL({ page: p })}
           onPageSizeChange={(s) => updateURL({ page_size: s, page: 1 })}

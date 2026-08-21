@@ -44,9 +44,10 @@ interface Props {
   menuKey: string;
   category?: string;
   canEdit?: boolean;
+  onCountChange?: (count: number) => void;
 }
 
-export default function AttachmentList({ entityType, entityUuid, menuKey, category = 'attachment', canEdit = true }: Props) {
+export default function AttachmentList({ entityType, entityUuid, menuKey, category = 'attachment', canEdit = true, onCountChange }: Props) {
   const { t } = useTranslation();
   const { showSnackbar } = useSnackbar();
 
@@ -60,6 +61,7 @@ export default function AttachmentList({ entityType, entityUuid, menuKey, catego
     try {
       const data = await listAttachments(entityType, entityUuid, menuKey, signal);
       setRows(data);
+      if (!signal?.aborted) onCountChange?.(data.length);
     } finally {
       if (!signal?.aborted) setLoading(false);
     }

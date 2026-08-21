@@ -9,6 +9,8 @@ export const useEntityDropdown = ({
   documentTypeCode,
   pkgUuid,
   countryCode,
+  productUuid,
+  quotationServiceType,
   initialSearch,
 }: {
   dropdownName: string;
@@ -24,6 +26,16 @@ export const useEntityDropdown = ({
    *  form's State/Province picker) — only applies to entities that carry a
    *  country_code column, a no-op otherwise. */
   countryCode?: string | null;
+  /** Scopes the dropdown's rows to a specific Product (the Quotation form's
+   *  Product Price picker) — only applies to entities that carry a
+   *  product_id FK, a no-op otherwise. */
+  productUuid?: string | null;
+  /** Scopes the dropdown's rows to Products applicable to this quotation
+   *  service type (e.g. "Hotel", "Flight") — the Quotation form's Product
+   *  picker, so only Products matching the already-selected Service Type
+   *  are offered. A no-op for any entity without a service_type
+   *  relationship (i.e. only ever applies to Product itself). */
+  quotationServiceType?: string | null;
   /** Seeds the very first fetch with a search term (e.g. an Enquiry's
    *  customer-name snapshot) instead of the default empty/general listing.
    *  Only affects the initial state — omitted by every existing caller. */
@@ -60,6 +72,8 @@ export const useEntityDropdown = ({
           document_type_code: documentTypeCode,
           pkg_uuid: pkgUuid ?? undefined,
           country_code: countryCode ?? undefined,
+          product_uuid: productUuid ?? undefined,
+          quotation_service_type: quotationServiceType ?? undefined,
         },
         signal,
       );
@@ -94,7 +108,7 @@ export const useEntityDropdown = ({
   // Tracks the previous scoping key so a genuine scope change (e.g. the
   // Location form's Country switching from India to Saudi Arabia) can be
   // told apart from a plain search refetch, below.
-  const scopeKey = `${documentTypeCode ?? ""}|${pkgUuid ?? ""}|${countryCode ?? ""}`;
+  const scopeKey = `${documentTypeCode ?? ""}|${pkgUuid ?? ""}|${countryCode ?? ""}|${productUuid ?? ""}|${quotationServiceType ?? ""}`;
   const prevScopeKeyRef = useRef(scopeKey);
 
   useEffect(() => {
@@ -115,7 +129,7 @@ export const useEntityDropdown = ({
     fetchData(search, 1, true, controller.signal);
     return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, documentTypeCode, pkgUuid, countryCode]);
+  }, [search, documentTypeCode, pkgUuid, countryCode, productUuid, quotationServiceType]);
 
   const loadMore = () => {
     if (!hasMore || loading) return;

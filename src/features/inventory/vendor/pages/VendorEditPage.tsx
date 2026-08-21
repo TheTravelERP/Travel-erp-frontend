@@ -1,10 +1,11 @@
 // src/features/inventory/vendor/pages/VendorEditPage.tsx
 import { useEffect, useState } from "react";
-import { Box, CircularProgress } from "@mui/material";
+import { Box, CircularProgress, Paper, Typography } from "@mui/material";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import VendorForm from "../components/VendorForm";
+import VendorDocumentsPanel from "../components/VendorDocumentsPanel";
 import type { VendorFormInput } from "../vendor.types";
 import { getVendorByUuid, updateVendorByUuid } from "../vendor.api";
 import { usePermission } from "../../../../hooks/usePermission";
@@ -80,7 +81,16 @@ export default function VendorEditPage() {
           <CircularProgress />
         </Box>
       ) : (
-        <VendorForm defaultValues={defaultValues} onSubmit={handleUpdate} />
+        <>
+          <VendorForm defaultValues={defaultValues} onSubmit={handleUpdate} />
+
+          <Paper variant="outlined" sx={{ p: 2, mt: 2 }}>
+            <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
+              {t("common.attachments")}
+            </Typography>
+            <VendorDocumentsPanel vendorUuid={uuid!} canEdit={perms.can_edit} />
+          </Paper>
+        </>
       )}
     </FormPageLayout>
   );

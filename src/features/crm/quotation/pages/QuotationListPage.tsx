@@ -39,7 +39,9 @@ export default function QuotationListPage() {
   const appliedFilters: QuotationFilterValues = {
     search: searchParams.get("search") || "",
     status: searchParams.get("status") || "",
+    business_type: searchParams.get("business_type") || "",
     enquiry_uuid: searchParams.get("enquiry_uuid") || "",
+    cust_uuid: searchParams.get("cust_uuid") || "",
     from_date: searchParams.get("from_date") || "",
     to_date: searchParams.get("to_date") || "",
     is_active: searchParams.get("is_active") || "",

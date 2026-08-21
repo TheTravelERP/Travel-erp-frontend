@@ -112,7 +112,7 @@ export default function ResolveLinkShell({
                 disabled={disabled}
                 onClick={() => setExpandedPanel((p) => (p === "create" ? "none" : "create"))}
               >
-                {t("quotation.createNew")}
+                {t("common.createNew")}
               </Button>
             </Stack>
 

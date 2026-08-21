@@ -221,7 +221,16 @@ export default function QuotationViewPage() {
 
             <Grid container spacing={1.5}>
               <Grid size={{ xs: 6 }}><Typography variant="body2" color="text.secondary">{t("common.customer")}</Typography><Typography>{quotation.customer_name}</Typography></Grid>
-              <Grid size={{ xs: 6 }}><Typography variant="body2" color="text.secondary">{t("quotation.enquiry")}</Typography><Typography>{quotation.enquiry_no}</Typography></Grid>
+              <Grid size={{ xs: 6 }}>
+                <Typography variant="body2" color="text.secondary">{t("quotation.enquiry")}</Typography>
+                {quotation.enquiry_uuid ? (
+                  <Link component={RouterLink} to={`/app/enquiries/${quotation.enquiry_uuid}`} underline="hover">
+                    {quotation.enquiry_no}
+                  </Link>
+                ) : (
+                  <Typography>{quotation.enquiry_no ?? "-"}</Typography>
+                )}
+              </Grid>
               <Grid size={{ xs: 6 }}><Typography variant="body2" color="text.secondary">{t("quotation.businessType")}</Typography><Typography>{quotation.business_type}</Typography></Grid>
               {quotation.business_type === "Package" && (
                 <Grid size={{ xs: 6 }}>

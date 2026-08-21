@@ -109,7 +109,7 @@ export default function QuotationPackagePanel({
         </Box>
         {!isResolved && !salesContextLocked && (
           <Button size="small" variant="outlined" disabled={disabled || linking} onClick={() => setDialogOpen(true)}>
-            {t("quotation.createNew")} {t("quotation.package")}
+            {t("common.createNew")} {t("quotation.package")}
           </Button>
         )}
       </Box>

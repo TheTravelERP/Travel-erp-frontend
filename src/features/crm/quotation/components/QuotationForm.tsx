@@ -5,9 +5,6 @@ import {
   Button,
   Divider,
   Grid,
-  IconButton,
-  Link,
-  MenuItem,
   Stack,
   TextField,
   Typography,
@@ -16,9 +13,8 @@ import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
 
 import { getQuotationSchema } from "../quotation.schema";
 import type { QuotationFormInput } from "../quotation.types";
@@ -35,12 +31,10 @@ import EnquirySummaryBar from "./EnquirySummaryBar";
 import QuotationCustomerPanel from "./quickResolve/QuotationCustomerPanel";
 import QuotationPackagePanel from "./quickResolve/QuotationPackagePanel";
 import QuotationOccupancyGroups from "./QuotationOccupancyGroups";
-import QuotationDisbursementPanel, { DISBURSEMENT_ELIGIBLE_SERVICE_TYPES } from "./QuotationDisbursementPanel";
-import QuotationAdHocTaxPanel, { AD_HOC_TAX_ELIGIBLE_SERVICE_TYPES } from "./QuotationAdHocTaxPanel";
+import QuotationServiceLineRow from "./QuotationServiceLineRow";
 import { getPackageByUuid } from "../../../package/package.api";
-import { DISCOUNT_TYPES, calculateRowLineTotal, calculateSectionTotal, toDiscountWireFields, type DiscountType } from "../pricing";
+import { calculateSectionTotal, toDiscountWireFields, type DiscountType } from "../pricing";
 import type { LineTaxError } from "../lineErrorParser";
-import { suggestFixLink } from "../lineErrorParser";
 
 // Enquiries whose conversion_status leaves them effectively closed — flagged
 // (not hidden) in the standalone picker so a user can still knowingly pick one.
@@ -109,11 +103,15 @@ const emptyValues: QuotationFormInput = {
 
 const emptyLine = {
   service_type: "Hotel",
-  vendor_uuid: null,
   airline_uuid: null,
   hotel_uuid: null,
+  product_price_uuid: null,
   description: "",
+  service_location: "",
+  travel_date_from: "",
+  travel_date_to: "",
   quantity: 1,
+  unit: "",
   cost_price: 0,
   selling_price: 0,
   discount_percent: 0,
@@ -123,42 +121,6 @@ const emptyLine = {
   tax_context: null,
   disbursement_candidate: false,
 };
-
-// Fixed per-column min-widths for the Service Lines row. Grid's responsive
-// column sizing (xs:.../sm:...) wraps fields onto multiple lines once the
-// viewport can't fit every column's xs=12 width side by side — a fixed-width
-// nowrap flex row scrolls horizontally instead, so the row itself never
-// breaks across viewports (see also QuotationOccupancyGroups.tsx, which
-// uses the identical pattern for its own row of fields).
-const SERVICE_LINE_COLUMN_WIDTHS = {
-  serviceType: 170,
-  description: 220,
-  quantity: 90,
-  costPrice: 120,
-  sellingPrice: 120,
-  discountType: 150,
-  discountValue: 120,
-  finalPrice: 150,
-  vendor: 180,
-  delete: 48,
-} as const;
-
-// Subtle, thin scrollbar for the horizontally-scrollable row area — no
-// outer card/border, just enough affordance to show more content exists.
-const SCROLLABLE_ROWS_SX = {
-  overflowX: "auto",
-  pb: 0.5,
-  "&::-webkit-scrollbar": { height: 6 },
-  "&::-webkit-scrollbar-thumb": { backgroundColor: "divider", borderRadius: 3 },
-  "&::-webkit-scrollbar-track": { backgroundColor: "transparent" },
-} as const;
-
-// Caps expansion content (Flight's Airline picker, Hotel's Hotel picker, the per-line tax
-// error) that sits *below* a scrollable row to a readable width instead of
-// stretching to the row's full (often 1000px+) scrollable content width —
-// otherwise a short alert message would render as one long line running off
-// to the right, unreadable without scrolling, on narrow viewports.
-const ROW_EXPANSION_SX = { maxWidth: "min(560px, 92vw)" } as const;
 
 // UTC-based so a "days" offset from a YYYY-MM-DD string can't drift by a day
 // depending on the browser's local timezone (new Date("2026-08-02") plus
@@ -229,7 +191,8 @@ export default function QuotationForm({
     handleSubmit,
     reset,
     setValue,
-    formState: { isSubmitting, errors },
+    getValues,
+    formState: { isSubmitting, isDirty, errors },
   } = useForm<QuotationFormInput>({
     resolver: zodResolver(schema),
     defaultValues: mergeFormDefaults(emptyValues, defaultValues && withInferredDiscountFields(defaultValues)),
@@ -242,6 +205,23 @@ export default function QuotationForm({
       reset(mergeFormDefaults(emptyValues, withInferredDiscountFields(defaultValues)));
     }
   }, [defaultValues, reset]);
+
+  // Warns before a tab close/refresh loses unsaved work — a Package
+  // quotation with occupancy rows and several service lines represents real
+  // typed effort, and a session-expiry save failure (see getErrorMessage's
+  // 401 branch) is exactly the moment a user might reflexively refresh.
+  // Native browsers show their own fixed confirmation text regardless of
+  // this string, so it isn't translated — only whether the prompt fires at
+  // all is under this component's control.
+  useEffect(() => {
+    if (disabled || !isDirty) return;
+    function handleBeforeUnload(e: BeforeUnloadEvent) {
+      e.preventDefault();
+      e.returnValue = "";
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [disabled, isDirty]);
 
   // "Valid For" (days) is a pure UI convenience — not part of the submitted
   // payload — that auto-fills valid_until as quotation_date + N days.
@@ -421,6 +401,19 @@ export default function QuotationForm({
   const packageResolved = !isPackageBusiness || !!pkgUuidWatched || (!!enquiry && !!enquiry.pkg_uuid);
   const linksResolved = customerResolved && packageResolved;
 
+  // A Package quotation's Occupancy Pricing section only becomes visible
+  // once linksResolved is true, so this can't join missingReadinessItems
+  // below (that list also decides whether the section renders at all —
+  // adding this would hide the very "Add Occupancy" button the user needs).
+  // Instead it disables Save on its own, the same proactive way Customer/
+  // Package do, rather than only surfacing after a failed submit (see
+  // quotation.schema.ts's matching zod .refine on occupancy_groups, which
+  // still exists as the actual Save-time gate — this is just the
+  // before-the-fact signal to the user that they saw it too late in the
+  // original bug report).
+  const occupancyGroupsMissing =
+    linksResolved && isPackageBusiness && (occupancyGroupsWatched?.length ?? 0) === 0;
+
   // Plain-language list of what's still blocking Save — shown next to the
   // Save button and in place of the Service Lines section, so the user
   // never has to guess why they can't submit yet.
@@ -518,7 +511,12 @@ export default function QuotationForm({
     // rest unchanged.
     payload.service_lines = payload.service_lines.map((line) => {
       const { discount_type, discount_value, ...rest } = line;
-      return { ...rest, ...toDiscountWireFields(discount_type, discount_value) };
+      return {
+        ...rest,
+        ...toDiscountWireFields(discount_type, discount_value),
+        travel_date_from: rest.travel_date_from || null,
+        travel_date_to: rest.travel_date_to || null,
+      };
     });
     if (payload.enquiry_uuid) {
       payload.cust_uuid = null;
@@ -902,6 +900,8 @@ export default function QuotationForm({
                 paxAdult={paxAdultWatched ?? 0}
                 paxChild={paxChildWatched ?? 0}
                 paxInfant={paxInfantWatched ?? 0}
+                lineTaxErrors={lineTaxErrors}
+                serviceLinesCount={serviceLinesWatched?.length ?? 0}
               />
             )}
 
@@ -919,239 +919,27 @@ export default function QuotationForm({
               )}
 
               <Grid size={{ xs: 12 }}>
-                {/* Horizontally-scrollable row area — MUI's standard
-                    overflowX:auto pattern (same one TableContainer applies
-                    internally), scoped to just this rows block so the page
-                    itself never scrolls sideways. Each row is a nowrap flex
-                    row of fixed-width columns (SERVICE_LINE_COLUMN_WIDTHS)
-                    instead of a responsive Grid, so it stays one intact
-                    horizontal line at every viewport instead of wrapping. */}
-                <Box sx={SCROLLABLE_ROWS_SX}>
-                  <Stack spacing={2} sx={{ minWidth: "fit-content" }}>
-                    {fields.map((field, index) => {
-                      const line = serviceLinesWatched?.[index];
-                      const discountType = line?.discount_type ?? "Percentage";
-                      const sellingPrice = line?.selling_price;
-                      const finalPrice = calculateRowLineTotal({
-                        selling_price: sellingPrice,
-                        discount_type: discountType,
-                        discount_value: line?.discount_value,
-                        quantity: line?.quantity,
-                      });
-                      // Backend line numbers are 1-based and count every
-                      // resolved line in submission order — matches this
-                      // row's index+1 as long as the line set submitted is
-                      // the one currently rendered (true right after a
-                      // failed save, before any further edits reorder it).
-                      const lineError = lineTaxErrors?.find((e) => e.lineNo === index + 1);
-                      const fixLink = lineError ? suggestFixLink(lineError.reason) : null;
-
-                      return (
-                        <Box key={field.id}>
-                        <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flexWrap: "nowrap" }}>
-                          <Box sx={{ width: SERVICE_LINE_COLUMN_WIDTHS.serviceType, flexShrink: 0 }}>
-                            <DropdownAutocomplete
-                              name={`service_lines.${index}.service_type`}
-                              label={t("quotation.serviceType")}
-                              control={control}
-                              dropdownName="quotation_service_type"
-                              useForm={true}
-                              allowAdd={false}
-                              disabled={disabled}
-                            />
-                          </Box>
-                          <Box sx={{ width: SERVICE_LINE_COLUMN_WIDTHS.description, flexShrink: 0 }}>
-                            <Controller
-                              name={`service_lines.${index}.description`}
-                              control={control}
-                              render={({ field: f }) => (
-                                <TextField {...f} label={t("quotation.description")} fullWidth disabled={disabled} />
-                              )}
-                            />
-                          </Box>
-                          <Box sx={{ width: SERVICE_LINE_COLUMN_WIDTHS.quantity, flexShrink: 0 }}>
-                            <Controller
-                              name={`service_lines.${index}.quantity`}
-                              control={control}
-                              render={({ field: f, fieldState }) => (
-                                <TextField {...f} type="number" label={t("quotation.quantity")} fullWidth disabled={disabled} error={!!fieldState.error} helperText={fieldState.error?.message} />
-                              )}
-                            />
-                          </Box>
-                          <Box sx={{ width: SERVICE_LINE_COLUMN_WIDTHS.costPrice, flexShrink: 0 }}>
-                            <Controller
-                              name={`service_lines.${index}.cost_price`}
-                              control={control}
-                              render={({ field: f }) => (
-                                <TextField {...f} type="number" label={t("quotation.costPrice")} fullWidth disabled={disabled} />
-                              )}
-                            />
-                          </Box>
-                          <Box sx={{ width: SERVICE_LINE_COLUMN_WIDTHS.sellingPrice, flexShrink: 0 }}>
-                            <Controller
-                              name={`service_lines.${index}.selling_price`}
-                              control={control}
-                              render={({ field: f }) => (
-                                <TextField {...f} type="number" label={t("quotation.sellingPrice")} fullWidth disabled={disabled} />
-                              )}
-                            />
-                          </Box>
-                          <Box sx={{ width: SERVICE_LINE_COLUMN_WIDTHS.discountType, flexShrink: 0 }}>
-                            <Controller
-                              name={`service_lines.${index}.discount_type`}
-                              control={control}
-                              render={({ field: f }) => (
-                                <TextField {...f} select label={t("quotation.discountType")} fullWidth disabled={disabled}>
-                                  {DISCOUNT_TYPES.map((opt) => (
-                                    <MenuItem key={opt} value={opt}>
-                                      {t(opt === "Percentage" ? "quotation.discountTypePercentage" : "quotation.discountTypeAmount")}
-                                    </MenuItem>
-                                  ))}
-                                </TextField>
-                              )}
-                            />
-                          </Box>
-                          <Box sx={{ width: SERVICE_LINE_COLUMN_WIDTHS.discountValue, flexShrink: 0 }}>
-                            <Controller
-                              name={`service_lines.${index}.discount_value`}
-                              control={control}
-                              render={({ field: f, fieldState }) => {
-                                const discountMax = discountType === "Percentage" ? 100 : sellingPrice ?? Infinity;
-                                return (
-                                  <TextField
-                                    {...f}
-                                    value={f.value ?? 0}
-                                    type="number"
-                                    label={t("quotation.discountAmount")}
-                                    fullWidth
-                                    disabled={disabled}
-                                    error={!!fieldState.error}
-                                    helperText={fieldState.error?.message}
-                                    slotProps={{ htmlInput: { min: 0, max: discountMax === Infinity ? undefined : discountMax } }}
-                                    onChange={(e) => {
-                                      // Hard clamp — the max attribute alone
-                                      // doesn't stop a user from typing digits
-                                      // past it (only the spinner/native
-                                      // validation respects it).
-                                      const raw = e.target.value;
-                                      if (raw === "") {
-                                        f.onChange(raw);
-                                        return;
-                                      }
-                                      const num = Number(raw);
-                                      f.onChange(Number.isNaN(num) ? raw : Math.min(Math.max(num, 0), discountMax));
-                                    }}
-                                  />
-                                );
-                              }}
-                            />
-                          </Box>
-                          <Box sx={{ width: SERVICE_LINE_COLUMN_WIDTHS.finalPrice, flexShrink: 0 }}>
-                            <TextField
-                              label={t("quotation.finalPrice")}
-                              fullWidth
-                              disabled
-                              value={finalPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                            />
-                          </Box>
-                          <Box sx={{ width: SERVICE_LINE_COLUMN_WIDTHS.vendor, flexShrink: 0 }}>
-                            <EntityAutocomplete
-                              name={`service_lines.${index}.vendor_uuid`}
-                              label={t("quotation.vendor")}
-                              control={control}
-                              dropdownName="vendors"
-                              disabled={disabled}
-                            />
-                          </Box>
-                          <Box sx={{ width: SERVICE_LINE_COLUMN_WIDTHS.delete, flexShrink: 0 }}>
-                            {!disabled && (
-                              <IconButton color="error" onClick={() => remove(index)}>
-                                <DeleteIcon />
-                              </IconButton>
-                            )}
-                          </Box>
-                        </Stack>
-
-                        {/* Flight-only — classify_tax_treatment() reaches
-                            AirlineMaster.default_tax_treatment via this
-                            line's own airline_id, a direct identity bridge
-                            decoupled from InventoryStock/sourcing (Master/
-                            Vendor/Inventory review). Kept out of the main row
-                            so every other service type stays exactly as
-                            compact as today. Capped to a readable width
-                            (ROW_EXPANSION_SX) instead of inheriting the
-                            scrollable row's full content width. */}
-                        {line?.service_type === "Flight" && (
-                          <Box sx={{ mt: 0.25, ...ROW_EXPANSION_SX }}>
-                            <EntityAutocomplete
-                              name={`service_lines.${index}.airline_uuid`}
-                              label={t("quotation.airline")}
-                              control={control}
-                              dropdownName="airlines"
-                              disabled={disabled}
-                            />
-                          </Box>
-                        )}
-
-                        {/* Hotel-only — resolve_place_of_supply() reaches
-                            HotelMaster.state via this line's own hotel_id,
-                            same direct-identity convention as Airline above. */}
-                        {line?.service_type === "Hotel" && (
-                          <Box sx={{ mt: 0.25, ...ROW_EXPANSION_SX }}>
-                            <EntityAutocomplete
-                              name={`service_lines.${index}.hotel_uuid`}
-                              label={t("quotation.hotel")}
-                              control={control}
-                              dropdownName="hotels"
-                              disabled={disabled}
-                            />
-                          </Box>
-                        )}
-
-                        {/* Ad-Hoc / Quick Quotation Tax Source (Layer 3B) —
-                            explicit tax classification for a line with no
-                            master/config source available, or (Flight only)
-                            no Airline linked to this specific line. Kept
-                            below the Airline/Hotel pickers so choosing an
-                            Airline naturally hides it (see
-                            QuotationAdHocTaxPanel's own master-driven
-                            check) without any extra wiring here. */}
-                        {AD_HOC_TAX_ELIGIBLE_SERVICE_TYPES.has(line?.service_type ?? "") && (
-                          <Box sx={ROW_EXPANSION_SX}>
-                            <QuotationAdHocTaxPanel
-                              control={control}
-                              setValue={setValue}
-                              lineIndex={index}
-                              serviceType={line?.service_type ?? ""}
-                              disabled={disabled}
-                            />
-                          </Box>
-                        )}
-
-                        {DISBURSEMENT_ELIGIBLE_SERVICE_TYPES.has(line?.service_type ?? "") && (
-                          <Box sx={ROW_EXPANSION_SX}>
-                            <QuotationDisbursementPanel control={control} lineIndex={index} disabled={disabled} />
-                          </Box>
-                        )}
-
-                        {lineError && (
-                          <Alert severity="warning" sx={{ mt: 1, ...ROW_EXPANSION_SX }}>
-                            <Typography variant="body2" fontWeight={600}>
-                              {t("quotation.taxConfigRequired")}
-                            </Typography>
-                            <Typography variant="body2">{lineError.reason}</Typography>
-                            {fixLink && (
-                              <Link component={RouterLink} to={fixLink.href} target="_blank" rel="noopener noreferrer" variant="body2">
-                                {t(fixLink.labelKey)}
-                              </Link>
-                            )}
-                          </Alert>
-                        )}
-                        </Box>
-                      );
-                    })}
-                  </Stack>
-                </Box>
+                <Stack spacing={1.5}>
+                  {fields.map((field, index) => {
+                    const lineError = lineTaxErrors?.find((e) => e.lineNo === index + 1);
+                    return (
+                      <Box key={field.id}>
+                        <QuotationServiceLineRow
+                          control={control}
+                          setValue={setValue}
+                          getValues={getValues}
+                          index={index}
+                          disabled={disabled}
+                          currencyCode={currencyWatched}
+                          priceAsOfDate={priceAsOfDate}
+                          onRemove={() => remove(index)}
+                          lineError={lineError}
+                        />
+                        {index < fields.length - 1 && <Divider sx={{ mt: 1.5 }} />}
+                      </Box>
+                    );
+                  })}
+                </Stack>
               </Grid>
 
               {/* Left-aligned, directly below the last row — continues the
@@ -1211,10 +999,12 @@ export default function QuotationForm({
             onBack={() => navigate("/app/crm/quotations")}
             onDiscard={() => reset()}
             submitting={isSubmitting}
-            saveDisabled={!linksResolved}
+            saveDisabled={!linksResolved || occupancyGroupsMissing}
             saveDisabledReason={
               missingReadinessItems.length > 0
                 ? `${t("quotation.waitingFor")} ${missingReadinessItems.join(", ")}`
+                : occupancyGroupsMissing
+                ? t("quotation.validation.atLeastOneOccupancyGroup")
                 : undefined
             }
           />

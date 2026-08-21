@@ -78,6 +78,9 @@ interface Props {
   perms: Perms;
   primaryCustomerUuid?: string | null;
   onCountChange?: (count: number) => void;
+  // Domestic packages never need passport/visa tracking (see
+  // TravellerSummaryCards.tsx) — passed through from BookingViewPage.tsx.
+  hidePassportVisa?: boolean;
 }
 
 interface Filters {
@@ -91,7 +94,7 @@ const emptyFilters: Filters = { traveller_type: "", nationality: "", status: "",
 
 type DialogMode = "create" | "edit" | "view";
 
-export default function TravellerList({ bookingUuid, perms, primaryCustomerUuid, onCountChange }: Props) {
+export default function TravellerList({ bookingUuid, perms, primaryCustomerUuid, onCountChange, hidePassportVisa }: Props) {
   const { t } = useTranslation();
   const { showSnackbar } = useSnackbar();
 
@@ -309,7 +312,7 @@ export default function TravellerList({ bookingUuid, perms, primaryCustomerUuid,
 
   return (
     <Box>
-      {!isTrash && <TravellerSummaryCards travellers={fullTravellers} loading={fullLoading} />}
+      {!isTrash && <TravellerSummaryCards travellers={fullTravellers} loading={fullLoading} hidePassportVisa={hidePassportVisa} />}
 
       <Stack direction="row" spacing={1.5} mb={2} flexWrap="wrap" useFlexGap alignItems="center">
         {!isTrash && perms.can_create && (
@@ -464,8 +467,8 @@ export default function TravellerList({ bookingUuid, perms, primaryCustomerUuid,
                   </TableRow>
                 )}
                 {rows.map((row, idx) => {
-                  const missingPassport = !row.passport_no;
-                  const pendingVisa = !row.visa_status || row.visa_status === "Pending";
+                  const missingPassport = !hidePassportVisa && !row.passport_no;
+                  const pendingVisa = !hidePassportVisa && (!row.visa_status || row.visa_status === "Pending");
                   const missingDob = !row.date_of_birth;
                   const isPrimary = Boolean(primaryCustomerUuid) && row.customer_uuid === primaryCustomerUuid;
 

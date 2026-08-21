@@ -71,6 +71,7 @@ export default function EnquiryFilters({
         <Grid size={{ xs: 12, md: 3 }}>
           <DropdownAutocomplete
             name="conversion_status"
+            dropdownName="enquiry_status"
             label={t("enquiry.conversionStatus")}
             value={value.conversion_status ?? null}
             onChange={(val: string | null) =>

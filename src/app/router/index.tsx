@@ -26,6 +26,8 @@ import VendorRoutes from '../../features/inventory/vendor/vendor.routes';
 import VendorContractRoutes from '../../features/inventory/vendorContract/vendorContract.routes';
 import DepartureRoutes from '../../features/departure/departure.routes';
 import InventoryStockRoutes from '../../features/inventory/inventoryStock/inventoryStock.routes';
+import ProductRoutes from '../../features/inventory/product/product.routes';
+import ProductPriceRoutes from '../../features/inventory/productPrice/productPrice.routes';
 import ZiyaratRoutes from '../../features/inventory/ziyarat/ziyarat.routes';
 import SettingsPage from '../../features/settings';
 import ChangePasswordPage from '../../features/profile/pages/ChangePasswordPage';
@@ -37,6 +39,7 @@ import DocumentTemplateSettingsPage from '../../features/settings/documentTempla
 import DocumentTemplateConfigRoutes from '../../features/settings/documentTemplates/documentTemplateConfig.routes';
 import BranchRoutes from '../../features/settings/branch/branch.routes';
 import DocumentTypeRoutes from '../../features/settings/documentType/documentType.routes';
+import ServiceTypeRoutes from '../../features/settings/serviceType/serviceType.routes';
 import TermsConditionRoutes from '../../features/settings/termsCondition/termsCondition.routes';
 import CurrencyMasterRoutes from '../../features/settings/currencyMaster/currencyMaster.routes';
 import ExchangeRateRoutes from '../../features/settings/exchangeRate/exchangeRate.routes';
@@ -44,6 +47,7 @@ import CurrencyRatePolicyRoutes from '../../features/settings/currencyRatePolicy
 import TaxRegistrationRoutes from '../../features/settings/taxRegistration/taxRegistration.routes';
 import LocalizationProfileRoutes from '../../features/settings/localizationProfile/localizationProfile.routes';
 import LocationRoutes from '../../features/settings/location/location.routes';
+import TaxCodeRoutes from '../../features/settings/taxCode/taxCode.routes';
 import StateProvinceRoutes from '../../features/settings/stateProvinceMaster/stateProvince.routes';
 import DocumentNumberSeriesRoutes from '../../features/settings/documentNumberSeries/documentNumberSeries.routes';
 import AuditLogRoutes from '../../features/settings/auditLog/auditLog.routes';
@@ -158,6 +162,8 @@ export default function AppRouter() {
         <Route path="/app/inventory/vendor-master/*" element={<VendorRoutes />} />
         <Route path="/app/inventory/contracts/*" element={<VendorContractRoutes />} />
         <Route path="/app/inventory/stock/*" element={<InventoryStockRoutes />} />
+        <Route path="/app/inventory/product-master/*" element={<ProductRoutes />} />
+        <Route path="/app/inventory/product-price-list/*" element={<ProductPriceRoutes />} />
         <Route path="/app/inventory/ziyarat/*" element={<ZiyaratRoutes />} />
         <Route path="/app/settings/theme-color" element={<SettingsPage />} />
         <Route path="/app/profile/change-password" element={<ChangePasswordPage />} />
@@ -184,6 +190,7 @@ export default function AppRouter() {
         <Route path="/app/settings/document-templates/config/*" element={<DocumentTemplateConfigRoutes />} />
         <Route path="/app/settings/branch-master/*" element={<BranchRoutes />} />
         <Route path="/app/settings/document-type-master/*" element={<DocumentTypeRoutes />} />
+        <Route path="/app/settings/service-type-master/*" element={<ServiceTypeRoutes />} />
         <Route path="/app/settings/terms-conditions-master/*" element={<TermsConditionRoutes />} />
         <Route path="/app/settings/currency-master/*" element={<CurrencyMasterRoutes />} />
         <Route path="/app/settings/exchange-rate-master/*" element={<ExchangeRateRoutes />} />
@@ -191,6 +198,7 @@ export default function AppRouter() {
         <Route path="/app/settings/tax-registration/*" element={<TaxRegistrationRoutes />} />
         <Route path="/app/settings/localization-profiles/*" element={<LocalizationProfileRoutes />} />
         <Route path="/app/settings/location-master/*" element={<LocationRoutes />} />
+        <Route path="/app/settings/tax-code-master/*" element={<TaxCodeRoutes />} />
         <Route path="/app/settings/state-province-master/*" element={<StateProvinceRoutes />} />
         <Route path="/app/settings/doc-numbering/*" element={<DocumentNumberSeriesRoutes />} />
         <Route path="/app/settings/audit-log/*" element={<AuditLogRoutes />} />

@@ -29,6 +29,7 @@ const blankValues: PackageQuickCreateValues = {
   code: "",
   package_type_uuid: null,
   currency_code: "",
+  is_domestic: true,
 };
 
 interface CreatePackageDialogProps {
@@ -81,6 +82,7 @@ export default function CreatePackageDialog({ open, onClose, onCreated, initialV
         code: values.code,
         package_type_uuid: values.package_type_uuid || undefined,
         currency_code: values.currency_code,
+        is_domestic: values.is_domestic,
       });
       onCreated({ uuid: pkg.uuid, name: pkg.name });
       showSnackbar({

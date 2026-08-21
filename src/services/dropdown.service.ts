@@ -53,6 +53,8 @@ export const getEntityDropdownOptions = async (
     document_type_code?: string;
     pkg_uuid?: string;
     country_code?: string;
+    product_uuid?: string;
+    quotation_service_type?: string;
   },
   signal?: AbortSignal
 ) => {
