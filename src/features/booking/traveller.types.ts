@@ -43,6 +43,9 @@ export interface TravellerDetail extends TravellerFormInput {
   booking_no?: string | null;
   full_name: string;
   age?: number | null;
+  // Computed server-side (Traveller.passport_status), never stored — see
+  // the backend model for the Valid/Expiring Soon/Expired/Missing rule.
+  passport_status?: string | null;
   visa_status?: string | null;
   status: string;
   version_no: number;

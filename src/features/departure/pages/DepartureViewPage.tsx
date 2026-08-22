@@ -54,6 +54,8 @@ export default function DepartureViewPage() {
   const [bookingPageSize, setBookingPageSize] = useState(10);
   const [bookingLoading, setBookingLoading] = useState(true);
 
+  const [tabCounts, setTabCounts] = useState<{ bookings?: number; travellers?: number; services?: number; payments?: number; documents?: number }>({});
+
   useEffect(() => {
     if (uuid) {
       load();
@@ -97,6 +99,7 @@ export default function DepartureViewPage() {
       const res = await getDepartureBookings(uuid!, { page: bookingPage, page_size: bookingPageSize });
       setBookingRows(res.data);
       setBookingTotal(res.pagination.total);
+      setTabCounts((prev) => ({ ...prev, bookings: res.pagination.total }));
     } catch {
       showSnackbar({ message: t("common.loadFailed"), severity: "error" });
     } finally {
@@ -175,6 +178,8 @@ export default function DepartureViewPage() {
     </>
   );
 
+  const withCount = (label: string, count?: number) => (count != null ? `${label} (${count})` : label);
+
   return (
     <Box sx={{ p: { xs: 1, md: 1 } }}>
       <Typography variant="h5" fontWeight={600} gutterBottom>
@@ -195,7 +200,7 @@ export default function DepartureViewPage() {
           { key: "summary", label: t("departure.tabs.summary"), content: summaryTab },
           {
             key: "bookings",
-            label: t("departure.tabs.bookings"),
+            label: withCount(t("departure.tabs.bookings"), tabCounts.bookings),
             content: (
               <BookingTable
                 rows={bookingRows}
@@ -211,23 +216,44 @@ export default function DepartureViewPage() {
           },
           {
             key: "travellers",
-            label: t("departure.tabs.travellers"),
-            content: <DepartureTravellersTable departureUuid={departure.uuid} />,
+            label: withCount(t("departure.tabs.travellers"), tabCounts.travellers),
+            content: (
+              <DepartureTravellersTable
+                departureUuid={departure.uuid}
+                onCountChange={(count) => setTabCounts((prev) => ({ ...prev, travellers: count }))}
+              />
+            ),
           },
           {
             key: "services",
-            label: t("departure.tabs.services"),
-            content: <DepartureServicesTable departureUuid={departure.uuid} />,
+            label: withCount(t("departure.tabs.services"), tabCounts.services),
+            content: (
+              <DepartureServicesTable
+                departureUuid={departure.uuid}
+                onCountChange={(count) => setTabCounts((prev) => ({ ...prev, services: count }))}
+              />
+            ),
           },
           {
             key: "payments",
-            label: t("departure.tabs.payments"),
-            content: <DeparturePaymentsTable departureUuid={departure.uuid} />,
+            label: withCount(t("departure.tabs.payments"), tabCounts.payments),
+            content: (
+              <DeparturePaymentsTable
+                departureUuid={departure.uuid}
+                onCountChange={(count) => setTabCounts((prev) => ({ ...prev, payments: count }))}
+              />
+            ),
           },
           {
             key: "documents",
-            label: t("departure.tabs.documents"),
-            content: <DepartureDocumentsPanel departureUuid={departure.uuid} canEdit={perms.can_edit} />,
+            label: withCount(t("departure.tabs.documents"), tabCounts.documents),
+            content: (
+              <DepartureDocumentsPanel
+                departureUuid={departure.uuid}
+                canEdit={perms.can_edit}
+                onCountChange={(count) => setTabCounts((prev) => ({ ...prev, documents: count }))}
+              />
+            ),
           },
           {
             key: "communication",

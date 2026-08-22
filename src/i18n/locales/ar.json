@@ -1553,6 +1553,7 @@
     "discountPercent": "الخصم %",
     "discountAmount": "الخصم",
     "discountType": "نوع الخصم",
+    "discountValue": "قيمة الخصم",
     "discountTypePercentage": "نسبة مئوية",
     "discountTypeAmount": "مبلغ",
     "vendor": "المورد",
@@ -1588,6 +1589,7 @@
     "convertToBooking": "تحويل إلى حجز",
     "downloadPdf": "تنزيل PDF",
     "gross": "الإجمالي",
+    "margin": "الهامش",
     "tax": "الضريبة",
     "total": "المجموع",
     "lostReason": "السبب",
@@ -1677,7 +1679,9 @@
     "adHocSourceLabel": "المصدر",
     "adHocSourceMaster": "سجل رئيسي",
     "adHocSourceLocalizationProfile": "إعدادات المؤسسة",
-    "adHocSourceManual": "يدوي"
+    "adHocSourceManual": "يدوي",
+    "lineLinkedToMaster": "مرتبط بسجل رئيسي",
+    "lineManualEntry": "إدخال يدوي"
   },
   "booking": {
     "sectionDetails": "تفاصيل الحجز",
@@ -1722,6 +1726,7 @@
     "nationality": "الجنسية",
     "specialAssistance": "مساعدة خاصة (كرسي متحرك)",
     "passportNo": "رقم جواز السفر",
+    "passportStatus": "حالة جواز السفر",
     "passportExpiryDate": "تاريخ انتهاء جواز السفر",
     "passportIssueCountry": "بلد إصدار جواز السفر",
     "mealPreference": "تفضيل الوجبة",
@@ -1954,5 +1959,9 @@
       "sellPriceInvalid": "يجب أن يكون سعر البيع رقمًا صالحًا غير سالب",
       "taxModeInvalid": "يجب أن يكون وضع الضريبة شاملاً أو غير شامل أو الإعداد الافتراضي للنظام"
     }
+  },
+  "reports": {
+    "travelerReportTitle": "تقرير الحاج / المسافر",
+    "bookingReportTitle": "تقرير الحجز"
   }
 }

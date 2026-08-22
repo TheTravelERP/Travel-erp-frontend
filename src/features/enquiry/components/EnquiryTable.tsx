@@ -288,6 +288,7 @@ export default function EnquiryTable({
           key: "edit",
           label: t("common.edit"),
           icon: <EditIcon fontSize="small" />,
+          show: enquiryPerms.can_edit,
           onClick: () => navigate(`/app/enquiries/${row.uuid}/edit`),
         },
       ],
@@ -529,11 +530,13 @@ export default function EnquiryTable({
               <CardContent>
                 <Stack direction="row" justifyContent="space-between">
                   <Stack direction="row" alignItems="center" spacing={1}>
-                    <Checkbox
-                      size="small"
-                      checked={selected.has(row.uuid)}
-                      onChange={() => toggleRow(row.uuid)}
-                    />
+                    {enquiryPerms.can_delete && (
+                      <Checkbox
+                        size="small"
+                        checked={selected.has(row.uuid)}
+                        onChange={() => toggleRow(row.uuid)}
+                      />
+                    )}
                     <Typography fontWeight={600}>{row.customer_name}</Typography>
                   </Stack>
                   {renderStatusChip(row.conversion_status)}
@@ -556,13 +559,15 @@ export default function EnquiryTable({
 
                 <Stack direction="row" justifyContent="flex-end" alignItems="center">
                   {isTrash ? (
-                    <IconButton
-                      size="small"
-                      color="success"
-                      onClick={() => setActionUuid(row.uuid)}
-                    >
-                      <RestoreFromTrashIcon fontSize="small" />
-                    </IconButton>
+                    enquiryPerms.can_delete && (
+                      <IconButton
+                        size="small"
+                        color="success"
+                        onClick={() => setActionUuid(row.uuid)}
+                      >
+                        <RestoreFromTrashIcon fontSize="small" />
+                      </IconButton>
+                    )
                   ) : (
                     <RowActionsMenu
                       ariaLabel={t("common.actions")}
@@ -574,6 +579,7 @@ export default function EnquiryTable({
                             label: t("common.delete"),
                             icon: <DeleteIcon fontSize="small" />,
                             color: "error",
+                            show: enquiryPerms.can_delete,
                             onClick: () => setActionUuid(row.uuid),
                           },
                         ],
@@ -641,12 +647,14 @@ export default function EnquiryTable({
           <TableHead>
             <TableRow>
               <TableCell padding="checkbox">
-                <Checkbox
-                  indeterminate={selected.size > 0 && selected.size < rows.length}
-                  checked={rows.length > 0 && selected.size === rows.length}
-                  onChange={toggleSelectAll}
-                  disabled={rows.length === 0}
-                />
+                {enquiryPerms.can_delete && (
+                  <Checkbox
+                    indeterminate={selected.size > 0 && selected.size < rows.length}
+                    checked={rows.length > 0 && selected.size === rows.length}
+                    onChange={toggleSelectAll}
+                    disabled={rows.length === 0}
+                  />
+                )}
               </TableCell>
               {columns.map((col) => (
                 <SortableTableCell
@@ -681,10 +689,12 @@ export default function EnquiryTable({
               rows.map((row) => (
                 <TableRow key={row.uuid} hover selected={selected.has(row.uuid)}>
                   <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={selected.has(row.uuid)}
-                      onChange={() => toggleRow(row.uuid)}
-                    />
+                    {enquiryPerms.can_delete && (
+                      <Checkbox
+                        checked={selected.has(row.uuid)}
+                        onChange={() => toggleRow(row.uuid)}
+                      />
+                    )}
                   </TableCell>
                   <TableCell>{row.enquiry_no}</TableCell>
                   <TableCell>{row.customer_name}</TableCell>
@@ -702,13 +712,15 @@ export default function EnquiryTable({
                   </TableCell>
                   <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                     {isTrash ? (
-                      <IconButton
-                        size="small"
-                        color="success"
-                        onClick={() => setActionUuid(row.uuid)}
-                      >
-                        <RestoreFromTrashIcon fontSize="small" />
-                      </IconButton>
+                      enquiryPerms.can_delete && (
+                        <IconButton
+                          size="small"
+                          color="success"
+                          onClick={() => setActionUuid(row.uuid)}
+                        >
+                          <RestoreFromTrashIcon fontSize="small" />
+                        </IconButton>
+                      )
                     ) : (
                       <RowActionsMenu
                         ariaLabel={t("common.actions")}
@@ -720,6 +732,7 @@ export default function EnquiryTable({
                               label: t("common.delete"),
                               icon: <DeleteIcon fontSize="small" />,
                               color: "error",
+                              show: enquiryPerms.can_delete,
                               onClick: () => setActionUuid(row.uuid),
                             },
                           ],

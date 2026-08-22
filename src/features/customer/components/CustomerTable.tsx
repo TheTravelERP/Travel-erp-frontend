@@ -43,6 +43,7 @@ import {
   restoreCustomerByUuid,
 } from "../customer.api";
 import { useSnackbar } from "../../../components/ui/SnackbarProvider";
+import { usePermission } from "../../../hooks/usePermission";
 
 /* ================= TYPES ================= */
 
@@ -102,6 +103,7 @@ export default function CustomerTable({
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const perms = usePermission("crm.customers");
   const columns = useMemo(() => getColumns(t), [t]);
   const localizationProfile = useLocalizationProfile();
   const { formatDate } = useMemo(() => createFormatters(localizationProfile), [localizationProfile]);
@@ -240,24 +242,28 @@ export default function CustomerTable({
 
       {!isTrash && (
         <>
-          <IconButton
-            size="small"
-            onClick={() => navigate(`/app/crm/customers/${row.uuid}/edit`)}
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
+          {perms.can_edit && (
+            <IconButton
+              size="small"
+              onClick={() => navigate(`/app/crm/customers/${row.uuid}/edit`)}
+            >
+              <EditIcon fontSize="small" />
+            </IconButton>
+          )}
 
-          <IconButton
-            size="small"
-            color="error"
-            onClick={() => setActionUuid(row.uuid)}
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
+          {perms.can_delete && (
+            <IconButton
+              size="small"
+              color="error"
+              onClick={() => setActionUuid(row.uuid)}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          )}
         </>
       )}
 
-      {isTrash && (
+      {isTrash && perms.can_delete && (
         <IconButton
           size="small"
           color="success"
@@ -285,11 +291,13 @@ export default function CustomerTable({
               <CardContent>
                 <Stack direction="row" justifyContent="space-between">
                   <Stack direction="row" alignItems="center" spacing={1}>
-                    <Checkbox
-                      size="small"
-                      checked={selected.has(row.uuid)}
-                      onChange={() => toggleRow(row.uuid)}
-                    />
+                    {perms.can_delete && (
+                      <Checkbox
+                        size="small"
+                        checked={selected.has(row.uuid)}
+                        onChange={() => toggleRow(row.uuid)}
+                      />
+                    )}
                     <Typography fontWeight={600}>{row.name}</Typography>
                   </Stack>
                 </Stack>
@@ -367,12 +375,14 @@ export default function CustomerTable({
           <TableHead>
             <TableRow>
               <TableCell padding="checkbox">
-                <Checkbox
-                  indeterminate={selected.size > 0 && selected.size < rows.length}
-                  checked={rows.length > 0 && selected.size === rows.length}
-                  onChange={toggleSelectAll}
-                  disabled={rows.length === 0}
-                />
+                {perms.can_delete && (
+                  <Checkbox
+                    indeterminate={selected.size > 0 && selected.size < rows.length}
+                    checked={rows.length > 0 && selected.size === rows.length}
+                    onChange={toggleSelectAll}
+                    disabled={rows.length === 0}
+                  />
+                )}
               </TableCell>
               {columns.map((col) => (
                 <SortableTableCell
@@ -407,10 +417,12 @@ export default function CustomerTable({
               rows.map((row) => (
                 <TableRow key={row.uuid} hover selected={selected.has(row.uuid)}>
                   <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={selected.has(row.uuid)}
-                      onChange={() => toggleRow(row.uuid)}
-                    />
+                    {perms.can_delete && (
+                      <Checkbox
+                        checked={selected.has(row.uuid)}
+                        onChange={() => toggleRow(row.uuid)}
+                      />
+                    )}
                   </TableCell>
                   <TableCell>{row.name}</TableCell>
                   <TableCell>{row.mobile}</TableCell>

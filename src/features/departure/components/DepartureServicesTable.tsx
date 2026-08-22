@@ -12,9 +12,10 @@ import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 
 interface Props {
   departureUuid: string;
+  onCountChange?: (count: number) => void;
 }
 
-export default function DepartureServicesTable({ departureUuid }: Props) {
+export default function DepartureServicesTable({ departureUuid, onCountChange }: Props) {
   const { t } = useTranslation();
   const { showSnackbar } = useSnackbar();
   const [rows, setRows] = useState<DepartureServiceSummaryItem[]>([]);
@@ -24,7 +25,7 @@ export default function DepartureServicesTable({ departureUuid }: Props) {
     let active = true;
     setLoading(true);
     getDepartureServices(departureUuid)
-      .then((res) => { if (active) setRows(res.data); })
+      .then((res) => { if (active) { setRows(res.data); onCountChange?.(res.data.length); } })
       .catch(() => showSnackbar({ message: t("common.loadFailed"), severity: "error" }))
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };

@@ -55,6 +55,8 @@ import CommunicationProviderRoutes from '../../features/settings/communicationPr
 import NotificationTemplateRoutes from '../../features/settings/notificationTemplates/notificationTemplate.routes';
 import EventAutomationRoutes from '../../features/settings/eventAutomation/eventAutomation.routes';
 import NotificationLogRoutes from '../../features/reports/notificationLogs/notificationLog.routes';
+import TravelerReportRoutes from '../../features/reports/travelers/travelerReport.routes';
+import BookingReportRoutes from '../../features/reports/bookings/bookingReport.routes';
 import NotificationAnalyticsPage from '../../features/reports/notificationAnalytics/pages/NotificationAnalyticsPage';
 import ProviderHealthPage from '../../features/reports/providerHealth/pages/ProviderHealthPage';
 import NotificationCenterRoutes from '../../features/notifications/notificationCenter.routes';
@@ -92,7 +94,6 @@ const COMING_SOON_ROUTES: { menuId: string; path: string }[] = [
   { menuId: 'ai.insights', path: '/app/ai/insights' },
   { menuId: 'ai.document_autofill', path: '/app/ai/document-scan' },
   { menuId: 'reports.sales', path: '/app/reports/sales' },
-  { menuId: 'reports.bookings', path: '/app/reports/bookings' },
   { menuId: 'reports.package_occupancy', path: '/app/reports/package-occupancy' },
   { menuId: 'reports.enquiry_conversion', path: '/app/reports/enquiry-conversion' },
   { menuId: 'reports.agent_performance', path: '/app/reports/agent-performance' },
@@ -111,7 +112,6 @@ const COMING_SOON_ROUTES: { menuId: string; path: string }[] = [
   { menuId: 'reports.room_allocation', path: '/app/reports/room-allocation' },
   { menuId: 'reports.visa_status', path: '/app/reports/visa-status' },
   { menuId: 'reports.passport_expiry', path: '/app/reports/passport-expiry' },
-  { menuId: 'reports.travelers', path: '/app/reports/travelers' },
   { menuId: 'reports.support', path: '/app/reports/support' },
   { menuId: 'reports.tasks', path: '/app/reports/tasks' },
   { menuId: 'reports.custom_builder', path: '/app/reports/custom' },
@@ -206,6 +206,8 @@ export default function AppRouter() {
         <Route path="/app/settings/notifications/*" element={<NotificationTemplateRoutes />} />
         <Route path="/app/settings/event-automation/*" element={<EventAutomationRoutes />} />
         <Route path="/app/reports/notification-logs/*" element={<NotificationLogRoutes />} />
+        <Route path="/app/reports/travelers/*" element={<TravelerReportRoutes />} />
+        <Route path="/app/reports/bookings/*" element={<BookingReportRoutes />} />
         <Route
           path="/app/reports/notification-analytics"
           element={

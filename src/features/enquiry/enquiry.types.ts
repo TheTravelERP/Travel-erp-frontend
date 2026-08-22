@@ -1,7 +1,6 @@
 // src/features/enquiry/enquiry.types.ts
 
 import type { CustomerDetail } from "../customer/customer.types";
-import type { PackageDetailResponse } from "../package/package.types";
 
 
 /* ==========================================================
@@ -142,13 +141,3 @@ export interface EnquiryCustomerLinkResult {
   customer: CustomerDetail;
 }
 
-/* ==========================================================
-   LINK / CREATE PACKAGE
-========================================================== */
-
-export interface EnquiryPackageLinkResult {
-  linked: boolean;
-  /** True when a new Package record was created; false when linked to an existing one. */
-  created: boolean;
-  package: PackageDetailResponse;
-}

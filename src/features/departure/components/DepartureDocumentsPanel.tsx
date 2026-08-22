@@ -23,9 +23,10 @@ const DOCUMENT_CATEGORIES = [
 interface Props {
   departureUuid: string;
   canEdit: boolean;
+  onCountChange?: (count: number) => void;
 }
 
-export default function DepartureDocumentsPanel({ departureUuid, canEdit }: Props) {
+export default function DepartureDocumentsPanel({ departureUuid, canEdit, onCountChange }: Props) {
   const { t } = useTranslation();
   const [category, setCategory] = useState<string>("Departure Circular");
 
@@ -52,6 +53,7 @@ export default function DepartureDocumentsPanel({ departureUuid, canEdit }: Prop
         menuKey="packages.departures"
         category={category}
         canEdit={canEdit}
+        onCountChange={onCountChange}
       />
     </>
   );

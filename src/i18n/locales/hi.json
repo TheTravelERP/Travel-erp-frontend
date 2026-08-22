@@ -1553,6 +1553,7 @@
     "discountPercent": "छूट %",
     "discountAmount": "छूट",
     "discountType": "छूट प्रकार",
+    "discountValue": "छूट मूल्य",
     "discountTypePercentage": "प्रतिशत",
     "discountTypeAmount": "राशि",
     "vendor": "आपूर्तिकर्ता",
@@ -1588,6 +1589,7 @@
     "convertToBooking": "बुकिंग में बदलें",
     "downloadPdf": "पीडीएफ डाउनलोड करें",
     "gross": "सकल",
+    "margin": "मार्जिन",
     "tax": "कर",
     "total": "कुल",
     "lostReason": "कारण",
@@ -1677,7 +1679,9 @@
     "adHocSourceLabel": "स्रोत",
     "adHocSourceMaster": "मास्टर",
     "adHocSourceLocalizationProfile": "संगठन कॉन्फ़िगरेशन",
-    "adHocSourceManual": "मैनुअल"
+    "adHocSourceManual": "मैनुअल",
+    "lineLinkedToMaster": "मास्टर से लिंक किया गया",
+    "lineManualEntry": "मैनुअल प्रविष्टि"
   },
   "booking": {
     "sectionDetails": "बुकिंग विवरण",
@@ -1722,6 +1726,7 @@
     "nationality": "राष्ट्रीयता",
     "specialAssistance": "विशेष सहायता (व्हीलचेयर)",
     "passportNo": "पासपोर्ट नंबर",
+    "passportStatus": "पासपोर्ट स्थिति",
     "passportExpiryDate": "पासपोर्ट समाप्ति तिथि",
     "passportIssueCountry": "पासपोर्ट जारी करने वाला देश",
     "mealPreference": "भोजन प्राथमिकता",
@@ -1954,5 +1959,9 @@
       "sellPriceInvalid": "विक्रय मूल्य एक मान्य गैर-ऋणात्मक संख्या होनी चाहिए",
       "taxModeInvalid": "कर मोड समावेशी, अनन्य, या सिस्टम डिफ़ॉल्ट होना चाहिए"
     }
+  },
+  "reports": {
+    "travelerReportTitle": "तीर्थयात्री / यात्री रिपोर्ट",
+    "bookingReportTitle": "बुकिंग रिपोर्ट"
   }
 }

@@ -17,6 +17,7 @@ import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 
 interface Props {
   departureUuid: string;
+  onCountChange?: (count: number) => void;
 }
 
 const STATUS_COLOR: Record<string, "default" | "primary" | "success" | "error" | "warning"> = {
@@ -29,7 +30,7 @@ const STATUS_COLOR: Record<string, "default" | "primary" | "success" | "error" |
   Closed: "default",
 };
 
-export default function DeparturePaymentsTable({ departureUuid }: Props) {
+export default function DeparturePaymentsTable({ departureUuid, onCountChange }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
@@ -45,6 +46,7 @@ export default function DeparturePaymentsTable({ departureUuid }: Props) {
         if (!active) return;
         setRows(res.data);
         setTotalNetAmount(res.total_net_amount);
+        onCountChange?.(res.data.length);
       })
       .catch(() => showSnackbar({ message: t("common.loadFailed"), severity: "error" }))
       .finally(() => { if (active) setLoading(false); });

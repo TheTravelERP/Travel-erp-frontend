@@ -29,6 +29,8 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import LinkIcon from "@mui/icons-material/Link";
+import EditNoteIcon from "@mui/icons-material/EditNote";
 import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -307,6 +309,7 @@ export default function QuotationViewPage() {
                       <TableCell sx={{ width: 40 }} />
                       <TableCell>{t("quotation.serviceType")}</TableCell>
                       <TableCell>{t("quotation.description")}</TableCell>
+                      <TableCell sx={{ width: 44 }} />
                       <TableCell align="right">{t("quotation.quantity")}</TableCell>
                       <TableCell align="right">{t("quotation.sellingPrice")}</TableCell>
                       <TableCell align="right">{t("quotation.discountPercent")}</TableCell>
@@ -345,6 +348,18 @@ export default function QuotationViewPage() {
                             </TableCell>
                             <TableCell>{line.service_type}</TableCell>
                             <TableCell>{line.description}</TableCell>
+                            <TableCell onClick={(e) => e.stopPropagation()}>
+                              {line.line_source && (
+                                <Tooltip
+                                  title={line.line_source === "MASTER_DRIVEN" ? t("quotation.lineLinkedToMaster") : t("quotation.lineManualEntry")}
+                                  arrow
+                                >
+                                  {line.line_source === "MASTER_DRIVEN"
+                                    ? <LinkIcon fontSize="small" color="primary" />
+                                    : <EditNoteIcon fontSize="small" color="disabled" />}
+                                </Tooltip>
+                              )}
+                            </TableCell>
                             <TableCell align="right">{line.quantity}</TableCell>
                             <TableCell align="right">{line.selling_price.toFixed(2)}</TableCell>
                             <TableCell align="right">{(line.discount_percent ?? 0) > 0 ? `${(line.discount_percent ?? 0).toFixed(2)}%` : "-"}</TableCell>
@@ -357,13 +372,17 @@ export default function QuotationViewPage() {
                             <TableCell align="right">{line.net_amount.toFixed(2)}</TableCell>
                           </TableRow>
                           <TableRow>
-                            <TableCell colSpan={9} sx={{ py: 0, borderBottom: isExpanded ? undefined : "none" }}>
+                            <TableCell colSpan={10} sx={{ py: 0, borderBottom: isExpanded ? undefined : "none" }}>
                               <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                                 <Box sx={{ py: 1.5, px: 2, bgcolor: "action.hover", borderRadius: 1, my: 1 }}>
                                   <Grid container spacing={1.5}>
                                     <Grid size={{ xs: 6, sm: 3 }}>
                                       <Typography variant="caption" color="text.secondary">{t("quotation.taxableValue")}</Typography>
                                       <Typography variant="body2">{quotation.currency_code} {line.taxable_amount.toFixed(2)}</Typography>
+                                    </Grid>
+                                    <Grid size={{ xs: 6, sm: 3 }}>
+                                      <Typography variant="caption" color="text.secondary">{t("quotation.margin")}</Typography>
+                                      <Typography variant="body2">{quotation.currency_code} {line.margin_amount.toFixed(2)}</Typography>
                                     </Grid>
                                     <Grid size={{ xs: 6, sm: 3 }}>
                                       <Typography variant="caption" color="text.secondary">{t("quotation.treatment")}</Typography>
@@ -478,6 +497,10 @@ export default function QuotationViewPage() {
               <Stack direction="row" justifyContent="space-between">
                 <Typography variant="body2" color="text.secondary">{t("quotation.gross")}</Typography>
                 <Typography variant="body2">{quotation.currency_code} {quotation.gross_amount.toFixed(2)}</Typography>
+              </Stack>
+              <Stack direction="row" justifyContent="space-between">
+                <Typography variant="body2" color="text.secondary">{t("quotation.margin")}</Typography>
+                <Typography variant="body2">{quotation.currency_code} {quotation.total_margin_amount.toFixed(2)}</Typography>
               </Stack>
               <Stack direction="row" justifyContent="space-between">
                 <Typography variant="body2" fontWeight={600}>{t("quotation.totalTax")}</Typography>

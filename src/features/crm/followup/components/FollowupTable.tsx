@@ -45,6 +45,7 @@ import {
   restoreFollowupByUuid,
 } from "../followup.api";
 import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
+import { usePermission } from "../../../../hooks/usePermission";
 import { getErrorMessage } from "../../../../utils/errorMessage";
 
 interface Props {
@@ -110,6 +111,7 @@ export default function FollowupTable({
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const perms = usePermission("crm.followups");
   const columns = useMemo(() => getColumns(t), [t]);
   const localizationProfile = useLocalizationProfile();
   const { formatDateTime } = useMemo(() => createFormatters(localizationProfile), [localizationProfile]);
@@ -253,15 +255,19 @@ export default function FollowupTable({
 
       {!isTrash && (
         <>
-          <IconButton size="small" onClick={() => navigate(`/app/crm/followups/${row.uuid}/edit`)}>
-            <EditIcon fontSize="small" />
-          </IconButton>
-          <IconButton size="small" color="error" onClick={() => setActionUuid(row.uuid)}>
-            <DeleteIcon fontSize="small" />
-          </IconButton>
+          {perms.can_edit && (
+            <IconButton size="small" onClick={() => navigate(`/app/crm/followups/${row.uuid}/edit`)}>
+              <EditIcon fontSize="small" />
+            </IconButton>
+          )}
+          {perms.can_delete && (
+            <IconButton size="small" color="error" onClick={() => setActionUuid(row.uuid)}>
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          )}
         </>
       )}
-      {isTrash && (
+      {isTrash && perms.can_delete && (
         <IconButton size="small" color="success" onClick={() => setActionUuid(row.uuid)}>
           <RestoreFromTrashIcon fontSize="small" />
         </IconButton>
@@ -292,11 +298,13 @@ export default function FollowupTable({
               <CardContent>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" rowGap={0.5}>
                   <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: 0, flex: "1 1 auto" }}>
-                    <Checkbox
-                      size="small"
-                      checked={selected.has(row.uuid)}
-                      onChange={() => toggleRow(row.uuid)}
-                    />
+                    {perms.can_delete && (
+                      <Checkbox
+                        size="small"
+                        checked={selected.has(row.uuid)}
+                        onChange={() => toggleRow(row.uuid)}
+                      />
+                    )}
                     <Typography fontWeight={600} noWrap sx={{ minWidth: 0 }}>
                       {row.customer_name || row.enquiry_no}
                     </Typography>
@@ -372,12 +380,14 @@ export default function FollowupTable({
           <TableHead>
             <TableRow>
               <TableCell padding="checkbox">
-                <Checkbox
-                  indeterminate={selected.size > 0 && selected.size < rows.length}
-                  checked={rows.length > 0 && selected.size === rows.length}
-                  onChange={toggleSelectAll}
-                  disabled={rows.length === 0}
-                />
+                {perms.can_delete && (
+                  <Checkbox
+                    indeterminate={selected.size > 0 && selected.size < rows.length}
+                    checked={rows.length > 0 && selected.size === rows.length}
+                    onChange={toggleSelectAll}
+                    disabled={rows.length === 0}
+                  />
+                )}
               </TableCell>
               {columns.map((col) => (
                 <SortableTableCell
@@ -435,7 +445,9 @@ export default function FollowupTable({
                   }
                 >
                   <TableCell padding="checkbox">
-                    <Checkbox checked={selected.has(row.uuid)} onChange={() => toggleRow(row.uuid)} />
+                    {perms.can_delete && (
+                      <Checkbox checked={selected.has(row.uuid)} onChange={() => toggleRow(row.uuid)} />
+                    )}
                   </TableCell>
                   <TableCell sx={{ whiteSpace: "nowrap" }}>
                     {formatDateTime(row.followup_datetime)}

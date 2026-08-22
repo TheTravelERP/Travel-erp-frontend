@@ -16,6 +16,7 @@ import {
   Alert,
   Autocomplete,
   Box,
+  Chip,
   CircularProgress,
   Divider,
   IconButton,
@@ -23,6 +24,7 @@ import {
   MenuItem,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { Controller, useWatch, type Control, type UseFormGetValues, type UseFormSetValue } from "react-hook-form";
@@ -30,6 +32,8 @@ import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DeleteIcon from "@mui/icons-material/Delete";
+import LinkIcon from "@mui/icons-material/Link";
+import EditNoteIcon from "@mui/icons-material/EditNote";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 
 import type { QuotationFormInput } from "../quotation.types";
@@ -40,6 +44,7 @@ import { useSnackbar } from "../../../../components/ui/SnackbarProvider";
 import { DISCOUNT_TYPES, calculateRowLineTotal } from "../pricing";
 import type { LineTaxError } from "../lineErrorParser";
 import { suggestFixLink } from "../lineErrorParser";
+import { TREATMENT_LABEL_KEYS, TREATMENT_SOURCE_LABEL_KEYS } from "../taxDisplay";
 import QuotationDisbursementPanel, { DISBURSEMENT_ELIGIBLE_SERVICE_TYPES } from "./QuotationDisbursementPanel";
 import QuotationAdHocTaxPanel, { AD_HOC_TAX_ELIGIBLE_SERVICE_TYPES } from "./QuotationAdHocTaxPanel";
 
@@ -132,14 +137,38 @@ export default function QuotationServiceLineRow({
   });
   const grossAmount = quantityNum * (Number(sellingPrice) || 0);
   const discountAmountTotal = Math.max(0, grossAmount - finalPrice);
-  // tax_amount/net_amount only ever arrive on a saved/loaded line — the
-  // authoritative 4-function tax resolver is server-only, never
-  // reimplemented client-side. A brand-new row simply has nothing here yet.
+  // tax_amount/net_amount/margin_amount/line_source/tax_breakdown only ever
+  // arrive on a saved/loaded line — the authoritative 4-function tax
+  // resolver is server-only, never reimplemented client-side. A brand-new
+  // row simply has nothing here yet.
   const taxAmount = (line as any)?.tax_amount;
   const taxPercent = (line as any)?.tax_percent;
   const netAmount = (line as any)?.net_amount;
+  const marginAmount = (line as any)?.margin_amount;
+  const taxableAmount = (line as any)?.taxable_amount;
+  const lineSource = (line as any)?.line_source as string | undefined;
+  const taxBreakdown = (line as any)?.tax_breakdown as { tax_name: string; tax_percent: number; tax_amount: number }[] | undefined;
+  const resolvedTreatment = (line as any)?.tax_context?.resolved_treatment as string | undefined;
+  const resolvedTreatmentSource = (line as any)?.tax_context?.resolved_treatment_source as string | undefined;
+  const resolvedPlaceOfSupply = (line as any)?.tax_context?.resolved_place_of_supply as string | undefined;
+  const resolvedTaxCode = (line as any)?.tax_context?.resolved_tax_code as string | undefined;
+  const treatmentLabel = resolvedTreatment
+    ? t(TREATMENT_LABEL_KEYS[resolvedTreatment] ?? "", { defaultValue: resolvedTreatment })
+    : undefined;
+  const treatmentSourceLabel = resolvedTreatmentSource
+    ? t(TREATMENT_SOURCE_LABEL_KEYS[resolvedTreatmentSource] ?? "", { defaultValue: resolvedTreatmentSource })
+    : undefined;
   const finalAmount = netAmount ?? finalPrice;
   const fixLink = lineError ? suggestFixLink(lineError.reason) : null;
+  // Same hover-tooltip pattern already proven on QuotationViewPage.tsx's
+  // collapsed line row — lets the applied tax rate/treatment be scannable
+  // without expanding this row at all.
+  const taxTooltip = taxPercent != null
+    ? [
+        `${t("quotation.taxRate")}: ${Number(taxPercent).toFixed(2)}%`,
+        treatmentLabel ? `${t("quotation.treatment")}: ${treatmentLabel}` : null,
+      ].filter(Boolean).join(" · ")
+    : undefined;
 
   function clearProductSelection() {
     setValue(`service_lines.${index}.product_price_uuid`, null, { shouldDirty: true });
@@ -275,6 +304,16 @@ export default function QuotationServiceLineRow({
               />
             )}
           />
+          {lineSource && (
+            <Chip
+              size="small"
+              variant="outlined"
+              sx={{ mt: 0.5 }}
+              icon={lineSource === "MASTER_DRIVEN" ? <LinkIcon fontSize="small" /> : <EditNoteIcon fontSize="small" />}
+              label={lineSource === "MASTER_DRIVEN" ? t("quotation.lineLinkedToMaster") : t("quotation.lineManualEntry")}
+              color={lineSource === "MASTER_DRIVEN" ? "primary" : "default"}
+            />
+          )}
         </Box>
 
         <Box sx={{ width: 80, flexShrink: 0 }}>
@@ -310,12 +349,14 @@ export default function QuotationServiceLineRow({
         </Box>
 
         <Box sx={{ width: 140, flexShrink: 0 }}>
-          <TextField
-            label={t("quotation.finalPrice")}
-            fullWidth
-            disabled
-            value={finalAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-          />
+          <Tooltip title={taxTooltip ?? ""} arrow placement="top" disableHoverListener={!taxTooltip}>
+            <TextField
+              label={t("quotation.finalPrice")}
+              fullWidth
+              disabled
+              value={finalAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+            />
+          </Tooltip>
         </Box>
 
         <IconButton
@@ -348,19 +389,28 @@ export default function QuotationServiceLineRow({
           }}
         >
           {/* ---- Details ---- */}
-          <Stack spacing={1.25} sx={{ flex: "1 1 220px", minWidth: 200 }}>
+          <Stack spacing={1.25} sx={{ flex: "1 1 260px", minWidth: 240 }}>
             <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: "0.06em" }}>
               {t("quotation.detailGroupDetails")}
             </Typography>
-            <DropdownAutocomplete
-              name={`service_lines.${index}.service_type`}
-              label={t("quotation.serviceType")}
-              control={control}
-              dropdownName="quotation_service_type"
-              useForm={true}
-              allowAdd={false}
-              disabled={disabled}
-            />
+            <Stack direction="row" spacing={1}>
+              <DropdownAutocomplete
+                name={`service_lines.${index}.service_type`}
+                label={t("quotation.serviceType")}
+                control={control}
+                dropdownName="quotation_service_type"
+                useForm={true}
+                allowAdd={false}
+                disabled={disabled}
+              />
+              <Controller
+                name={`service_lines.${index}.service_location`}
+                control={control}
+                render={({ field: f }) => (
+                  <TextField {...f} value={f.value ?? ""} label={t("quotation.serviceLocation")} fullWidth disabled={disabled} />
+                )}
+              />
+            </Stack>
             <Stack direction="row" spacing={1}>
               <Controller
                 name={`service_lines.${index}.travel_date_from`}
@@ -398,13 +448,6 @@ export default function QuotationServiceLineRow({
               />
             </Stack>
             <Controller
-              name={`service_lines.${index}.service_location`}
-              control={control}
-              render={({ field: f }) => (
-                <TextField {...f} value={f.value ?? ""} label={t("quotation.serviceLocation")} fullWidth disabled={disabled} />
-              )}
-            />
-            <Controller
               name={`service_lines.${index}.description`}
               control={control}
               render={({ field: f }) => (
@@ -420,74 +463,114 @@ export default function QuotationServiceLineRow({
             <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: "0.06em" }}>
               {t("quotation.detailGroupCommercial")}
             </Typography>
-            <Controller
-              name={`service_lines.${index}.unit`}
-              control={control}
-              render={({ field: f }) => (
-                <TextField {...f} value={f.value ?? ""} label={t("quotation.unit")} fullWidth disabled={disabled} />
-              )}
-            />
-            {isProductDriven ? (
-              <TextField label={t("quotation.costPrice")} fullWidth disabled value={line?.cost_price ?? 0} />
-            ) : (
+            <Stack direction="row" spacing={1}>
               <Controller
-                name={`service_lines.${index}.cost_price`}
+                name={`service_lines.${index}.unit`}
                 control={control}
                 render={({ field: f }) => (
-                  <TextField {...f} type="number" label={t("quotation.costPrice")} fullWidth disabled={disabled} />
+                  <TextField {...f} value={f.value ?? ""} label={t("quotation.unit")} fullWidth disabled={disabled} />
                 )}
               />
-            )}
+              {isProductDriven ? (
+                <TextField label={t("quotation.costPrice")} fullWidth disabled value={line?.cost_price ?? 0} />
+              ) : (
+                <Controller
+                  name={`service_lines.${index}.cost_price`}
+                  control={control}
+                  render={({ field: f }) => (
+                    <TextField {...f} type="number" label={t("quotation.costPrice")} fullWidth disabled={disabled} />
+                  )}
+                />
+              )}
+            </Stack>
             {isProductDriven && (
               <TextField label={t("quotation.vendor")} fullWidth disabled value={productInfo?.vendor_name ?? ""} />
             )}
-            <TextField
-              label={t("quotation.gross")}
-              fullWidth
-              disabled
-              value={grossAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-            />
+            <Stack direction="row" spacing={1}>
+              <TextField
+                label={t("quotation.gross")}
+                fullWidth
+                disabled
+                value={grossAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+              />
+              <TextField
+                label={t("quotation.margin")}
+                fullWidth
+                disabled
+                value={marginAmount != null ? Number(marginAmount).toLocaleString(undefined, { maximumFractionDigits: 2 }) : ""}
+              />
+            </Stack>
           </Stack>
 
           <Divider orientation="vertical" flexItem />
 
           {/* ---- Tax & Discount ---- */}
-          <Stack spacing={1.25} sx={{ flex: "1 1 220px", minWidth: 200 }}>
+          <Stack spacing={1.25} sx={{ flex: "1 1 260px", minWidth: 240 }}>
             <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: "0.06em" }}>
               {t("quotation.detailGroupTaxDiscount")}
             </Typography>
-            <Stack direction="row" spacing={1}>
-              <TextField
-                label={t("quotation.taxCode")}
-                fullWidth
-                disabled
-                value={productInfo?.tax_code_code ?? (line as any)?.tax_context?.resolved_tax_code ?? ""}
-              />
-              <TextField
-                label={t("quotation.taxRate")}
-                fullWidth
-                disabled
-                value={
-                  productInfo?.tax_code_rate != null
-                    ? `${productInfo.tax_code_rate}%`
-                    : taxPercent != null
-                      ? `${taxPercent}%`
-                      : ""
-                }
-              />
-            </Stack>
-            <TextField
-              label={t("quotation.taxAmount")}
-              fullWidth
-              disabled
-              value={taxAmount != null ? Number(taxAmount).toLocaleString(undefined, { maximumFractionDigits: 2 }) : ""}
-            />
-            <Stack direction="row" spacing={1}>
+            {/* One read-only row PER tax component (IGST/CGST/SGST/Cess/...),
+                each carrying its own code/rate/taxable-value/amount — never a
+                single blended row shown alongside a separate plain-text
+                breakdown, which is what made "19%" above and "18%" in the
+                breakdown below look like two conflicting numbers instead of
+                one being the sum of the other. Falls back to one row built
+                from the blended fields only when the resolver hasn't
+                returned an itemized breakdown at all (e.g. a flat non-GST
+                profile, or a brand-new unsaved line with nothing computed
+                yet). */}
+            <Typography variant="caption" color="text.secondary">{t("quotation.taxBreakdown")}</Typography>
+            {(taxBreakdown && taxBreakdown.length > 0
+              ? taxBreakdown.map((c) => ({
+                  code: c.tax_name,
+                  rate: `${c.tax_percent}%`,
+                  amount: Number(c.tax_amount).toLocaleString(undefined, { maximumFractionDigits: 2 }),
+                }))
+              : [{
+                  code: resolvedTaxCode ?? productInfo?.tax_code_code ?? "",
+                  rate: taxPercent != null
+                    ? `${taxPercent}%`
+                    : productInfo?.tax_code_rate != null
+                      ? `${productInfo.tax_code_rate}%`
+                      : "",
+                  amount: taxAmount != null ? Number(taxAmount).toLocaleString(undefined, { maximumFractionDigits: 2 }) : "",
+                }]
+            ).map((row, idx) => (
+              <Box key={idx} sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                <TextField label={t("quotation.taxCode")} disabled sx={{ flex: "1 1 90px" }} value={row.code} />
+                <TextField label={t("quotation.taxRate")} disabled sx={{ flex: "1 1 80px" }} value={row.rate} />
+                <TextField
+                  label={t("quotation.taxableValue")}
+                  disabled
+                  sx={{ flex: "1 1 100px" }}
+                  value={taxableAmount != null ? Number(taxableAmount).toLocaleString(undefined, { maximumFractionDigits: 2 }) : ""}
+                />
+                <TextField label={t("quotation.taxAmount")} disabled sx={{ flex: "1 1 90px" }} value={row.amount} />
+              </Box>
+            ))}
+            {(treatmentLabel || resolvedPlaceOfSupply) && (
+              <Stack direction="row" spacing={1}>
+                <TextField
+                  label={t("quotation.treatment")}
+                  fullWidth
+                  disabled
+                  value={treatmentLabel ?? ""}
+                  helperText={treatmentSourceLabel ? `${t("quotation.adHocSourceLabel")}: ${treatmentSourceLabel}` : undefined}
+                />
+                <TextField
+                  label={t("quotation.placeOfSupply")}
+                  fullWidth
+                  disabled
+                  value={resolvedPlaceOfSupply ?? ""}
+                />
+              </Stack>
+            )}
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
               <Controller
                 name={`service_lines.${index}.discount_type`}
                 control={control}
                 render={({ field: f }) => (
-                  <TextField {...f} select label={t("quotation.discountType")} fullWidth disabled={disabled} sx={{ width: 120, flexShrink: 0 }}>
+                  <TextField {...f} select label={t("quotation.discountType")} sx={{ flex: "1 1 110px" }} disabled={disabled}>
                     {DISCOUNT_TYPES.map((opt) => (
                       <MenuItem key={opt} value={opt}>
                         {t(opt === "Percentage" ? "quotation.discountTypePercentage" : "quotation.discountTypeAmount")}
@@ -506,8 +589,8 @@ export default function QuotationServiceLineRow({
                       {...f}
                       value={f.value ?? 0}
                       type="number"
-                      label={t("quotation.discountAmount")}
-                      fullWidth
+                      label={t("quotation.discountValue")}
+                      sx={{ flex: "1 1 100px" }}
                       disabled={disabled}
                       error={!!fieldState.error}
                       helperText={fieldState.error?.message}
@@ -525,13 +608,13 @@ export default function QuotationServiceLineRow({
                   );
                 }}
               />
-            </Stack>
-            <TextField
-              label={t("quotation.discountAmount")}
-              fullWidth
-              disabled
-              value={discountAmountTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-            />
+              <TextField
+                label={t("quotation.discountAmount")}
+                disabled
+                sx={{ flex: "1 1 100px" }}
+                value={discountAmountTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+              />
+            </Box>
           </Stack>
 
           {AD_HOC_TAX_ELIGIBLE_SERVICE_TYPES.has(line?.service_type ?? "") && (

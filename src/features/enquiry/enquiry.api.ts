@@ -3,7 +3,6 @@ import api from "../../services/api";
 
 import type {
   EnquiryCustomerLinkResult,
-  EnquiryPackageLinkResult,
   EnquiryDetail,
   EnquiryFormInput,
   EnquiryListApiResponse,
@@ -202,22 +201,6 @@ export async function linkCustomerForEnquiry(
 ): Promise<EnquiryCustomerLinkResult> {
   const { data } = await api.post<EnquiryCustomerLinkResult>(
     `/api/v1/enquiries/${uuid}/link-customer`,
-    {},
-    { withCredentials: true },
-  );
-
-  return data;
-}
-
-/* ==========================================================
-   LINK / CREATE PACKAGE
-========================================================== */
-
-export async function linkPackageForEnquiry(
-  uuid: string,
-): Promise<EnquiryPackageLinkResult> {
-  const { data } = await api.post<EnquiryPackageLinkResult>(
-    `/api/v1/enquiries/${uuid}/link-package`,
     {},
     { withCredentials: true },
   );

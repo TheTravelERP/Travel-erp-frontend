@@ -1553,6 +1553,7 @@
     "discountPercent": "Descuento %",
     "discountAmount": "Descuento",
     "discountType": "Tipo de descuento",
+    "discountValue": "Valor del descuento",
     "discountTypePercentage": "Porcentaje",
     "discountTypeAmount": "Monto",
     "vendor": "Proveedor",
@@ -1588,6 +1589,7 @@
     "convertToBooking": "Convertir en reserva",
     "downloadPdf": "Descargar PDF",
     "gross": "Bruto",
+    "margin": "Margen",
     "tax": "Impuesto",
     "total": "Total",
     "lostReason": "Motivo",
@@ -1677,7 +1679,9 @@
     "adHocSourceLabel": "Origen",
     "adHocSourceMaster": "Maestro",
     "adHocSourceLocalizationProfile": "Configuración de la Organización",
-    "adHocSourceManual": "Manual"
+    "adHocSourceManual": "Manual",
+    "lineLinkedToMaster": "Vinculado a un maestro",
+    "lineManualEntry": "Entrada manual"
   },
   "booking": {
     "sectionDetails": "Detalles de la reserva",
@@ -1722,6 +1726,7 @@
     "nationality": "Nacionalidad",
     "specialAssistance": "Asistencia especial (silla de ruedas)",
     "passportNo": "N.º de pasaporte",
+    "passportStatus": "Estado del pasaporte",
     "passportExpiryDate": "Fecha de vencimiento del pasaporte",
     "passportIssueCountry": "País de emisión del pasaporte",
     "mealPreference": "Preferencia de comida",
@@ -1954,5 +1959,9 @@
       "sellPriceInvalid": "El precio de venta debe ser un número válido no negativo",
       "taxModeInvalid": "El modo de impuesto debe ser Inclusivo, Exclusivo o Predeterminado del sistema"
     }
+  },
+  "reports": {
+    "travelerReportTitle": "Informe de Peregrino / Viajero",
+    "bookingReportTitle": "Informe de reservas"
   }
 }

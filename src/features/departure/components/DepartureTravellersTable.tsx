@@ -21,9 +21,10 @@ import { useSnackbar } from "../../../components/ui/SnackbarProvider";
 
 interface Props {
   departureUuid: string;
+  onCountChange?: (count: number) => void;
 }
 
-export default function DepartureTravellersTable({ departureUuid }: Props) {
+export default function DepartureTravellersTable({ departureUuid, onCountChange }: Props) {
   const { t } = useTranslation();
   const { showSnackbar } = useSnackbar();
 
@@ -46,6 +47,7 @@ export default function DepartureTravellersTable({ departureUuid }: Props) {
       .then((res) => {
         setRows(res.data);
         setTotal(res.pagination.total);
+        onCountChange?.(res.pagination.total);
       })
       .catch((err) => {
         if (!axios.isCancel(err)) showSnackbar({ message: t("common.loadFailed"), severity: "error" });

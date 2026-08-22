@@ -1553,6 +1553,7 @@
     "discountPercent": "Discount %",
     "discountAmount": "Discount",
     "discountType": "Discount Type",
+    "discountValue": "Discount Value",
     "discountTypePercentage": "Percentage",
     "discountTypeAmount": "Amount",
     "vendor": "Supplier",
@@ -1588,6 +1589,7 @@
     "convertToBooking": "Convert to Booking",
     "downloadPdf": "Download PDF",
     "gross": "Gross",
+    "margin": "Margin",
     "tax": "Tax",
     "total": "Total",
     "lostReason": "Reason",
@@ -1677,7 +1679,9 @@
     "adHocSourceLabel": "Source",
     "adHocSourceMaster": "Master",
     "adHocSourceLocalizationProfile": "Organization Configuration",
-    "adHocSourceManual": "Manual"
+    "adHocSourceManual": "Manual",
+    "lineLinkedToMaster": "Linked to Master",
+    "lineManualEntry": "Manual Entry"
   },
   "booking": {
     "sectionDetails": "Booking Details",
@@ -1722,6 +1726,7 @@
     "nationality": "Nationality",
     "specialAssistance": "Special Assistance (Wheelchair)",
     "passportNo": "Passport No",
+    "passportStatus": "Passport Status",
     "passportExpiryDate": "Passport Expiry Date",
     "passportIssueCountry": "Passport Issue Country",
     "mealPreference": "Meal Preference",
@@ -1954,5 +1959,9 @@
       "sellPriceInvalid": "Sell price must be a valid non-negative number",
       "taxModeInvalid": "Tax mode must be Inclusive, Exclusive, or System Default"
     }
+  },
+  "reports": {
+    "travelerReportTitle": "Pilgrim / Traveler Report",
+    "bookingReportTitle": "Booking Report"
   }
 }
